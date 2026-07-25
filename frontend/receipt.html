@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+<title>
+LinkWorld Express | Shipment Receipt
+</title>
+
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+
+<link rel="stylesheet" href="css/receipt.css">
+
+
+<link rel="stylesheet"
+
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+
+</head>
+
+
+
+<body>
+
+
+
+<!-- ==================================================
+LOADING
+================================================== -->
+
+
+<div id="loading">
+
+
+<i class="fa-solid fa-spinner fa-spin"></i>
+
+
+<p>
+Generating Receipt...
+</p>
+
+
+</div>
+
+
+
+
+
+
+<!-- ==================================================
+RECEIPT CONTAINER
+================================================== -->
+
+
+<div class="receipt-container">
+
+
+
+<!-- HEADER -->
+
+
+<header class="receipt-header">
+
+
+<div class="company">
+
+
+<img src="images/plane.web.png">
+
+
+<div>
+
+
+<h1>
+LinkWorld Express
+</h1>
+
+
+<p>
+Global Logistics & Delivery
+</p>
+
+
+</div>
+
+
+</div>
+
+
+
+
+<div class="receipt-title">
+
+
+<h2>
+SHIPMENT RECEIPT
+</h2>
+
+
+<p id="receiptDate">
+
+</p>
+
+
+</div>
+
+
+</header>
+
+
+
+
+
+
+
+<!-- TRACKING BOX -->
+
+
+<section class="tracking-box">
+
+
+<div>
+
+
+<h4>
+Tracking Number
+</h4>
+
+
+<h2 id="trackingNumber">
+
+Loading...
+
+</h2>
+
+
+</div>
+
+
+
+
+<div>
+
+
+<h4>
+Shipment Status
+</h4>
+
+
+<span id="shipmentStatus">
+
+Loading...
+
+</span>
+
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+
+
+<!-- SENDER RECEIVER -->
+
+<section class="people-section">
+
+
+
+<div class="person-card">
+
+
+<h3>
+
+<i class="fa-solid fa-user"></i>
+
+Sender
+
+</h3>
+
+
+<p>
+<strong>Name:</strong>
+
+<span id="senderName"></span>
+
+</p>
+
+
+<p>
+<strong>Phone:</strong>
+
+<span id="senderPhone"></span>
+
+</p>
+
+
+<p>
+<strong>Email:</strong>
+
+<span id="senderEmail"></span>
+
+</p>
+
+
+
+</div>
+
+
+
+
+
+<div class="person-card">
+
+
+<h3>
+
+<i class="fa-solid fa-user-check"></i>
+
+Receiver
+
+</h3>
+
+
+<p>
+
+<strong>Name:</strong>
+
+<span id="receiverName"></span>
+
+
+</p>
+
+
+<p>
+
+<strong>Phone:</strong>
+
+<span id="receiverPhone"></span>
+
+
+</p>
+
+
+<p>
+
+<strong>Email:</strong>
+
+<span id="receiverEmail"></span>
+
+
+</p>
+
+
+<p>
+
+<strong>Address:</strong>
+
+<span id="receiverAddress"></span>
+
+
+</p>
+
+
+</div>
+
+
+
+</section>
+<!-- ==================================================
+SHIPMENT DETAILS
+================================================== -->
+
+
+<section class="shipment-details">
+
+
+<h2>
+
+<i class="fa-solid fa-box"></i>
+
+Shipment Information
+
+</h2>
+
+
+
+<div class="details-grid">
+
+
+
+<div class="detail-item">
+
+<label>
+Shipment Type
+</label>
+
+<p id="shipmentType">
+-
+</p>
+
+</div>
+
+
+
+<div class="detail-item">
+
+<label>
+Origin
+</label>
+
+<p id="origin">
+-
+</p>
+
+</div>
+
+
+
+<div class="detail-item">
+
+<label>
+Current Location
+</label>
+
+<p id="currentLocation">
+-
+</p>
+
+</div>
+
+
+
+
+<div class="detail-item">
+
+<label>
+Destination
+</label>
+
+<p id="destination">
+-
+</p>
+
+</div>
+
+
+
+
+<div class="detail-item">
+
+<label>
+Expected Delivery
+</label>
+
+<p id="deliveryDate">
+-
+</p>
+
+</div>
+
+
+
+
+<div class="detail-item">
+
+<label>
+Payment Status
+</label>
+
+<p id="paymentStatus">
+-
+</p>
+
+</div>
+
+
+
+</div>
+
+
+</section>
+
+
+
+
+
+
+
+<!-- ==================================================
+GPS INFORMATION
+================================================== -->
+
+
+<section class="gps-section">
+
+
+<h2>
+
+<i class="fa-solid fa-location-dot"></i>
+
+Shipment Coordinates
+
+</h2>
+
+
+
+<div class="gps-grid">
+
+
+
+<div class="gps-card">
+
+
+<h4>
+Current Location
+</h4>
+
+
+<p>
+
+Latitude:
+
+<span id="currentLatitude">
+0
+</span>
+
+</p>
+
+
+<p>
+
+Longitude:
+
+<span id="currentLongitude">
+0
+</span>
+
+</p>
+
+
+
+</div>
+
+
+
+
+
+<div class="gps-card">
+
+
+<h4>
+Destination Location
+</h4>
+
+
+
+<p>
+
+Latitude:
+
+<span id="destinationLatitude">
+0
+</span>
+
+</p>
+
+
+
+<p>
+
+Longitude:
+
+<span id="destinationLongitude">
+0
+</span>
+
+</p>
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+
+
+<!-- ==================================================
+PROGRESS TRACKING
+================================================== -->
+
+
+<section class="progress-section">
+
+
+<h2>
+
+<i class="fa-solid fa-route"></i>
+
+Delivery Progress
+
+</h2>
+
+
+
+<div class="progress-container">
+
+
+<div class="progress-bar">
+
+
+<div id="progressFill">
+
+</div>
+
+
+</div>
+
+
+<p>
+
+<span id="progressText">
+
+0
+
+</span>
+
+%
+
+Completed
+
+</p>
+
+
+</div>
+
+
+
+</section>
+<!-- ==================================================
+ROUTE HISTORY
+================================================== -->
+
+
+<section class="route-section">
+
+
+<h2>
+
+<i class="fa-solid fa-road"></i>
+
+Shipment Journey
+
+</h2>
+
+
+
+<table class="route-table">
+
+
+<thead>
+
+<tr>
+
+<th>
+Date
+</th>
+
+
+<th>
+Location
+</th>
+
+
+<th>
+Status
+</th>
+
+
+<th>
+Coordinates
+</th>
+
+
+</tr>
+
+
+</thead>
+
+
+
+<tbody id="routeHistory">
+
+
+<tr>
+
+<td colspan="4">
+
+Loading route history...
+
+</td>
+
+</tr>
+
+
+</tbody>
+
+
+
+</table>
+
+
+</section>
+
+
+
+
+
+
+
+<!-- ==================================================
+BARCODE AREA
+================================================== -->
+
+
+<section class="barcode-section">
+
+
+<div class="barcode">
+
+
+<div class="barcode-lines">
+
+||||||||||||||||||||||||
+
+</div>
+
+
+<p id="barcodeNumber">
+
+</p>
+
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+
+
+<!-- ==================================================
+ACTION BUTTONS
+================================================== -->
+
+
+<div class="receipt-actions">
+
+
+<button onclick="window.print()">
+
+
+<i class="fa-solid fa-print"></i>
+
+Print Receipt
+
+
+</button>
+
+
+
+
+<button onclick="downloadReceipt()">
+
+
+
+<i class="fa-solid fa-download"></i>
+
+Download Receipt
+
+
+</button>
+
+
+
+</div>
+
+
+
+
+
+
+
+<!-- ==================================================
+FOOTER
+================================================== -->
+
+
+<footer class="receipt-footer">
+
+
+<div>
+
+
+<img src="images/plane.web.png">
+
+
+</div>
+
+
+
+<div>
+
+
+<h3>
+LinkWorld Express
+</h3>
+
+
+<p>
+Fast. Secure. Worldwide Delivery.
+</p>
+
+
+<p>
+
+Customer Support: 24/7
+
+</p>
+
+
+</div>
+
+
+
+<div>
+
+
+<p>
+
+Thank you for choosing LinkWorld Express.
+
+</p>
+
+
+<p>
+
+This receipt is electronically generated.
+
+</p>
+
+
+</div>
+
+
+
+</footer>
+
+
+
+
+</div>
+
+
+
+
+
+
+<script src="js/receipt.js"></script>
+
+
+</body>
+
+</html>

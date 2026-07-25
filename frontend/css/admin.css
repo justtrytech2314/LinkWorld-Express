@@ -1,0 +1,1083 @@
+/* ==========================================================
+   LINKWORLD EXPRESS
+   ADMIN LOGIN
+   Part 1
+========================================================== */
+
+/* ==========================================================
+   RESET
+========================================================== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+
+    font-family:"Poppins",sans-serif;
+
+    background:#07111f;
+
+    color:#ffffff;
+
+    overflow:hidden;
+
+}
+
+/* ==========================================================
+   BACKGROUND
+========================================================== */
+
+.background{
+
+    position:fixed;
+
+    inset:0;
+
+    width:100%;
+
+    height:100%;
+
+    background:
+    linear-gradient(rgba(4,12,22,.88),rgba(4,12,22,.92)),
+    url("../images/world-map.png") center center/cover no-repeat;
+
+    z-index:-3;
+
+}
+
+.overlay{
+
+    position:absolute;
+
+    inset:0;
+
+    background:
+
+    radial-gradient(circle at top right,
+    rgba(0,162,255,.18),
+    transparent 45%),
+
+    radial-gradient(circle at bottom left,
+    rgba(0,102,255,.18),
+    transparent 45%);
+
+}
+
+/* ==========================================================
+   FLOATING CIRCLES
+========================================================== */
+
+.floating-circle{
+
+    position:absolute;
+
+    border-radius:50%;
+
+    filter:blur(2px);
+
+    animation:float 15s linear infinite;
+
+}
+
+.circle1{
+
+    width:240px;
+
+    height:240px;
+
+    left:-80px;
+
+    top:80px;
+
+    background:rgba(0,132,255,.15);
+
+}
+
+.circle2{
+
+    width:160px;
+
+    height:160px;
+
+    right:10%;
+
+    top:12%;
+
+    background:rgba(0,180,255,.12);
+
+    animation-duration:18s;
+
+}
+
+.circle3{
+
+    width:280px;
+
+    height:280px;
+
+    bottom:-120px;
+
+    left:15%;
+
+    background:rgba(0,90,255,.14);
+
+    animation-duration:20s;
+
+}
+
+.circle4{
+
+    width:140px;
+
+    height:140px;
+
+    right:18%;
+
+    bottom:12%;
+
+    background:rgba(0,150,255,.16);
+
+    animation-duration:16s;
+
+}
+
+@keyframes float{
+
+    0%{
+
+        transform:translateY(0px);
+
+    }
+
+    50%{
+
+        transform:translateY(-35px);
+
+    }
+
+    100%{
+
+        transform:translateY(0px);
+
+    }
+
+}
+
+/* ==========================================================
+   LOGIN CONTAINER
+========================================================== */
+
+.login-container{
+
+    width:100%;
+
+    height:100vh;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    padding:40px;
+
+}
+
+/* ==========================================================
+   LOGIN CARD
+========================================================== */
+
+.login-card{
+
+    width:470px;
+
+    max-width:100%;
+
+    padding:45px;
+
+    border-radius:28px;
+
+    backdrop-filter:blur(18px);
+
+    background:rgba(255,255,255,.08);
+
+    border:1px solid rgba(255,255,255,.15);
+
+    box-shadow:
+
+    0 0 50px rgba(0,140,255,.18),
+
+    0 25px 50px rgba(0,0,0,.45);
+
+    animation:cardFade .8s ease;
+
+}
+
+@keyframes cardFade{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(50px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateY(0);
+
+    }
+
+}
+
+/* ==========================================================
+   LOGO
+========================================================== */
+
+.logo-area{
+
+    text-align:center;
+
+    margin-bottom:35px;
+
+}
+
+.logo-area img{
+
+    width:90px;
+
+    height:90px;
+
+    object-fit:contain;
+
+    margin-bottom:18px;
+
+}
+
+.logo-area h1{
+
+    font-size:30px;
+
+    font-weight:700;
+
+    letter-spacing:.5px;
+
+}
+
+.logo-area p{
+
+    margin-top:8px;
+
+    color:#9eb5c8;
+
+    font-size:15px;
+
+}
+
+/* ==========================================================
+   FORM TITLE
+========================================================== */
+
+.login-form h2{
+
+    font-size:24px;
+
+    text-align:center;
+
+    margin-bottom:30px;
+
+    font-weight:600;
+
+}
+
+.login-form h2 i{
+
+    color:#1ca3ff;
+
+    margin-right:10px;
+
+}
+
+/* ==========================================================
+   ERROR MESSAGE
+========================================================== */
+
+.error-message{
+
+    display:none;
+
+    margin-bottom:20px;
+
+    padding:14px;
+
+    border-radius:12px;
+
+    background:#6d1212;
+
+    border:1px solid #ff5b5b;
+
+    color:#ffffff;
+
+    font-size:14px;
+
+    text-align:center;
+
+}
+/* ==========================================================
+   INPUT GROUPS
+========================================================== */
+
+.input-group{
+
+    margin-bottom:25px;
+
+}
+
+.input-group label{
+
+    display:block;
+
+    margin-bottom:10px;
+
+    font-size:14px;
+
+    font-weight:500;
+
+    color:#d7e8f8;
+
+}
+
+.input-group label i{
+
+    color:#1ca3ff;
+
+    margin-right:8px;
+
+}
+
+.input-group input{
+
+    width:100%;
+
+    height:58px;
+
+    padding:0 18px;
+
+    border-radius:14px;
+
+    border:1px solid rgba(255,255,255,.15);
+
+    background:rgba(255,255,255,.08);
+
+    color:#ffffff;
+
+    font-size:15px;
+
+    outline:none;
+
+    transition:.35s;
+
+}
+
+.input-group input::placeholder{
+
+    color:#93a9bb;
+
+}
+
+.input-group input:focus{
+
+    border-color:#1ca3ff;
+
+    box-shadow:0 0 15px rgba(28,163,255,.35);
+
+}
+
+/* ==========================================================
+   PASSWORD BOX
+========================================================== */
+
+.password-box{
+
+    position:relative;
+
+}
+
+.password-box input{
+
+    padding-right:60px;
+
+}
+
+.toggle-password{
+
+    position:absolute;
+
+    right:18px;
+
+    top:50%;
+
+    transform:translateY(-50%);
+
+    border:none;
+
+    background:none;
+
+    cursor:pointer;
+
+    color:#8eb5d3;
+
+    font-size:18px;
+
+    transition:.3s;
+
+}
+
+.toggle-password:hover{
+
+    color:#1ca3ff;
+
+}
+
+/* ==========================================================
+   LOGIN BUTTON
+========================================================== */
+
+.login-btn{
+
+    width:100%;
+
+    height:58px;
+
+    border:none;
+
+    border-radius:15px;
+
+    margin-top:10px;
+
+    background:linear-gradient(135deg,#0077ff,#00b7ff);
+
+    color:#fff;
+
+    font-size:17px;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:.35s;
+
+    letter-spacing:.5px;
+
+    box-shadow:0 12px 30px rgba(0,140,255,.35);
+
+}
+
+.login-btn i{
+
+    margin-right:10px;
+
+}
+
+.login-btn:hover{
+
+    transform:translateY(-3px);
+
+    box-shadow:0 20px 40px rgba(0,140,255,.45);
+
+}
+
+.login-btn:active{
+
+    transform:scale(.98);
+
+}
+
+/* ==========================================================
+   LOADING SCREEN
+========================================================== */
+
+.loading-screen{
+
+    position:fixed;
+
+    inset:0;
+
+    background:#050d18;
+
+    display:none;
+
+    justify-content:center;
+
+    align-items:center;
+
+    z-index:99999;
+
+}
+
+.loading-card{
+
+    width:430px;
+
+    max-width:92%;
+
+    text-align:center;
+
+    padding:45px;
+
+    border-radius:25px;
+
+    background:rgba(255,255,255,.08);
+
+    backdrop-filter:blur(18px);
+
+    border:1px solid rgba(255,255,255,.15);
+
+    box-shadow:0 20px 50px rgba(0,0,0,.45);
+
+}
+
+.loading-card img{
+
+    width:90px;
+
+    margin-bottom:20px;
+
+}
+
+.loading-card h2{
+
+    font-size:30px;
+
+    margin-bottom:10px;
+
+}
+
+.loading-card p{
+
+    color:#b5c9da;
+
+    margin-bottom:25px;
+
+    font-size:15px;
+
+}
+
+/* ==========================================================
+   PROGRESS BAR
+========================================================== */
+
+.progress{
+
+    width:100%;
+
+    height:12px;
+
+    background:rgba(255,255,255,.12);
+
+    border-radius:30px;
+
+    overflow:hidden;
+
+}
+
+.progress-bar{
+
+    width:0%;
+
+    height:100%;
+
+    border-radius:30px;
+
+    background:linear-gradient(90deg,#00b7ff,#0077ff);
+
+    transition:width .4s ease;
+
+}
+
+#progressPercent{
+
+    display:block;
+
+    margin-top:16px;
+
+    font-size:17px;
+
+    font-weight:600;
+
+    color:#1ca3ff;
+
+}
+
+/* ==========================================================
+   TOAST
+========================================================== */
+
+.toast{
+
+    position:fixed;
+
+    right:30px;
+
+    top:30px;
+
+    min-width:300px;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+    padding:18px 22px;
+
+    border-radius:15px;
+
+    background:#0d2036;
+
+    border-left:5px solid #00c853;
+
+    color:#fff;
+
+    box-shadow:0 18px 35px rgba(0,0,0,.35);
+
+    transform:translateX(450px);
+
+    transition:.45s;
+
+    z-index:999999;
+
+}
+
+.toast.show{
+
+    transform:translateX(0);
+
+}
+
+.toast i{
+
+    color:#00c853;
+
+    font-size:22px;
+
+}
+
+/* ==========================================================
+   FOOTER
+========================================================== */
+
+.login-footer{
+
+    position:fixed;
+
+    left:0;
+
+    bottom:20px;
+
+    width:100%;
+
+    text-align:center;
+
+    color:#91aac0;
+
+    font-size:14px;
+
+}
+
+.login-footer i{
+
+    margin-right:6px;
+
+}
+/* ==========================================================
+   RESPONSIVE DESIGN
+========================================================== */
+
+@media (max-width:1200px){
+
+    .login-card{
+
+        width:450px;
+
+    }
+
+}
+
+@media (max-width:768px){
+
+    body{
+
+        overflow:auto;
+
+    }
+
+    .login-container{
+
+        padding:30px 20px;
+
+    }
+
+    .login-card{
+
+        width:100%;
+
+        padding:35px 28px;
+
+        border-radius:22px;
+
+    }
+
+    .logo-area img{
+
+        width:75px;
+
+        height:75px;
+
+    }
+
+    .logo-area h1{
+
+        font-size:25px;
+
+    }
+
+    .login-form h2{
+
+        font-size:22px;
+
+    }
+
+    .loading-card{
+
+        width:92%;
+
+        padding:35px 25px;
+
+    }
+
+}
+
+@media (max-width:480px){
+
+    .login-card{
+
+        padding:28px 22px;
+
+    }
+
+    .logo-area img{
+
+        width:65px;
+
+        height:65px;
+
+    }
+
+    .logo-area h1{
+
+        font-size:22px;
+
+    }
+
+    .logo-area p{
+
+        font-size:13px;
+
+    }
+
+    .login-form h2{
+
+        font-size:20px;
+
+    }
+
+    .input-group input{
+
+        height:54px;
+
+        font-size:14px;
+
+    }
+
+    .login-btn{
+
+        height:54px;
+
+        font-size:15px;
+
+    }
+
+    .loading-card h2{
+
+        font-size:24px;
+
+    }
+
+    .loading-card p{
+
+        font-size:14px;
+
+    }
+
+    .toast{
+
+        right:15px;
+
+        left:15px;
+
+        min-width:auto;
+
+    }
+
+}
+
+/* ==========================================================
+   BUTTON LOADING STATE
+========================================================== */
+
+.login-btn.loading{
+
+    pointer-events:none;
+
+    opacity:.8;
+
+    cursor:not-allowed;
+
+}
+
+.login-btn.loading i{
+
+    animation:spin 1s linear infinite;
+
+}
+
+@keyframes spin{
+
+    from{
+
+        transform:rotate(0deg);
+
+    }
+
+    to{
+
+        transform:rotate(360deg);
+
+    }
+
+}
+
+/* ==========================================================
+   PULSE ANIMATION
+========================================================== */
+
+.loading-card img{
+
+    animation:pulseLogo 2s infinite;
+
+}
+
+@keyframes pulseLogo{
+
+    0%{
+
+        transform:scale(1);
+
+    }
+
+    50%{
+
+        transform:scale(1.08);
+
+    }
+
+    100%{
+
+        transform:scale(1);
+
+    }
+
+}
+
+/* ==========================================================
+   SHIMMER EFFECT
+========================================================== */
+
+.progress{
+
+    position:relative;
+
+}
+
+.progress::after{
+
+    content:"";
+
+    position:absolute;
+
+    top:0;
+
+    left:-120%;
+
+    width:40%;
+
+    height:100%;
+
+    background:
+
+    linear-gradient(
+
+        90deg,
+
+        transparent,
+
+        rgba(255,255,255,.4),
+
+        transparent
+
+    );
+
+    animation:shimmer 2s infinite;
+
+}
+
+@keyframes shimmer{
+
+    100%{
+
+        left:140%;
+
+    }
+
+}
+
+/* ==========================================================
+   FADE ANIMATION
+========================================================== */
+
+.fade-in{
+
+    animation:fadeIn .5s ease;
+
+}
+
+@keyframes fadeIn{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(20px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateY(0);
+
+    }
+
+}
+
+/* ==========================================================
+   CHROME AUTOFILL FIX
+========================================================== */
+
+input:-webkit-autofill,
+
+input:-webkit-autofill:hover,
+
+input:-webkit-autofill:focus,
+
+input:-webkit-autofill:active{
+
+    -webkit-box-shadow:0 0 0 1000px rgba(255,255,255,.08) inset !important;
+
+    -webkit-text-fill-color:#ffffff !important;
+
+    transition:background-color 5000s ease-in-out 0s;
+
+}
+
+/* ==========================================================
+   CUSTOM SCROLLBAR
+========================================================== */
+
+::-webkit-scrollbar{
+
+    width:8px;
+
+}
+
+::-webkit-scrollbar-track{
+
+    background:#08111d;
+
+}
+
+::-webkit-scrollbar-thumb{
+
+    background:#1ca3ff;
+
+    border-radius:20px;
+
+}
+
+::-webkit-scrollbar-thumb:hover{
+
+    background:#008cff;
+
+}
+
+/* ==========================================================
+   SELECTION
+========================================================== */
+
+::selection{
+
+    background:#1ca3ff;
+
+    color:#ffffff;
+
+}
+
+/* ==========================================================
+   ACCESSIBILITY
+========================================================== */
+
+button:focus,
+
+input:focus{
+
+    outline:none;
+
+}
+
+button{
+
+    font-family:inherit;
+
+}
+
+input{
+
+    font-family:inherit;
+
+}
+
+/* ==========================================================
+   END OF FILE
+========================================================== */
