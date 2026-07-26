@@ -4,7 +4,7 @@
 // Part 1
 // ======================================================
 
-const API_URL = "http://localhost:5000/api/shipments";
+const API_URL = "https://linkworld-express2-1.onrender.com/api/shipments";
 
 let shipments = [];
 
