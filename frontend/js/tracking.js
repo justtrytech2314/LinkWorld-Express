@@ -10,7 +10,7 @@
 // ==============================
 
 const API_URL =
-"http://localhost:5000/api/shipments";
+"https://linkworld-express2-1.onrender.com/api/shipments";
 
 // ==============================
 // GLOBAL VARIABLES
