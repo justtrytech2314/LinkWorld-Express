@@ -17,6 +17,13 @@ const progressPercent = document.getElementById("progressPercent");
 const togglePassword = document.getElementById("togglePassword");
 
 // ======================================================
+// API
+// ======================================================
+
+const API_URL =
+"https://linkworld-express2-1.onrender.com";
+
+// ======================================================
 // SHOW / HIDE PASSWORD
 // ======================================================
 
@@ -51,12 +58,11 @@ loginForm.addEventListener("submit", async (e) => {
     errorMessage.style.display = "none";
 
     const email = emailInput.value.trim();
-
     const password = passwordInput.value.trim();
 
     try {
 
-        const response = await fetch("http://localhost:5000/api/auth/login", {
+        const response = await fetch(`${API_URL}/api/auth/login`, {
 
             method: "POST",
 
@@ -96,6 +102,8 @@ loginForm.addEventListener("submit", async (e) => {
     }
 
     catch (err) {
+
+        console.error(err);
 
         errorMessage.style.display = "block";
 
@@ -168,7 +176,7 @@ function startLoading() {
 
             setTimeout(()=>{
 
-                window.location.href="dashboard.html";
+                window.location.href = "dashboard.html";
 
             },800);
 
