@@ -1,62 +1,99 @@
-/* ======================================================
-   LINKWORLD EXPRESS - PART 1
-   RESET + VARIABLES + HEADER
-====================================================== */
-:root{
+/* =======================================================
+   LINKWORLD EXPRESS
+   style.css
+   PART 1
+   RESET • VARIABLES • GLOBAL • LOADER
+======================================================= */
 
-    --bg:#080D18;
-    --bg2:#101A2D;
-    --card:#141D34;
 
-    --gold:#F4B400;
-    --gold2:#FFC93C;
+/* =======================================================
+   GOOGLE FONT
+======================================================= */
 
-    --blue:#4F7CFF;
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
 
-    --white:#ffffff;
-    --text:#d8dfea;
-    --muted:#8f9bb3;
 
-    /* ADD THESE */
-    --primary:#ffffff;
-    --secondary:#4F7CFF;
-    --accent:#F4B400;
-
-    --container:1200px;
-
-    --radius:14px;
-
-}
+/* =======================================================
+   RESET
+======================================================= */
 
 *{
+
     margin:0;
+
     padding:0;
+
     box-sizing:border-box;
+
 }
 
 html{
+
     scroll-behavior:smooth;
+
 }
 
 body{
 
-    background:var(--bg);
+    font-family:"Poppins",sans-serif;
 
-    color:var(--white);
+    background:#f7f9fc;
 
-    font-family:'Inter',sans-serif;
+    color:#222;
 
     overflow-x:hidden;
 
-}
-
-img{
-
-    max-width:100%;
-
-    display:block;
+    line-height:1.6;
 
 }
+
+
+/* =======================================================
+   VARIABLES
+======================================================= */
+
+:root{
+
+    --primary:#0d6efd;
+
+    --secondary:#0056d6;
+
+    --accent:#00b4ff;
+
+    --success:#28a745;
+
+    --warning:#ffc107;
+
+    --danger:#dc3545;
+
+    --dark:#132238;
+
+    --light:#ffffff;
+
+    --gray:#f3f6fb;
+
+    --border:#dde6ef;
+
+    --text:#555;
+
+    --shadow:
+
+    0 12px 35px rgba(0,0,0,.08);
+
+    --shadow-hover:
+
+    0 18px 45px rgba(0,0,0,.12);
+
+    --radius:18px;
+
+    --transition:.35s ease;
+
+}
+
+
+/* =======================================================
+   GLOBAL ELEMENTS
+======================================================= */
 
 a{
 
@@ -72,25 +109,282 @@ ul{
 
 }
 
-button,input{
+img{
 
-    font-family:inherit;
+    max-width:100%;
+
+    display:block;
+
+}
+
+button{
+
+    border:none;
+
+    outline:none;
+
+    cursor:pointer;
+
+    font-family:"Poppins",sans-serif;
+
+    transition:var(--transition);
+
+}
+
+input,
+
+textarea{
+
+    outline:none;
+
+    font-family:"Poppins",sans-serif;
+
+}
+
+section{
+
+    padding:90px 8%;
 
 }
 
 .container{
 
-    width:92%;
+    width:100%;
 
-    max-width:var(--container);
+    max-width:1400px;
 
     margin:auto;
 
 }
 
-/* ======================================================
+
+/* =======================================================
+   SECTION HEADER
+======================================================= */
+
+.section-header{
+
+    text-align:center;
+
+    margin-bottom:60px;
+
+}
+
+.section-header span{
+
+    display:inline-block;
+
+    color:var(--primary);
+
+    font-weight:600;
+
+    letter-spacing:1px;
+
+    text-transform:uppercase;
+
+    margin-bottom:15px;
+
+}
+
+.section-header h2{
+
+    font-size:42px;
+
+    color:var(--dark);
+
+    margin-bottom:15px;
+
+}
+
+.section-header p{
+
+    max-width:700px;
+
+    margin:auto;
+
+    color:#666;
+
+    font-size:17px;
+
+    line-height:1.8;
+
+}
+
+
+/* =======================================================
+   BUTTONS
+======================================================= */
+
+.primary-btn{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    padding:16px 32px;
+
+    background:var(--primary);
+
+    color:#fff;
+
+    border-radius:50px;
+
+    font-weight:600;
+
+    transition:var(--transition);
+
+}
+
+.primary-btn:hover{
+
+    background:var(--secondary);
+
+    transform:translateY(-4px);
+
+    box-shadow:var(--shadow-hover);
+
+}
+
+.secondary-btn{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    padding:16px 32px;
+
+    border:2px solid #fff;
+
+    color:#fff;
+
+    border-radius:50px;
+
+    font-weight:600;
+
+    transition:var(--transition);
+
+}
+
+.secondary-btn:hover{
+
+    background:#fff;
+
+    color:var(--primary);
+
+}
+
+
+/* =======================================================
+   PAGE LOADER
+======================================================= */
+
+.page-loader{
+
+    position:fixed;
+
+    inset:0;
+
+    background:#fff;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    z-index:999999;
+
+    transition:.4s;
+
+}
+
+.loader-content{
+
+    text-align:center;
+
+}
+
+.loader-content img{
+
+    width:90px;
+
+    margin:auto;
+
+    margin-bottom:25px;
+
+}
+
+.loader-spinner{
+
+    width:70px;
+
+    height:70px;
+
+    margin:0 auto 25px;
+
+    border-radius:50%;
+
+    border:6px solid #dce8ff;
+
+    border-top-color:var(--primary);
+
+    animation:spin 1s linear infinite;
+
+}
+
+.loader-content h2{
+
+    color:var(--primary);
+
+    font-size:28px;
+
+    margin-bottom:12px;
+
+}
+
+.loader-content p{
+
+    color:#666;
+
+    font-size:15px;
+
+}
+
+@keyframes spin{
+
+    from{
+
+        transform:rotate(0deg);
+
+    }
+
+    to{
+
+        transform:rotate(360deg);
+
+    }
+
+}
+
+
+/* =======================================================
+   END PART 1
+======================================================= */
+/* =======================================================
+   LINKWORLD EXPRESS
+   style.css
+   PART 2
+   HEADER • NAVIGATION • HERO
+======================================================= */
+
+
+/* =======================================================
    HEADER
-====================================================== */
+======================================================= */
 
 .header{
 
@@ -102,31 +396,30 @@ button,input{
 
     width:100%;
 
-    height:85px;
+    background:#fff;
 
-    background:rgba(8,13,24,.94);
+    box-shadow:0 4px 20px rgba(0,0,0,.06);
 
-    backdrop-filter:blur(12px);
-
-    border-bottom:1px solid rgba(255,255,255,.08);
-
-    z-index:999;
+    z-index:1000;
 
 }
 
 .header .container{
 
-    height:85px;
-
     display:flex;
+
+    justify-content:space-between;
 
     align-items:center;
 
+    padding:18px 8%;
+
 }
 
-/* ======================================================
+
+/* =======================================================
    LOGO
-====================================================== */
+======================================================= */
 
 .logo{
 
@@ -134,91 +427,60 @@ button,input{
 
     align-items:center;
 
-    gap:15px;
+    gap:12px;
 
-    flex-shrink:0;
+    font-size:24px;
+
+    font-weight:700;
+
+    color:var(--primary);
 
 }
 
 .logo img{
 
-    width:58px;
-
-    height:58px;
-
-    object-fit:contain;
+    width:55px;
 
 }
 
-.logo-text h2{
 
-    font-family:'Space Grotesk',sans-serif;
-
-    font-size:22px;
-
-    letter-spacing:1px;
-
-}
-
-.logo-text span{
-
-    display:block;
-
-    margin-top:2px;
-
-    color:var(--gold);
-
-    letter-spacing:6px;
-
-    font-size:11px;
-
-}
-
-/* ======================================================
+/* =======================================================
    NAVIGATION
-====================================================== */
+======================================================= */
 
 .navbar{
-
-    margin-left:auto;
-
-}
-
-.nav-links{
 
     display:flex;
 
     align-items:center;
 
-    gap:42px;
+    gap:35px;
 
 }
 
-.nav-links li{
+.navbar a{
 
     position:relative;
 
-}
-
-.nav-links a{
-
-    color:var(--text);
-
-    font-size:15px;
+    font-size:16px;
 
     font-weight:500;
 
-    transition:.3s;
+    color:#333;
+
+    transition:var(--transition);
 
 }
 
-.nav-links a:hover{
+.navbar a:hover,
 
-    color:var(--gold);
+.navbar a.active{
+
+    color:var(--primary);
 
 }
 
-.nav-links a::after{
+.navbar a::after{
 
     content:"";
 
@@ -230,29 +492,95 @@ button,input{
 
     width:0;
 
-    height:2px;
+    height:3px;
 
-    background:var(--gold);
+    background:var(--primary);
 
     transition:.3s;
 
+    border-radius:50px;
+
 }
 
-.nav-links a:hover::after,
+.navbar a:hover::after,
 
-.nav-links .active::after{
+.navbar a.active::after{
 
     width:100%;
 
 }
 
-/* ======================================================
+
+/* =======================================================
+   HEADER BUTTONS
+======================================================= */
+
+.header-buttons{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:15px;
+
+}
+
+.track-btn{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    background:var(--primary);
+
+    color:#fff;
+
+    padding:12px 22px;
+
+    border-radius:50px;
+
+    font-weight:600;
+
+    transition:var(--transition);
+
+}
+
+.track-btn:hover{
+
+    background:var(--secondary);
+
+    transform:translateY(-3px);
+
+}
+
+.menu-toggle{
+
+    display:none;
+
+    width:48px;
+
+    height:48px;
+
+    border-radius:12px;
+
+    background:var(--primary);
+
+    color:#fff;
+
+    font-size:20px;
+
+}
+
+
+/* =======================================================
    HERO
-====================================================== */
+======================================================= */
 
 .hero{
 
-    padding-top:130px;
+    position:relative;
 
     min-height:100vh;
 
@@ -260,16 +588,370 @@ button,input{
 
     align-items:center;
 
-}
-/* ======================================================
-   HERO SECTION
-====================================================== */
+    overflow:hidden;
 
-.hero-container{
+    background:url("../images/hero-bg.jpg")
+
+    center/cover no-repeat;
+
+}
+
+.hero-overlay{
+
+    position:absolute;
+
+    inset:0;
+
+    background:linear-gradient(
+
+        90deg,
+
+        rgba(8,28,54,.88),
+
+        rgba(8,28,54,.55)
+
+    );
+
+}
+
+.hero-content{
+
+    position:relative;
+
+    z-index:2;
 
     display:grid;
 
-    grid-template-columns:1.1fr 1fr;
+    grid-template-columns:1.2fr 1fr;
+
+    align-items:center;
+
+    gap:60px;
+
+    padding-top:120px;
+
+}
+
+
+/* =======================================================
+   HERO LEFT
+======================================================= */
+
+.hero-tag{
+
+    display:inline-block;
+
+    background:rgba(255,255,255,.15);
+
+    color:#fff;
+
+    padding:10px 20px;
+
+    border-radius:50px;
+
+    margin-bottom:25px;
+
+    backdrop-filter:blur(8px);
+
+}
+
+.hero-left h1{
+
+    font-size:62px;
+
+    line-height:1.2;
+
+    color:#fff;
+
+    margin-bottom:25px;
+
+    font-weight:800;
+
+}
+
+.hero-left p{
+
+    color:#e4e8ee;
+
+    font-size:18px;
+
+    line-height:1.9;
+
+    margin-bottom:40px;
+
+    max-width:650px;
+
+}
+
+.hero-buttons{
+
+    display:flex;
+
+    gap:20px;
+
+    flex-wrap:wrap;
+
+}
+
+
+/* =======================================================
+   HERO IMAGE
+======================================================= */
+
+.hero-right{
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+}
+
+.hero-right img{
+
+    width:100%;
+
+    max-width:600px;
+
+    animation:floatImage 4s ease-in-out infinite;
+
+}
+
+
+@keyframes floatImage{
+
+    0%{
+
+        transform:translateY(0);
+
+    }
+
+    50%{
+
+        transform:translateY(-15px);
+
+    }
+
+    100%{
+
+        transform:translateY(0);
+
+    }
+
+}
+
+
+/* =======================================================
+   END PART 2
+======================================================= */
+/* =======================================================
+   LINKWORLD EXPRESS
+   style.css
+   PART 3
+   QUICK TRACKING • STATISTICS • ABOUT • WHY CHOOSE US
+======================================================= */
+
+
+/* =======================================================
+   QUICK TRACKING
+======================================================= */
+
+.quick-track{
+
+    margin-top:-90px;
+
+    position:relative;
+
+    z-index:10;
+
+}
+
+.track-card{
+
+    background:#fff;
+
+    border-radius:25px;
+
+    padding:50px;
+
+    box-shadow:var(--shadow);
+
+    text-align:center;
+
+}
+
+.track-card h2{
+
+    font-size:34px;
+
+    color:var(--dark);
+
+    margin-bottom:15px;
+
+}
+
+.track-card p{
+
+    color:#666;
+
+    margin-bottom:35px;
+
+}
+
+.track-form{
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    gap:15px;
+
+    flex-wrap:wrap;
+
+}
+
+.track-form input{
+
+    width:500px;
+
+    max-width:100%;
+
+    height:60px;
+
+    border:2px solid var(--border);
+
+    border-radius:50px;
+
+    padding:0 25px;
+
+    font-size:16px;
+
+    transition:.3s;
+
+}
+
+.track-form input:focus{
+
+    border-color:var(--primary);
+
+    box-shadow:0 0 0 4px rgba(13,110,253,.12);
+
+}
+
+.track-form button{
+
+    height:60px;
+
+    padding:0 35px;
+
+    border-radius:50px;
+
+    background:var(--primary);
+
+    color:#fff;
+
+    font-size:16px;
+
+    font-weight:600;
+
+}
+
+.track-form button:hover{
+
+    background:var(--secondary);
+
+}
+
+
+/* =======================================================
+   STATISTICS
+======================================================= */
+
+.statistics{
+
+    background:var(--gray);
+
+}
+
+.stats-grid{
+
+    display:grid;
+
+    grid-template-columns:repeat(4,1fr);
+
+    gap:30px;
+
+}
+
+.stat-card{
+
+    background:#fff;
+
+    border-radius:20px;
+
+    padding:40px 25px;
+
+    text-align:center;
+
+    transition:.35s;
+
+    box-shadow:var(--shadow);
+
+}
+
+.stat-card:hover{
+
+    transform:translateY(-10px);
+
+    box-shadow:var(--shadow-hover);
+
+}
+
+.stat-card i{
+
+    font-size:42px;
+
+    color:var(--primary);
+
+    margin-bottom:20px;
+
+}
+
+.stat-card h2{
+
+    font-size:42px;
+
+    color:var(--dark);
+
+    margin-bottom:10px;
+
+}
+
+.stat-card p{
+
+    color:#666;
+
+}
+
+
+/* =======================================================
+   ABOUT SECTION
+======================================================= */
+
+.about-home{
+
+    background:#fff;
+
+}
+
+.about-grid{
+
+    display:grid;
+
+    grid-template-columns:1fr 1fr;
 
     align-items:center;
 
@@ -277,1966 +959,945 @@ button,input{
 
 }
 
-.hero-left{
-
-    max-width:620px;
-
-}
-
-.small-title{
-
-    display:inline-block;
-
-    color:var(--gold);
-
-    background:rgba(244,180,0,.08);
-
-    border:1px solid rgba(244,180,0,.25);
-
-    padding:10px 18px;
-
-    border-radius:50px;
-
-    font-size:13px;
-
-    font-weight:600;
-
-    letter-spacing:2px;
-
-    margin-bottom:25px;
-
-}
-
-.hero-left h1{
-
-    font-family:'Space Grotesk',sans-serif;
-
-    font-size:62px;
-
-    line-height:1.1;
-
-    margin-bottom:25px;
-
-}
-
-.hero-left h1 span{
-
-    color:var(--gold);
-
-}
-
-.hero-left p{
-
-    color:var(--text);
-
-    font-size:18px;
-
-    line-height:1.8;
-
-    margin-bottom:35px;
-
-}
-
-/* ======================================================
-   TRACKING BOX
-====================================================== */
-
-.tracking-box{
-
-    display:flex;
-
-    align-items:center;
-
-    background:var(--card);
-
-    border-radius:12px;
-
-    overflow:hidden;
-
-    border:1px solid rgba(255,255,255,.08);
-
-    box-shadow:0 15px 35px rgba(0,0,0,.25);
-
-}
-
-.tracking-box input{
-
-    flex:1;
-
-    background:none;
-
-    border:none;
-
-    outline:none;
-
-    color:#fff;
-
-    padding:18px 22px;
-
-    font-size:16px;
-
-}
-
-.tracking-box input::placeholder{
-
-    color:#9ca9c5;
-
-}
-
-.tracking-box button{
-
-    border:none;
-
-    background:var(--gold);
-
-    color:#111;
-
-    padding:18px 34px;
-
-    cursor:pointer;
-
-    font-weight:700;
-
-    transition:.3s;
-
-}
-
-.tracking-box button:hover{
-
-    background:var(--gold2);
-
-}
-
-/* ======================================================
-   ERROR
-====================================================== */
-
-#error{
-
-    margin-top:15px;
-
-    color:#ff6b6b;
-
-    font-size:14px;
-
-}
-
-/* ======================================================
-   DEMO BUTTON
-====================================================== */
-
-.example-id{
-
-    margin-top:18px;
-
-    color:#9ca9c5;
-
-    font-size:14px;
-
-}
-
-.example-id button{
-
-    background:none;
-
-    border:none;
-
-    color:var(--gold);
-
-    cursor:pointer;
-
-    font-weight:600;
-
-}
-
-/* ======================================================
-   STATS
-====================================================== */
-
-.hero-stats{
-
-    display:flex;
-
-    gap:55px;
-
-    margin-top:50px;
-
-}
-
-.hero-stats h2{
-
-    font-size:34px;
-
-    color:var(--gold);
-
-}
-
-.hero-stats p{
-
-    color:#b7bfd2;
-
-    margin-top:6px;
-
-}
-
-/* ======================================================
-   RIGHT SIDE
-====================================================== */
-
-.hero-right{
-
-    display:flex;
-
-    justify-content:center;
-
-    align-items:center;
-
-}
-
-.radar-scene{
+.about-image img{
 
     width:100%;
 
-    max-width:520px;
+}
+
+.section-tag{
+
+    display:inline-block;
+
+    color:var(--primary);
+
+    font-weight:600;
+
+    margin-bottom:18px;
+
+    text-transform:uppercase;
 
 }
 
-.radar-ring{
+.about-content h2{
 
-    fill:none;
+    font-size:42px;
 
-    stroke:rgba(255,255,255,.12);
+    margin-bottom:20px;
 
-    stroke-width:1.5;
-
-}
-
-.flight-path{
-
-    fill:none;
-
-    stroke:var(--gold);
-
-    stroke-width:2;
-
-    stroke-dasharray:8;
+    color:var(--dark);
 
 }
 
-.hub-dot{
+.about-content p{
 
-    fill:#6c88ff;
+    color:#666;
 
-}
+    margin-bottom:20px;
 
-.hub-dot.active{
-
-    fill:var(--gold);
+    line-height:1.9;
 
 }
 
-.plane-glyph{
 
-    font-size:22px;
+/* =======================================================
+   WHY CHOOSE US
+======================================================= */
 
-}
+.why-us{
 
-.plane-marker{
-
-    offset-path:path("M40,330 C120,220 160,120 260,90 C330,68 360,140 300,190 C240,240 200,300 260,330");
-
-    animation:flyPlane 10s linear infinite;
+    background:var(--gray);
 
 }
 
-@keyframes flyPlane{
+.features-grid{
 
-    from{
+    display:grid;
 
-        offset-distance:0%;
+    grid-template-columns:repeat(4,1fr);
 
-    }
-
-    to{
-
-        offset-distance:100%;
-
-    }
+    gap:30px;
 
 }
-/* ======================================================
-   LOADING OVERLAY
-====================================================== */
 
-.load-overlay{
+.feature-card{
 
-    position:fixed;
+    background:#fff;
 
-    inset:0;
+    border-radius:20px;
 
-    background:rgba(8,13,24,.95);
+    padding:40px 30px;
 
-    display:flex;
-
-    justify-content:center;
-
-    align-items:center;
-
-    opacity:0;
-
-    visibility:hidden;
+    text-align:center;
 
     transition:.35s;
 
-    z-index:9999;
+    box-shadow:var(--shadow);
 
 }
 
-.load-overlay.visible{
+.feature-card:hover{
 
-    opacity:1;
+    transform:translateY(-12px);
 
-    visibility:visible;
-
-}
-
-.load-card{
-
-    text-align:center;
+    box-shadow:var(--shadow-hover);
 
 }
 
-.load-ring{
+.feature-card i{
 
-    width:60px;
+    width:80px;
 
-    height:60px;
+    height:80px;
 
     margin:auto;
 
-    border-radius:50%;
+    display:flex;
 
-    border:4px solid rgba(255,255,255,.15);
-
-    border-top-color:var(--gold);
-
-    animation:spin 1s linear infinite;
-
-}
-
-@keyframes spin{
-
-    to{
-
-        transform:rotate(360deg);
-
-    }
-
-}
-
-.load-card p{
-
-    margin-top:20px;
-
-    color:var(--text);
-
-    font-size:16px;
-
-}
-
-.load-card span{
-
-    color:var(--gold);
-
-}
-
-/* ======================================================
-   GENERAL SPACING
-====================================================== */
-
-section{
-
-    padding:80px 0;
-
-}
-
-button{
-
-    transition:.3s;
-
-}
-
-button:hover{
-
-    transform:translateY(-2px);
-
-}
-
-/* ======================================================
-   RESPONSIVE TABLET
-====================================================== */
-
-@media(max-width:992px){
-
-.hero-container{
-
-    grid-template-columns:1fr;
-
-    text-align:center;
-
-}
-
-.hero-left{
-
-    max-width:100%;
-
-}
-
-.hero-left p{
-
-    margin:auto auto 35px;
-
-}
-
-.hero-stats{
+    align-items:center;
 
     justify-content:center;
 
-}
+    border-radius:50%;
 
-.hero-right{
+    background:rgba(13,110,253,.12);
 
-    margin-top:50px;
+    color:var(--primary);
 
-}
+    font-size:34px;
 
-.nav-links{
-
-    gap:25px;
+    margin-bottom:25px;
 
 }
 
-.hero-left h1{
+.feature-card h3{
+
+    font-size:24px;
+
+    color:var(--dark);
+
+    margin-bottom:15px;
+
+}
+
+.feature-card p{
+
+    color:#666;
+
+    line-height:1.8;
+
+}
+
+
+/* =======================================================
+   END PART 3
+======================================================= */
+/* =======================================================
+   LINKWORLD EXPRESS
+   style.css
+   PART 4
+   SERVICES • HOW IT WORKS • TESTIMONIALS
+======================================================= */
+
+
+/* =======================================================
+   OUR SERVICES
+======================================================= */
+
+.services-home{
+
+    background:#ffffff;
+
+}
+
+.services-grid{
+
+    display:grid;
+
+    grid-template-columns:repeat(3,1fr);
+
+    gap:30px;
+
+}
+
+.service-card{
+
+    background:#fff;
+
+    padding:40px 30px;
+
+    border-radius:22px;
+
+    box-shadow:var(--shadow);
+
+    transition:.35s;
+
+    text-align:center;
+
+    border:1px solid #eef2f7;
+
+}
+
+.service-card:hover{
+
+    transform:translateY(-12px);
+
+    box-shadow:var(--shadow-hover);
+
+    border-color:var(--primary);
+
+}
+
+.service-card i{
+
+    width:85px;
+
+    height:85px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    margin:0 auto 25px;
+
+    border-radius:50%;
+
+    background:rgba(13,110,253,.1);
+
+    color:var(--primary);
+
+    font-size:36px;
+
+}
+
+.service-card h3{
+
+    font-size:24px;
+
+    color:var(--dark);
+
+    margin-bottom:15px;
+
+}
+
+.service-card p{
+
+    color:#666;
+
+    line-height:1.8;
+
+}
+
+
+/* =======================================================
+   HOW IT WORKS
+======================================================= */
+
+.how-it-works{
+
+    background:var(--gray);
+
+}
+
+.steps-grid{
+
+    display:grid;
+
+    grid-template-columns:repeat(4,1fr);
+
+    gap:30px;
+
+}
+
+.step-card{
+
+    background:#fff;
+
+    border-radius:22px;
+
+    padding:40px 25px;
+
+    text-align:center;
+
+    box-shadow:var(--shadow);
+
+    transition:.35s;
+
+    position:relative;
+
+}
+
+.step-card:hover{
+
+    transform:translateY(-10px);
+
+    box-shadow:var(--shadow-hover);
+
+}
+
+.step-number{
+
+    position:absolute;
+
+    top:20px;
+
+    right:20px;
+
+    width:45px;
+
+    height:45px;
+
+    border-radius:50%;
+
+    background:var(--primary);
+
+    color:#fff;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    font-weight:700;
+
+}
+
+.step-card i{
 
     font-size:48px;
 
-}
+    color:var(--primary);
+
+    margin:20px 0;
 
 }
 
-/* ======================================================
-   MOBILE
-====================================================== */
+.step-card h3{
 
-@media(max-width:768px){
+    font-size:24px;
 
-.header{
+    color:var(--dark);
 
-    height:auto;
-
-    padding:18px 0;
+    margin-bottom:15px;
 
 }
 
-.header .container{
+.step-card p{
+
+    color:#666;
+
+    line-height:1.8;
+
+}
+
+
+/* =======================================================
+   TESTIMONIALS
+======================================================= */
+
+.testimonials{
+
+    background:#fff;
+
+}
+
+.testimonial-grid{
+
+    display:grid;
+
+    grid-template-columns:repeat(3,1fr);
+
+    gap:30px;
+
+}
+
+.testimonial-card{
+
+    background:#fff;
+
+    border-radius:22px;
+
+    padding:35px;
+
+    box-shadow:var(--shadow);
+
+    transition:.35s;
+
+    border:1px solid #edf1f5;
+
+}
+
+.testimonial-card:hover{
+
+    transform:translateY(-10px);
+
+    box-shadow:var(--shadow-hover);
+
+}
+
+.stars{
+
+    color:#ffc107;
+
+    margin-bottom:20px;
+
+    font-size:18px;
+
+}
+
+.testimonial-card p{
+
+    color:#555;
+
+    line-height:1.9;
+
+    margin-bottom:30px;
+
+    font-style:italic;
+
+}
+
+.client{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:15px;
+
+}
+
+.client img{
+
+    width:65px;
+
+    height:65px;
+
+    border-radius:50%;
+
+    object-fit:cover;
+
+}
+
+.client h4{
+
+    color:var(--dark);
+
+    margin-bottom:5px;
+
+    font-size:18px;
+
+}
+
+.client span{
+
+    color:#777;
+
+    font-size:14px;
+
+}
+
+
+/* =======================================================
+   END PART 4
+======================================================= */
+/* =======================================================
+   LINKWORLD EXPRESS
+   style.css
+   PART 5
+   GLOBAL COVERAGE • CTA • CONTACT • FOOTER • RESPONSIVE
+======================================================= */
+
+
+/* =======================================================
+   GLOBAL COVERAGE
+======================================================= */
+
+.global-coverage{
+
+    background:var(--gray);
+
+}
+
+.coverage-grid{
+
+    display:grid;
+
+    grid-template-columns:1fr 1fr;
+
+    align-items:center;
+
+    gap:70px;
+
+}
+
+.coverage-image img{
+
+    width:100%;
+
+    animation:floatImage 5s ease-in-out infinite;
+
+}
+
+.coverage-content span{
+
+    display:inline-block;
+
+    color:var(--primary);
+
+    font-weight:600;
+
+    text-transform:uppercase;
+
+    margin-bottom:15px;
+
+}
+
+.coverage-content h2{
+
+    font-size:42px;
+
+    color:var(--dark);
+
+    margin-bottom:20px;
+
+}
+
+.coverage-content p{
+
+    color:#666;
+
+    line-height:1.9;
+
+    margin-bottom:30px;
+
+}
+
+.coverage-content ul{
+
+    display:flex;
 
     flex-direction:column;
 
     gap:18px;
 
-    height:auto;
-
 }
 
-.navbar{
-
-    margin-left:0;
-
-}
-
-.nav-links{
-
-    flex-wrap:wrap;
-
-    justify-content:center;
-
-    gap:20px;
-
-}
-
-.hero{
-
-    padding-top:180px;
-
-}
-
-.hero-left h1{
-
-    font-size:38px;
-
-}
-
-.hero-left p{
-
-    font-size:16px;
-
-}
-
-.hero-stats{
-
-    flex-direction:column;
-
-    gap:25px;
-
-}
-
-.tracking-box{
-
-    flex-direction:column;
-
-}
-
-.tracking-box input{
-
-    width:100%;
-
-    text-align:center;
-
-}
-
-.tracking-box button{
-
-    width:100%;
-
-}
-
-.radar-scene{
-
-    max-width:360px;
-
-}
-
-}
-
-/* ======================================================
-   SMALL MOBILE
-====================================================== */
-
-@media(max-width:480px){
-
-.hero{
-
-    padding-top:200px;
-
-}
-
-.small-title{
-
-    font-size:11px;
-
-}
-
-.hero-left h1{
-
-    font-size:32px;
-
-}
-
-.hero-left p{
-
-    font-size:15px;
-
-}
-
-.logo-text h2{
-
-    font-size:18px;
-
-}
-
-.logo-text span{
-
-    font-size:10px;
-
-    letter-spacing:4px;
-
-}
-
-.nav-links{
-
-    gap:15px;
-
-}
-
-}
-/*==================================================
-                OUR SERVICES
-==================================================*/
-
-.services{
-    padding:100px 0;
-    background:linear-gradient(135deg,#080D18 0%,#101A2D 45%,#141D34 100%);
-    position:relative;
-    overflow:hidden;
-}
-
-.services::before{
-    content:"";
-    position:absolute;
-    top:-180px;
-    right:-180px;
-    width:420px;
-    height:420px;
-    border-radius:50%;
-    background:rgba(244,180,0,.06);
-}
-
-.services::after{
-    content:"";
-    position:absolute;
-    bottom:-180px;
-    left:-180px;
-    width:350px;
-    height:350px;
-    border-radius:50%;
-    background:rgba(79,124,255,.08);
-}
-
-.services .container{
-    position:relative;
-    z-index:2;
-}
-
-/*==============================
-SECTION HEADER
-==============================*/
-
-.section-header{
-    text-align:center;
-    max-width:720px;
-    margin:0 auto 70px;
-}
-
-.section-tag{
-    display:inline-flex;
-    align-items:center;
-    gap:10px;
-    padding:10px 24px;
-    border-radius:50px;
-    background:rgba(244,180,0,.12);
-    border:1px solid rgba(244,180,0,.25);
-    color:#F4B400;
-    font-size:.85rem;
-    font-weight:700;
-    letter-spacing:1px;
-    text-transform:uppercase;
-    margin-bottom:20px;
-}
-
-.section-header h2{
-    font-size:2.8rem;
-    color:#ffffff;
-    margin-bottom:20px;
-    line-height:1.2;
-    font-weight:700;
-}
-
-.section-header p{
-    color:#cfd8e8;
-    font-size:1.05rem;
-    line-height:1.9;
-}
-
-/*==============================
-GRID
-==============================*/
-
-.services-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
-    gap:30px;
-}
-
-/*==============================
-CARD
-==============================*/
-
-.service-card{
-    background:rgba(255,255,255,.08);
-    backdrop-filter:blur(14px);
-    border:1px solid rgba(255,255,255,.10);
-    border-radius:22px;
-    padding:40px 35px;
-    position:relative;
-    overflow:hidden;
-    transition:.4s ease;
-    box-shadow:0 20px 45px rgba(0,0,0,.25);
-}
-
-.service-card::before{
-    content:"";
-    position:absolute;
-    top:0;
-    left:0;
-    width:100%;
-    height:4px;
-    background:linear-gradient(90deg,#4F7CFF,#F4B400);
-    transform:scaleX(0);
-    transition:.4s;
-}
-
-.service-card:hover::before{
-    transform:scaleX(1);
-}
-
-.service-card:hover{
-    transform:translateY(-12px);
-    background:rgba(255,255,255,.12);
-    border-color:rgba(244,180,0,.35);
-    box-shadow:0 28px 60px rgba(0,0,0,.35);
-}
-
-/*==============================
-ICON
-==============================*/
-.service-icon{
-
-    width:78px;
-    height:78px;
+.coverage-content li{
 
     display:flex;
+
     align-items:center;
-    justify-content:center;
 
-    margin-bottom:28px;
+    gap:12px;
 
-    border-radius:20px;
+    color:#444;
 
-    background:linear-gradient(135deg,#4F7CFF,#6B92FF);
+    font-weight:500;
+
+}
+
+.coverage-content li i{
+
+    color:var(--success);
+
+}
+
+
+/* =======================================================
+   CALL TO ACTION
+======================================================= */
+
+.cta-section{
+
+    background:linear-gradient(
+
+        135deg,
+
+        #0d6efd,
+
+        #0047ba
+
+    );
+
+}
+
+.cta-box{
+
+    text-align:center;
 
     color:#fff;
 
-    transition:.4s;
-
-    box-shadow:0 15px 35px rgba(79,124,255,.35);
+    padding:70px 40px;
 
 }
 
-.service-icon i{
+.cta-box h2{
 
-    font-size:34px;
+    font-size:46px;
 
-    color:#ffffff;
-
-    display:block;
-
-    line-height:1;
+    margin-bottom:20px;
 
 }
 
-.service-card:hover .service-icon{
+.cta-box p{
 
-    background:linear-gradient(135deg,#F4B400,#FFC93C);
+    font-size:18px;
 
-    color:#111;
-
-    transform:rotate(-8deg) scale(1.08);
-
-}
-
-/*==============================
-TEXT
-==============================*/
-
-.service-card h3{
-    color:#ffffff;
-    font-size:1.45rem;
-    margin-bottom:15px;
-    font-weight:700;
-}
-
-.service-card p{
-    color:#d8dfea;
     line-height:1.8;
-    font-size:.98rem;
-}
 
-/*==============================
-RESPONSIVE
-==============================*/
+    max-width:750px;
 
-@media(max-width:768px){
+    margin:auto;
 
-    .services{
-        padding:70px 0;
-    }
-
-    .section-header h2{
-        font-size:2rem;
-    }
-
-    .services-grid{
-        grid-template-columns:1fr;
-    }
-
-    .service-card{
-        padding:35px 28px;
-    }
+    margin-bottom:40px;
 
 }
-/*==================================================
-                WHY CHOOSE US
-==================================================*/
-/*==================================================
-                WHY CHOOSE US
-==================================================*/
 
-.why-us{
-    padding:100px 0;
-    background:linear-gradient(135deg,#101A2D 0%,#141D34 50%,#1B2A45 100%);
-    position:relative;
-    overflow:hidden;
-}
+.cta-buttons{
 
-.why-us::before{
-    content:"";
-    position:absolute;
-    top:-180px;
-    right:-180px;
-    width:380px;
-    height:380px;
-    border-radius:50%;
-    background:rgba(244,180,0,.06);
-}
-
-.why-us::after{
-    content:"";
-    position:absolute;
-    bottom:-180px;
-    left:-180px;
-    width:350px;
-    height:350px;
-    border-radius:50%;
-    background:rgba(79,124,255,.08);
-}
-
-.why-container{
-    position:relative;
-    z-index:2;
-    display:grid;
-    grid-template-columns:1.1fr 1fr;
-    gap:70px;
-    align-items:center;
-}
-
-.why-left h2{
-    font-size:2.6rem;
-    color:#ffffff;
-    line-height:1.2;
-    margin:20px 0;
-}
-
-.why-left p{
-    color:#cfd8e8;
-    line-height:1.9;
-    margin-bottom:35px;
-    font-size:1.05rem;
-}
-
-.why-features{
     display:flex;
-    flex-direction:column;
+
+    justify-content:center;
+
     gap:20px;
+
+    flex-wrap:wrap;
+
 }
 
-.feature-item{
-    display:flex;
-    align-items:center;
-    gap:15px;
-    font-size:1rem;
-    color:#ffffff;
-    font-weight:500;
+
+/* =======================================================
+   CONTACT
+======================================================= */
+
+.contact-preview{
+
+    background:#fff;
+
 }
 
-.feature-item i{
-    width:45px;
-    height:45px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    border-radius:50%;
-    background:rgba(244,180,0,.12);
-    color:#F4B400;
-    font-size:1rem;
-    flex-shrink:0;
-}
+.contact-grid{
 
-.why-right{
     display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:25px;
+
+    grid-template-columns:repeat(4,1fr);
+
+    gap:30px;
+
 }
 
-.why-card{
-    background:rgba(255,255,255,.08);
-    backdrop-filter:blur(15px);
-    border:1px solid rgba(255,255,255,.12);
-    border-radius:24px;
+.contact-card{
+
+    background:#fff;
+
+    border-radius:20px;
+
     padding:40px 25px;
+
     text-align:center;
-    transition:.35s ease;
-    box-shadow:0 20px 45px rgba(0,0,0,.20);
-}
 
-.why-card:hover{
-    transform:translateY(-10px);
-    background:rgba(255,255,255,.12);
-    border-color:rgba(244,180,0,.45);
-    box-shadow:0 25px 60px rgba(0,0,0,.35);
-}
+    box-shadow:var(--shadow);
 
-.why-icon{
-    width:80px;
-    height:80px;
-    background:#F4B400;
-    border-radius:50%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    margin:0 auto 22px;
     transition:.35s;
-}
-
-.why-icon i{
-    font-size:36px;
-    color:#ffffff;
-    line-height:1;
-}
-
-.why-card:hover .why-icon{
-    background:#4F7CFF;
-    transform:rotate(-8deg) scale(1.08);
-}
-
-.why-card h3{
-    font-size:2.2rem;
-    color:#F4B400;
-    margin-bottom:10px;
-    font-weight:700;
-}
-
-.why-card p{
-    color:#d8dfea;
-    font-weight:500;
-    font-size:1rem;
-}
-
-@media(max-width:991px){
-
-    .why-container{
-        grid-template-columns:1fr;
-    }
-
-    .why-right{
-        margin-top:20px;
-    }
 
 }
 
-@media(max-width:768px){
+.contact-card:hover{
 
-    .why-us{
-        padding:70px 0;
-    }
+    transform:translateY(-10px);
 
-    .why-left h2{
-        font-size:2rem;
-    }
-
-    .why-right{
-        grid-template-columns:1fr;
-    }
+    box-shadow:var(--shadow-hover);
 
 }
-/*==================================================
-FOOTER
-==================================================*/
+
+.contact-card i{
+
+    font-size:42px;
+
+    color:var(--primary);
+
+    margin-bottom:20px;
+
+}
+
+.contact-card h3{
+
+    color:var(--dark);
+
+    margin-bottom:15px;
+
+}
+
+.contact-card p{
+
+    color:#666;
+
+    line-height:1.8;
+
+}
+
+
+/* =======================================================
+   FOOTER
+======================================================= */
 
 .footer{
-    background:#081726;
+
+    background:#081c36;
+
     color:#fff;
-    padding:70px 8% 25px;
-}
 
-.footer-container{
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-start;
-    gap:60px;
-    flex-wrap:wrap;
-}
-
-.footer-box{
-    flex:1;
-    min-width:280px;
-}
-
-/*==============================
-LEFT SIDE
-==============================*/
-
-.footer-box h3{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    font-size:28px;
-    margin-bottom:15px;
-    color:#fff;
-}
-
-.footer-box h3 i{
-    color:var(--accent);
-    font-size:28px;
-}
-
-.footer-line{
-    width:70px;
-    height:4px;
-    background:var(--accent);
-    border-radius:50px;
-    margin-bottom:20px;
-}
-
-.footer-box p{
-    color:#c8d2dc;
-    line-height:1.8;
-    font-size:15px;
-}
-
-/*==============================
-VERTICAL DIVIDER
-==============================*/
-
-.footer-divider{
-    width:1px;
-    background:rgba(255,255,255,.12);
-    align-self:stretch;
-}
-
-/*==============================
-SOCIAL ICONS
-==============================*/
-
-.footer-social{
-    display:flex;
-    gap:15px;
-    margin-top:28px;
-}
-
-.footer-social a{
-    width:46px;
-    height:46px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    border-radius:50%;
-    background:rgba(255,255,255,.08);
-    color:#fff;
-    text-decoration:none;
-    font-size:18px;
-    transition:.35s;
-}
-
-.footer-social a:hover{
-    background:var(--accent);
-    color:#081726;
-    transform:translateY(-6px);
-}
-
-/*==============================
-CONTACT
-==============================*/
-
-.footer-contact{
-    display:flex;
-    flex-direction:column;
-    gap:22px;
-}
-
-.footer-contact p{
-    display:flex;
-    align-items:center;
-    gap:15px;
-    font-size:16px;
-    color:#d8e2ec;
-}
-
-.footer-contact i{
-    width:42px;
-    height:42px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:rgba(255,255,255,.08);
-    border-radius:50%;
-    color:var(--accent);
-    font-size:17px;
-}
-
-.footer-contact a{
-    color:#d8e2ec;
-    text-decoration:none;
-    transition:.3s;
-}
-
-.footer-contact a:hover{
-    color:var(--accent);
-}
-
-/*==============================
-COPYRIGHT
-==============================*/
-
-.footer-bottom{
-    margin-top:50px;
-    padding-top:22px;
-    border-top:1px solid rgba(255,255,255,.12);
-    text-align:center;
-}
-
-.footer-bottom p{
-    color:#aeb8c3;
-    font-size:15px;
-    letter-spacing:.4px;
-}
-
-/*==============================
-RESPONSIVE
-==============================*/
-
-@media(max-width:768px){
-
-    .footer-container{
-        flex-direction:column;
-        gap:45px;
-    }
-
-    .footer-divider{
-        display:none;
-    }
-
-    .footer-box{
-        width:100%;
-    }
-
-    .footer-social{
-        justify-content:flex-start;
-    }
-
-}
-/* ======================================================
-   LINKWORLD EXPRESS
-   TRACKING LAZY LOADING OVERLAY
-====================================================== */
-
-
-.load-overlay{
-
-    position:fixed;
-
-    top:0;
-
-    left:0;
-
-    width:100%;
-
-    height:100%;
-
-    background:rgba(7,29,73,0.96);
-
-    display:none;
-
-    justify-content:center;
-
-    align-items:center;
-
-    z-index:99999;
+    padding:80px 0 25px;
 
 }
 
+.footer-grid{
 
+    display:grid;
 
-
-.load-card{
-
-    background:white;
-
-    width:350px;
-
-    padding:40px 30px;
-
-    border-radius:20px;
-
-    text-align:center;
-
-    box-shadow:0 20px 50px rgba(0,0,0,0.25);
-
-    animation:loadPop .4s ease;
-
-}
-
-
-
-
-.load-ring{
-
-    width:80px;
-
-    height:80px;
-
-    margin:auto;
-
-    border-radius:50%;
-
-    border:7px solid #e5e7eb;
-
-    border-top:7px solid #f9c900;
-
-    animation:spinLoader 1s linear infinite;
-
-}
-
-
-
-
-#loadMessage{
-
-    margin-top:25px;
-
-    color:#071d49;
-
-    font-size:17px;
-
-    font-weight:600;
-
-    line-height:1.5;
-
-}
-
-
-
-#loadMessage span{
-
-    color:#f9c900;
-
-}
-
-
-
-
-@keyframes spinLoader{
-
-
-    from{
-
-        transform:rotate(0deg);
-
-    }
-
-
-    to{
-
-        transform:rotate(360deg);
-
-    }
-
-
-}
-
-
-
-
-@keyframes loadPop{
-
-
-    from{
-
-        opacity:0;
-
-        transform:scale(.8);
-
-    }
-
-
-    to{
-
-        opacity:1;
-
-        transform:scale(1);
-
-    }
-
-
-}
-
-
-
-
-
-
-/* MOBILE */
-
-@media(max-width:600px){
-
-
-    .load-card{
-
-        width:85%;
-
-        padding:35px 20px;
-
-    }
-
-
-
-    .load-ring{
-
-        width:65px;
-
-        height:65px;
-
-    }
-
-
-}
-/* ================================
-   TRACKING LAZY LOADING
-================================ */
-
-.load-overlay{
-
-    position:fixed;
-
-    top:0;
-    left:0;
-
-    width:100%;
-    height:100%;
-
-    background:rgba(7,29,73,0.95);
-
-    display:none;
-
-    align-items:center;
-    justify-content:center;
-
-    z-index:9999;
-
-}
-
-
-
-.load-card{
-
-    background:white;
-
-    padding:40px;
-
-    border-radius:20px;
-
-    text-align:center;
-
-    width:350px;
-
-}
-
-
-
-.load-ring{
-
-    width:60px;
-
-    height:60px;
-
-    border:6px solid #ddd;
-
-    border-top:6px solid #f9c900;
-
-    border-radius:50%;
-
-    margin:auto;
-
-    animation:spin 1s linear infinite;
-
-}
-
-
-
-.load-card p{
-
-    margin-top:25px;
-
-    color:#071d49;
-
-    font-weight:600;
-
-}
-
-
-
-@keyframes spin{
-
-    from{
-
-        transform:rotate(0deg);
-
-    }
-
-    to{
-
-        transform:rotate(360deg);
-
-    }
-
-}
-/* =========================================
-   LINKWORLD EXPRESS
-   TRACKING LOADING OVERLAY
-========================================= */
-
-
-.load-overlay{
-
-    position:fixed;
-
-    top:0;
-
-    left:0;
-
-    width:100%;
-
-    height:100%;
-
-    background:rgba(7,29,73,0.92);
-
-    display:none;
-
-    align-items:center;
-
-    justify-content:center;
-
-    z-index:9999;
-
-}
-
-
-
-.load-overlay.active{
-
-    display:flex;
-
-}
-
-
-
-.load-card{
-
-    background:white;
-
-    width:350px;
-
-    padding:40px;
-
-    border-radius:20px;
-
-    text-align:center;
-
-    box-shadow:0 20px 50px rgba(0,0,0,.3);
-
-}
-
-
-
-.load-card h3{
-
-    margin-top:25px;
-
-    color:#071d49;
-
-    font-size:18px;
-
-}
-
-
-
-.load-ring{
-
-    width:70px;
-
-    height:70px;
-
-    border-radius:50%;
-
-    border:6px solid #e5e7eb;
-
-    border-top:6px solid #f9c900;
-
-    margin:auto;
-
-    animation:spinLoader 1s linear infinite;
-
-}
-
-
-
-@keyframes spinLoader{
-
-
-from{
-
-transform:rotate(0deg);
-
-}
-
-
-to{
-
-transform:rotate(360deg);
-
-}
-
-
-}
-
-
-
-
-
-/* =========================================
-   HERO COUNTER NUMBERS
-========================================= */
-
-
-.hero-stats{
-
-    display:flex;
+    grid-template-columns:repeat(4,1fr);
 
     gap:40px;
 
 }
 
+.footer-logo{
 
+    width:75px;
 
-.counter-box{
+    margin-bottom:20px;
+
+}
+
+.footer-column h3,
+
+.footer-column h4{
+
+    margin-bottom:20px;
+
+}
+
+.footer-column p{
+
+    color:#d5dbe3;
+
+    line-height:1.8;
+
+}
+
+.footer-column ul{
 
     display:flex;
 
-    align-items:center;
+    flex-direction:column;
+
+    gap:12px;
 
 }
 
+.footer-column ul li a{
 
-
-.counter-box h2{
-
-    font-size:42px;
-
-    font-weight:700;
-
-    color:#071d49;
-
-}
-
-
-
-.counter-box span{
-
-    font-size:35px;
-
-    font-weight:700;
-
-    color:#f9c900;
-
-    margin-left:5px;
-
-}
-
-
-
-.counter-box p{
-
-    display:block;
-
-    margin-left:10px;
-
-    color:#555;
-
-}
-
-
-
-
-
-
-/* =========================================
-   TRACK BUTTON EFFECT
-========================================= */
-
-
-#trackBtn{
-
-    cursor:pointer;
+    color:#d5dbe3;
 
     transition:.3s;
 
 }
 
+.footer-column ul li a:hover{
 
+    color:#fff;
 
-#trackBtn:hover{
-
-    transform:translateY(-3px);
-
-}
-
-
-
-#trackBtn.loading{
-
-    opacity:.7;
-
-    pointer-events:none;
+    padding-left:6px;
 
 }
 
+.social-links{
 
+    display:flex;
 
+    gap:12px;
 
-
-
-/* =========================================
-        MOBILE FIX
-========================================= */
-
-
-@media(max-width:900px){
-
-
-.hero-stats{
-
-    flex-direction:column;
-
-    gap:20px;
+    margin-top:20px;
 
 }
 
+.social-links a{
 
+    width:45px;
 
-.counter-box h2{
+    height:45px;
 
-    font-size:35px;
-
-}
-
-
-
-.load-card{
-
-    width:90%;
-
-}
-
-
-}
-/* =========================================================
-   LINKWORLD EXPRESS
-   ADMIN STYLE LOADING SCREEN
-========================================================= */
-
-
-.loading-screen{
-
-    position:fixed;
-
-    top:0;
-
-    left:0;
-
-    width:100%;
-
-    height:100%;
-
-    background:rgba(7,29,73,0.96);
-
-    display:none;
+    display:flex;
 
     align-items:center;
 
     justify-content:center;
 
-    z-index:99999;
+    border-radius:50%;
+
+    background:rgba(255,255,255,.08);
+
+    color:#fff;
+
+    transition:.35s;
 
 }
 
+.social-links a:hover{
 
+    background:var(--primary);
 
-.loading-screen.active{
+    transform:translateY(-5px);
+
+}
+
+.footer hr{
+
+    margin:50px 0 25px;
+
+    border:none;
+
+    height:1px;
+
+    background:rgba(255,255,255,.12);
+
+}
+
+.footer-bottom{
 
     display:flex;
 
-}
+    justify-content:space-between;
 
+    align-items:center;
 
+    flex-wrap:wrap;
 
-
-.loading-card{
-
-
-    width:380px;
-
-    background:white;
-
-    padding:45px 35px;
-
-    border-radius:20px;
-
-    text-align:center;
-
-    box-shadow:0 20px 60px rgba(0,0,0,.35);
-
-    animation:loadingAppear .4s ease;
+    gap:15px;
 
 }
 
+.footer-bottom p{
 
-
-@keyframes loadingAppear{
-
-
-from{
-
-    transform:scale(.8);
-
-    opacity:0;
-
-}
-
-
-to{
-
-    transform:scale(1);
-
-    opacity:1;
-
-}
-
-
-}
-
-
-
-
-
-.loading-card img{
-
-
-    width:75px;
-
-    height:75px;
-
-    object-fit:contain;
-
-    margin-bottom:15px;
-
-
-}
-
-
-
-
-.loading-card h2{
-
-
-    color:#071d49;
-
-    font-size:26px;
-
-    margin-bottom:15px;
-
-
-}
-
-
-
-
-
-.loading-card p{
-
-
-    color:#666;
+    color:#d5dbe3;
 
     font-size:15px;
 
-    margin-bottom:25px;
-
-
 }
 
 
+/* =======================================================
+   RESPONSIVE
+======================================================= */
 
+@media(max-width:1100px){
 
+    .hero-content,
 
-/* PROGRESS BAR */
+    .about-grid,
 
+    .coverage-grid{
 
-.progress{
+        grid-template-columns:1fr;
 
+    }
 
-    width:100%;
+    .stats-grid,
 
-    height:12px;
+    .features-grid,
 
-    background:#e5e7eb;
+    .services-grid,
 
-    border-radius:20px;
+    .steps-grid,
 
-    overflow:hidden;
+    .testimonial-grid,
 
-}
+    .contact-grid,
 
+    .footer-grid{
 
+        grid-template-columns:repeat(2,1fr);
 
-
-.progress-bar{
-
-
-    width:0%;
-
-    height:100%;
-
-    background:#f9c900;
-
-    border-radius:20px;
-
-    transition:.4s ease;
-
+    }
 
 }
 
+@media(max-width:768px){
 
+    .navbar{
 
+        display:none;
 
-#progressPercent{
+    }
 
+    .menu-toggle{
 
-    display:block;
+        display:flex;
 
-    margin-top:15px;
+        align-items:center;
 
-    color:#071d49;
+        justify-content:center;
 
-    font-size:22px;
+    }
 
-    font-weight:700;
+    .hero-left h1{
 
+        font-size:42px;
 
-}
+    }
 
+    .section-header h2{
 
+        font-size:32px;
 
+    }
 
+    .track-form{
 
-/* =========================================================
-   COUNTER ANIMATION STYLE
-========================================================= */
+        flex-direction:column;
 
+    }
 
-.hero-stats h2{
+    .track-form input,
 
+    .track-form button{
 
-    font-size:42px;
+        width:100%;
 
-    color:#071d49;
+    }
 
-    font-weight:700;
+    .stats-grid,
 
+    .features-grid,
 
-}
+    .services-grid,
 
+    .steps-grid,
 
+    .testimonial-grid,
 
+    .contact-grid,
 
+    .footer-grid{
 
-/* =========================================================
-   TRACK BUTTON
-========================================================= */
+        grid-template-columns:1fr;
 
+    }
 
-#trackBtn{
+    .footer-bottom{
 
+        text-align:center;
 
-    cursor:pointer;
+        justify-content:center;
 
-    transition:.3s ease;
-
-
-}
-
-
-
-#trackBtn:hover{
-
-
-    transform:translateY(-3px);
-
-
-}
-
-
-
-
-
-
-/* =========================================================
-   MOBILE
-========================================================= */
-
-
-@media(max-width:600px){
-
-
-.loading-card{
-
-
-    width:90%;
-
-    padding:35px 25px;
-
+    }
 
 }
 
-
-
-.loading-card h2{
-
-
-    font-size:22px;
-
-
-}
-
-
-
-.hero-stats{
-
-
-    flex-direction:column;
-
-
-}
-
-
-
-}
-
-
+/* =======================================================
+   END OF style.css
+======================================================= */

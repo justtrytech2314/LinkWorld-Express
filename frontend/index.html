@@ -5,378 +5,102 @@
 
 <meta charset="UTF-8">
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta
+name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>
+
+LinkWorld Express | Global Logistics & Courier Services
+
+</title>
+
+<meta
+name="description"
+content="LinkWorld Express provides reliable worldwide courier, logistics, freight forwarding and live shipment tracking.">
+
+<meta
+name="keywords"
+content="Courier, Logistics, Shipping, Freight, Tracking, LinkWorld Express">
+
+<meta
+name="author"
+content="LinkWorld Express">
 
 
-<title>LinkWorld Express | Global Courier & Logistics</title>
+<!-- ================================================= -->
+<!-- FAVICON -->
+<!-- ================================================= -->
+
+<link
+rel="icon"
+href="images/logo.png">
 
 
-
+<!-- ================================================= -->
 <!-- GOOGLE FONTS -->
+<!-- ================================================= -->
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
+<link
+rel="preconnect"
+href="https://fonts.googleapis.com">
 
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link
+rel="preconnect"
+href="https://fonts.gstatic.com"
+crossorigin>
 
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link
+href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+rel="stylesheet">
 
 
-
+<!-- ================================================= -->
 <!-- FONT AWESOME -->
+<!-- ================================================= -->
 
-<link rel="stylesheet"
+<link
+rel="stylesheet"
 href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 
 
+<!-- ================================================= -->
+<!-- AOS ANIMATION -->
+<!-- ================================================= -->
 
-<!-- CSS -->
+<link
+rel="stylesheet"
+href="https://unpkg.com/aos@2.3.4/dist/aos.css">
 
-<link rel="stylesheet" href="css/style.css">
 
+<!-- ================================================= -->
+<!-- MAIN CSS -->
+<!-- ================================================= -->
 
+<link
+rel="stylesheet"
+href="css/style.css">
 
 </head>
-
 
 <body>
 
 
+<!-- ================================================= -->
+<!-- PAGE LOADER -->
+<!-- ================================================= -->
 
-<!-- ================= HEADER ================= -->
+<div
+id="pageLoader"
+class="page-loader">
 
+<div class="loader-content">
 
-<header class="header">
+<img
+src="images/logo.png"
+alt="LinkWorld Express">
 
-
-<div class="container">
-
-
-
-<a href="index.html" class="logo">
-
-
-<img src="images/plane.web.png" alt="LinkWorld Express">
-
-
-<div class="logo-text">
-
-
-<h2>LINKWORLD</h2>
-
-
-<span>EXPRESS</span>
-
-
-</div>
-
-
-</a>
-
-
-
-
-
-<nav class="navbar">
-
-
-<ul class="nav-links">
-
-
-<li><a href="#">Home</a></li>
-
-<li><a href="#">About</a></li>
-
-<li><a href="#services">Services</a></li>
-
-<li><a href="#tracking">Tracking</a></li>
-
-<li><a href="#">Contact</a></li>
-
-
-</ul>
-
-
-</nav>
-
-
-
-</div>
-
-
-</header>
-
-
-
-
-
-
-<!-- ================= HERO ================= -->
-
-
-<section class="hero">
-
-
-<div class="container hero-container">
-
-
-
-<div class="hero-left">
-
-
-
-<span class="small-title">
-
-LIVE ACROSS 195 COUNTRIES
-
-</span>
-
-
-
-
-
-<h1>
-
-Delivering Trust,<br>
-
-Connecting <span>the World.</span>
-
-</h1>
-
-
-
-
-
-
-<p>
-
-LinkWorld Express provides fast, secure and reliable logistics services
-across more than 195 countries. Enter your tracking number to see exactly
-where your shipment is right now.
-
-</p>
-
-
-
-
-
-<!-- TRACKING BOX -->
-
-
-<div class="tracking-box" id="tracking">
-
-
-
-<input
-
-type="text"
-
-id="trackInput"
-
-placeholder="Enter Tracking Number"
-
-autocomplete="off"
-
->
-
-
-
-
-
-<button id="trackBtn">
-
-
-Track
-
-
-</button>
-
-
-
-
-</div>
-
-
-
-
-<p id="error"></p>
-
-
-
-
-
-<p class="example-id">
-
-
-Don't have one?
-
-
-<button type="button" onclick="fillExample()">
-
-
-Try a demo ID →
-
-
-</button>
-
-
-</p>
-
-
-
-
-
-<div class="hero-stats">
-
-
-
-<div>
-
-
-<h2>195+</h2>
-
-
-<p>Countries</p>
-
-
-</div>
-
-
-
-
-
-<div>
-
-
-<h2>25K+</h2>
-
-
-<p>Shipments</p>
-
-
-</div>
-
-
-
-
-
-<div>
-
-
-<h2>99%</h2>
-
-
-<p>On-Time</p>
-
-
-</div>
-
-
-
-
-</div>
-
-
-
-
-
-
-</div>
-
-
-
-
-
-
-
-
-<!-- RIGHT SIDE -->
-
-
-<div class="hero-right">
-
-
-<svg class="radar-scene" viewBox="0 0 400 420">
-
-
-
-<circle class="radar-ring" cx="200" cy="210" r="60"/>
-
-
-<circle class="radar-ring" cx="200" cy="210" r="120"/>
-
-
-<circle class="radar-ring" cx="200" cy="210" r="180"/>
-
-
-
-
-<path class="flight-path"
-d="M40,330 C120,220 160,120 260,90 C330,68 360,140 300,190 C240,240 200,300 260,330"/>
-
-
-
-
-<circle class="hub-dot active" cx="40" cy="330" r="4.5"/>
-
-
-<circle class="hub-dot" cx="260" cy="90" r="4"/>
-
-
-<circle class="hub-dot" cx="300" cy="190" r="4"/>
-
-
-<circle class="hub-dot active" cx="260" cy="330" r="4.5"/>
-
-
-
-
-<text class="plane-marker">
-
-<tspan class="plane-glyph">
-
-✈
-
-</tspan>
-
-</text>
-
-
-
-</svg>
-
-
-
-</div>
-
-
-
-
-</div>
-
-
-</section>
-
-
-
-
-
-
-<!-- ========================================================= -->
-<!-- TRACKING LOADING SCREEN (SAME AS ADMIN LOGIN) -->
-<!-- ========================================================= -->
-
-
-<section id="loadingScreen" class="loading-screen">
-
-
-
-<div class="loading-card">
-
-
-
-<img src="images/plane.web.png" alt="LinkWorld Express">
-
-
+<div class="loader-spinner"></div>
 
 <h2>
 
@@ -384,587 +108,263 @@ LinkWorld Express
 
 </h2>
 
+<p>
 
-
-
-<p id="loadingText">
-
-
-Connecting to secure server...
-
+Preparing your experience...
 
 </p>
 
+</div>
+
+</div>
 
 
+<!-- ================================================= -->
+<!-- HEADER -->
+<!-- ================================================= -->
+
+<header class="header">
+
+<div class="container">
+
+<a
+href="index.html"
+class="logo">
+
+<img
+src="images/logo.png"
+alt="LinkWorld Express">
+
+<span>
+
+LinkWorld Express
+
+</span>
+
+</a>
 
 
-<div class="progress">
+<nav
+class="navbar"
+id="navbar">
 
+<a
+href="index.html"
+class="active">
+
+Home
+
+</a>
+
+<a
+href="about.html">
+
+About
+
+</a>
+
+<a
+href="services.html">
+
+Services
+
+</a>
+
+<a
+href="tracking.html">
+
+Track Shipment
+
+</a>
+
+<a
+href="contact.html">
+
+Contact
+
+</a>
+
+</nav>
+
+
+<div class="header-buttons">
+
+<a
+href="tracking.html"
+class="track-btn">
+
+<i class="fa-solid fa-location-crosshairs"></i>
+
+Track
+
+</a>
+
+<button
+id="menuToggle"
+class="menu-toggle">
+
+<i class="fa-solid fa-bars"></i>
+
+</button>
+
+</div>
+
+</div>
+
+</header>
+
+
+<!-- ================================================= -->
+<!-- HERO SECTION -->
+<!-- ================================================= -->
+
+<section class="hero">
+
+<div class="hero-overlay"></div>
+
+<div class="container hero-content">
+
+<div
+class="hero-left"
+data-aos="fade-right">
+
+<span class="hero-tag">
+
+Worldwide Logistics Company
+
+</span>
+
+<h1>
+
+Fast, Reliable & Secure Global Shipping Solutions
+
+</h1>
+
+<p>
+
+Ship packages anywhere in the world with confidence. Track every shipment live, enjoy reliable delivery, and experience world-class logistics with LinkWorld Express.
+
+</p>
+
+<div class="hero-buttons">
+
+<a
+href="tracking.html"
+class="primary-btn">
+
+<i class="fa-solid fa-location-dot"></i>
+
+Track Shipment
+
+</a>
+
+<a
+href="contact.html"
+class="secondary-btn">
+
+<i class="fa-solid fa-paper-plane"></i>
+
+Ship Now
+
+</a>
+
+</div>
+
+</div>
 
 
 <div
+class="hero-right"
+data-aos="fade-left">
 
-id="progressBar"
-
-class="progress-bar">
-
-
-</div>
-
-
+<img
+src="images/hero-delivery.png"
+alt="Global Logistics">
 
 </div>
 
-
-
-
-<span id="progressPercent">
-
-
-0%
-
-
-</span>
-
-
-
-
 </div>
-
-
-
-</section>
-<!-- ================= SERVICES SECTION ================= -->
-
-
-<section class="services" id="services">
-
-
-<div class="container">
-
-
-
-<div class="section-header">
-
-
-
-<span class="section-tag">
-
-<i class="fa-solid fa-box"></i>
-
-OUR SERVICES
-
-</span>
-
-
-
-
-<h2>
-
-Global Logistics Solutions Built For Speed
-
-</h2>
-
-
-
-
-<p>
-
-LinkWorld Express provides reliable domestic and international shipping
-services with secure handling, real-time tracking and professional
-logistics support across 195+ countries.
-
-</p>
-
-
-
-</div>
-
-
-
-
-
-<div class="services-grid">
-
-
-
-<!-- CARD 1 -->
-
-<div class="service-card">
-
-
-<div class="service-icon">
-
-<i class="fa-solid fa-plane"></i>
-
-</div>
-
-
-<h3>
-
-Air Freight
-
-</h3>
-
-
-<p>
-
-Fast international air cargo delivery with secure handling and
-priority transportation worldwide.
-
-</p>
-
-
-</div>
-
-
-
-
-
-
-<!-- CARD 2 -->
-
-<div class="service-card">
-
-
-<div class="service-icon">
-
-<i class="fa-solid fa-ship"></i>
-
-</div>
-
-
-<h3>
-
-Sea Freight
-
-</h3>
-
-
-<p>
-
-Cost-effective ocean freight solutions for large commercial
-and personal shipments across continents.
-
-</p>
-
-
-</div>
-
-
-
-
-
-
-<!-- CARD 3 -->
-
-<div class="service-card">
-
-
-<div class="service-icon">
-
-<i class="fa-solid fa-truck-fast"></i>
-
-</div>
-
-
-<h3>
-
-Road Transport
-
-</h3>
-
-
-<p>
-
-Reliable local and cross-border road transportation with
-scheduled and express delivery options.
-
-</p>
-
-
-</div>
-
-
-
-
-
-
-<!-- CARD 4 -->
-
-<div class="service-card">
-
-
-<div class="service-icon">
-
-<i class="fa-solid fa-box-open"></i>
-
-</div>
-
-
-<h3>
-
-Express Delivery
-
-</h3>
-
-
-<p>
-
-Time-sensitive parcel delivery designed for urgent documents,
-packages and valuable cargo.
-
-</p>
-
-
-</div>
-
-
-
-
-
-
-<!-- CARD 5 -->
-
-<div class="service-card">
-
-
-<div class="service-icon">
-
-<i class="fa-solid fa-warehouse"></i>
-
-</div>
-
-
-<h3>
-
-Warehousing
-
-</h3>
-
-
-<p>
-
-Safe storage facilities with inventory management and flexible
-distribution solutions.
-
-</p>
-
-
-</div>
-
-
-
-
-
-
-<!-- CARD 6 -->
-
-<div class="service-card">
-
-
-<div class="service-icon">
-
-<i class="fa-solid fa-earth-americas"></i>
-
-</div>
-
-
-<h3>
-
-Global Logistics
-
-</h3>
-
-
-<p>
-
-Complete supply chain management connecting businesses and
-customers around the world.
-
-</p>
-
-
-</div>
-
-
-
-
-
-</div>
-
-
-</div>
-
 
 </section>
 
 
+<!-- ================================================= -->
+<!-- START MAIN CONTENT -->
+<!-- ================================================= -->
 
+<main>
+    <!-- ================================================= -->
+<!-- QUICK TRACKING -->
+<!-- ================================================= -->
 
-
-
-
-
-<!-- ================= WHY CHOOSE US ================= -->
-
-
-<section class="why-us">
-
-
+<section class="quick-track">
 
 <div class="container">
 
-
-
-<div class="why-container">
-
-
-
-
-
-<!-- LEFT SIDE -->
-
-
-<div class="why-left">
-
-
-
-<span class="section-tag">
-
-
-<i class="fa-solid fa-award"></i>
-
-
-WHY CHOOSE US
-
-
-</span>
-
-
-
-
+<div
+class="track-card"
+data-aos="zoom-in">
 
 <h2>
 
-
-Delivering Confidence Across Every Destination
-
+Track Your Shipment Instantly
 
 </h2>
 
-
-
-
-
 <p>
 
-
-At LinkWorld Express, we combine advanced logistics technology,
-experienced professionals and a worldwide delivery network to
-ensure every shipment reaches its destination safely, securely,
-and on time.
-
+Enter your tracking number below to get real-time shipment updates.
 
 </p>
 
+<div class="track-form">
 
+<input
+type="text"
+id="homeTrackingNumber"
+placeholder="Enter Tracking Number">
 
+<button
+id="homeTrackBtn">
 
+<i class="fa-solid fa-magnifying-glass"></i>
 
+Track Now
 
-<div class="why-features">
-
-
-
-
-
-<div class="feature-item">
-
-
-<i class="fa-solid fa-circle-check"></i>
-
-
-<span>
-
-Worldwide delivery to 195+ countries
-
-</span>
-
+</button>
 
 </div>
 
-
-
-
-
-
-
-<div class="feature-item">
-
-
-<i class="fa-solid fa-circle-check"></i>
-
-
-<span>
-
-24/7 shipment monitoring & customer support
-
-</span>
-
+</div>
 
 </div>
 
+</section>
 
 
+<!-- ================================================= -->
+<!-- COMPANY STATISTICS -->
+<!-- ================================================= -->
 
+<section class="statistics">
 
+<div class="container">
 
+<div class="stats-grid">
 
-<div class="feature-item">
-
-
-<i class="fa-solid fa-circle-check"></i>
-
-
-<span>
-
-Safe handling with insured transportation
-
-</span>
-
-
-</div>
-
-
-
-
-
-
-
-<div class="feature-item">
-
-
-<i class="fa-solid fa-circle-check"></i>
-
-
-<span>
-
-Fast customs clearance & express shipping
-
-</span>
-
-
-</div>
-
-
-
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-
-
-
-<!-- RIGHT SIDE -->
-
-
-<div class="why-right">
-
-
-
-
-
-<div class="why-card">
-
-
-<div class="why-icon">
-
-<i class="fa-solid fa-earth-americas"></i>
-
-</div>
-
-
-<h3>
-
-195+
-
-</h3>
-
-
-<p>
-
-Countries Served
-
-</p>
-
-
-</div>
-
-
-
-
-
-
-
-
-<div class="why-card">
-
-
-<div class="why-icon">
-
-<i class="fa-solid fa-truck-fast"></i>
-
-</div>
-
-
-<h3>
-
-98%
-
-</h3>
-
-
-<p>
-
-On-Time Delivery
-
-</p>
-
-
-</div>
-
-
-
-
-
-
-
-
-<div class="why-card">
-
-
-<div class="why-icon">
+<div
+class="stat-card"
+data-aos="fade-up">
 
 <i class="fa-solid fa-box"></i>
 
-</div>
+<h2
+class="counter"
+data-target="250000">
 
+0
 
-<h3>
-
-1M+
-
-</h3>
-
+</h2>
 
 <p>
 
@@ -972,313 +372,1221 @@ Packages Delivered
 
 </p>
 
+</div>
+
+<div
+class="stat-card"
+data-aos="fade-up"
+data-aos-delay="100">
+
+<i class="fa-solid fa-earth-americas"></i>
+
+<h2
+class="counter"
+data-target="180">
+
+0
+
+</h2>
+
+<p>
+
+Countries Served
+
+</p>
 
 </div>
 
+<div
+class="stat-card"
+data-aos="fade-up"
+data-aos-delay="200">
+
+<i class="fa-solid fa-users"></i>
+
+<h2
+class="counter"
+data-target="85000">
+
+0
+
+</h2>
+
+<p>
+
+Happy Customers
+
+</p>
+
+</div>
+
+<div
+class="stat-card"
+data-aos="fade-up"
+data-aos-delay="300">
+
+<i class="fa-solid fa-truck-fast"></i>
+
+<h2
+class="counter"
+data-target="24">
+
+0
+
+</h2>
+
+<p>
+
+Hours Customer Support
+
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
 
 
+<!-- ================================================= -->
+<!-- ABOUT -->
+<!-- ================================================= -->
+
+<section class="about-home">
+
+<div class="container about-grid">
+
+<div
+class="about-image"
+data-aos="fade-right">
+
+<img
+src="images/about-delivery.png"
+alt="About LinkWorld Express">
+
+</div>
+
+<div
+class="about-content"
+data-aos="fade-left">
+
+<span class="section-tag">
+
+About LinkWorld Express
+
+</span>
+
+<h2>
+
+Connecting Businesses & People Across The World
+
+</h2>
+
+<p>
+
+LinkWorld Express is committed to providing dependable courier, freight, and logistics services across local and international destinations. We combine advanced shipment tracking, experienced logistics professionals, and efficient transportation networks to ensure every package reaches its destination safely and on time.
+
+</p>
+
+<p>
+
+Whether you're shipping personal parcels or managing commercial freight, our goal is to provide a secure, transparent, and reliable delivery experience from pickup to final delivery.
+
+</p>
+
+<a
+href="about.html"
+class="primary-btn">
+
+Learn More
+
+</a>
+
+</div>
+
+</div>
+
+</section>
 
 
+<!-- ================================================= -->
+<!-- WHY CHOOSE US -->
+<!-- ================================================= -->
 
+<section class="why-us">
 
+<div class="container">
 
-<div class="why-card">
+<div class="section-header">
 
+<span>
 
-<div class="why-icon">
+Why Choose Us
+
+</span>
+
+<h2>
+
+Reliable Logistics Built Around Your Needs
+
+</h2>
+
+</div>
+
+<div class="features-grid">
+
+<div
+class="feature-card"
+data-aos="fade-up">
+
+<i class="fa-solid fa-location-crosshairs"></i>
+
+<h3>
+
+Live Tracking
+
+</h3>
+
+<p>
+
+Monitor your shipment from dispatch to delivery with real-time updates.
+
+</p>
+
+</div>
+
+<div
+class="feature-card"
+data-aos="fade-up"
+data-aos-delay="100">
+
+<i class="fa-solid fa-shield-halved"></i>
+
+<h3>
+
+Secure Delivery
+
+</h3>
+
+<p>
+
+Every shipment is handled with care using secure transportation procedures.
+
+</p>
+
+</div>
+
+<div
+class="feature-card"
+data-aos="fade-up"
+data-aos-delay="200">
+
+<i class="fa-solid fa-globe"></i>
+
+<h3>
+
+Worldwide Coverage
+
+</h3>
+
+<p>
+
+Ship confidently to destinations across multiple countries and regions.
+
+</p>
+
+</div>
+
+<div
+class="feature-card"
+data-aos="fade-up"
+data-aos-delay="300">
 
 <i class="fa-solid fa-headset"></i>
 
-</div>
-
-
 <h3>
 
-24/7
+24/7 Support
 
 </h3>
 
-
 <p>
 
-Customer Support
+Our customer support team is available to assist you whenever you need help.
 
 </p>
 
+</div>
 
 </div>
 
-
-
-
-
-
-
 </div>
-
-
-
-
-
-</div>
-
-
-</div>
-
 
 </section>
-<!-- ================= FOOTER ================= -->
+<!-- ================================================= -->
+<!-- OUR SERVICES -->
+<!-- ================================================= -->
 
+<section class="services-home">
 
-<footer class="footer">
+<div class="container">
 
+<div class="section-header">
 
+<span>
 
-<div class="footer-container">
+Our Services
 
+</span>
 
+<h2>
 
-<!-- LEFT SIDE -->
+Complete Logistics Solutions
 
+</h2>
 
-<div class="footer-box">
+<p>
 
+From small parcels to international freight, we provide reliable logistics solutions tailored to individuals and businesses.
 
+</p>
+
+</div>
+
+<div class="services-grid">
+
+<div
+class="service-card"
+data-aos="fade-up">
+
+<i class="fa-solid fa-plane"></i>
 
 <h3>
 
+Air Freight
+
+</h3>
+
+<p>
+
+Fast international air cargo services for urgent shipments worldwide.
+
+</p>
+
+</div>
+
+<div
+class="service-card"
+data-aos="fade-up"
+data-aos-delay="100">
+
+<i class="fa-solid fa-ship"></i>
+
+<h3>
+
+Ocean Freight
+
+</h3>
+
+<p>
+
+Affordable sea freight solutions for commercial and large-volume cargo.
+
+</p>
+
+</div>
+
+<div
+class="service-card"
+data-aos="fade-up"
+data-aos-delay="200">
+
+<i class="fa-solid fa-truck"></i>
+
+<h3>
+
+Road Transport
+
+</h3>
+
+<p>
+
+Reliable domestic and regional road transportation with real-time tracking.
+
+</p>
+
+</div>
+
+<div
+class="service-card"
+data-aos="fade-up"
+data-aos-delay="300">
 
 <i class="fa-solid fa-box"></i>
 
+<h3>
 
-Express
-
+Express Delivery
 
 </h3>
 
-
-
-
-<div class="footer-line"></div>
-
-
-
-
-
 <p>
 
-
-Fast, secure and reliable global shipping solutions
-connecting you anywhere in the world.
-
+Fast door-to-door delivery for documents, parcels and valuable packages.
 
 </p>
 
+</div>
+
+<div
+class="service-card"
+data-aos="fade-up"
+data-aos-delay="400">
+
+<i class="fa-solid fa-warehouse"></i>
+
+<h3>
+
+Warehousing
+
+</h3>
+
+<p>
+
+Modern storage facilities with inventory management and secure handling.
+
+</p>
+
+</div>
+
+<div
+class="service-card"
+data-aos="fade-up"
+data-aos-delay="500">
+
+<i class="fa-solid fa-file-contract"></i>
+
+<h3>
+
+Customs Clearance
+
+</h3>
+
+<p>
+
+Professional customs documentation and clearance for international shipments.
+
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
 
 
+<!-- ================================================= -->
+<!-- HOW IT WORKS -->
+<!-- ================================================= -->
 
+<section class="how-it-works">
 
+<div class="container">
 
+<div class="section-header">
 
-<div class="footer-social">
+<span>
 
+Simple Process
 
+</span>
 
-<a href="#" target="_blank">
+<h2>
 
+How Shipping Works
 
-<i class="fa-brands fa-facebook-f"></i>
+</h2>
 
+<p>
 
-</a>
+Shipping with LinkWorld Express is quick, secure and easy.
 
+</p>
 
+</div>
 
+<div class="steps-grid">
 
+<div
+class="step-card"
+data-aos="zoom-in">
 
-<a href="#" target="_blank">
+<div class="step-number">
 
+01
 
-<i class="fa-brands fa-instagram"></i>
+</div>
 
+<i class="fa-solid fa-box-open"></i>
 
-</a>
+<h3>
 
+Book Shipment
 
+</h3>
 
+<p>
 
+Schedule your shipment through our customer support or logistics team.
 
-<a href="#" target="_blank">
+</p>
 
+</div>
 
-<i class="fa-brands fa-linkedin-in"></i>
+<div
+class="step-card"
+data-aos="zoom-in"
+data-aos-delay="100">
 
+<div class="step-number">
 
-</a>
+02
 
+</div>
 
+<i class="fa-solid fa-truck-pickup"></i>
 
+<h3>
 
+Pickup
 
-<a href="#" target="_blank">
+</h3>
 
+<p>
 
-<i class="fa-brands fa-tiktok"></i>
+Our courier collects your package safely from the pickup location.
 
+</p>
 
-</a>
+</div>
 
+<div
+class="step-card"
+data-aos="zoom-in"
+data-aos-delay="200">
 
+<div class="step-number">
 
+03
 
+</div>
+
+<i class="fa-solid fa-route"></i>
+
+<h3>
+
+Transit
+
+</h3>
+
+<p>
+
+Track every movement of your shipment with our live tracking system.
+
+</p>
+
+</div>
+
+<div
+class="step-card"
+data-aos="zoom-in"
+data-aos-delay="300">
+
+<div class="step-number">
+
+04
+
+</div>
+
+<i class="fa-solid fa-house"></i>
+
+<h3>
+
+Delivery
+
+</h3>
+
+<p>
+
+Your shipment arrives safely at its destination with delivery confirmation.
+
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+<!-- ================================================= -->
+<!-- CUSTOMER TESTIMONIALS -->
+<!-- ================================================= -->
+
+<section class="testimonials">
+
+<div class="container">
+
+<div class="section-header">
+
+<span>
+
+Testimonials
+
+</span>
+
+<h2>
+
+What Our Customers Say
+
+</h2>
+
+<p>
+
+Thousands of businesses and individuals trust LinkWorld Express for reliable logistics and courier services.
+
+</p>
+
+</div>
+
+<div class="testimonial-grid">
+
+<div
+class="testimonial-card"
+data-aos="fade-up">
+
+<div class="stars">
+
+<i class="fa-solid fa-star"></i>
+<i class="fa-solid fa-star"></i>
+<i class="fa-solid fa-star"></i>
+<i class="fa-solid fa-star"></i>
+<i class="fa-solid fa-star"></i>
+
+</div>
+
+<p>
+
+"The tracking system is incredibly accurate, and my shipment arrived ahead of schedule. Excellent customer service!"
+
+</p>
+
+<div class="client">
+
+<img
+src="images/client1.jpg"
+alt="Customer">
+
+<div>
+
+<h4>
+
+Michael Johnson
+
+</h4>
+
+<span>
+
+Business Owner
+
+</span>
+
+</div>
+
+</div>
 
 </div>
 
 
+<div
+class="testimonial-card"
+data-aos="fade-up"
+data-aos-delay="150">
+
+<div class="stars">
+
+<i class="fa-solid fa-star"></i>
+<i class="fa-solid fa-star"></i>
+<i class="fa-solid fa-star"></i>
+<i class="fa-solid fa-star"></i>
+<i class="fa-solid fa-star"></i>
+
+</div>
+
+<p>
+
+"I've used LinkWorld Express for international deliveries several times. Every package arrived safely."
+
+</p>
+
+<div class="client">
+
+<img
+src="images/client2.jpg"
+alt="Customer">
+
+<div>
+
+<h4>
+
+Sarah Williams
+
+</h4>
+
+<span>
+
+Online Seller
+
+</span>
+
+</div>
+
+</div>
 
 </div>
 
 
+<div
+class="testimonial-card"
+data-aos="fade-up"
+data-aos-delay="300">
 
+<div class="stars">
 
+<i class="fa-solid fa-star"></i>
+<i class="fa-solid fa-star"></i>
+<i class="fa-solid fa-star"></i>
+<i class="fa-solid fa-star"></i>
+<i class="fa-solid fa-star"></i>
 
-
-
-
-
-<!-- DIVIDER -->
-
-
-<div class="footer-divider"></div>
-
-
-
-
-
-
-
-
-
-<!-- RIGHT SIDE -->
-
-
-<div class="footer-box">
-
-
-
-
-
-<div class="footer-contact">
-
-
-
-
-
+</div>
 
 <p>
 
-
-<i class="fa-solid fa-phone"></i>
-
-
-+1 (254) 472 4196
-
+"Professional team, secure deliveries and real-time shipment updates. Highly recommended."
 
 </p>
 
+<div class="client">
+
+<img
+src="images/client3.jpg"
+alt="Customer">
+
+<div>
+
+<h4>
+
+David Smith
+
+</h4>
+
+<span>
+
+Import & Export
+
+</span>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
 
 
+<!-- ================================================= -->
+<!-- GLOBAL COVERAGE -->
+<!-- ================================================= -->
 
+<section class="global-coverage">
 
+<div class="container">
 
+<div class="coverage-grid">
+
+<div
+class="coverage-image"
+data-aos="fade-right">
+
+<img
+src="images/world-map.png"
+alt="Worldwide Coverage">
+
+</div>
+
+<div
+class="coverage-content"
+data-aos="fade-left">
+
+<span>
+
+Worldwide Network
+
+</span>
+
+<h2>
+
+Delivering Across Continents
+
+</h2>
 
 <p>
 
-
-<i class="fa-solid fa-envelope"></i>
-
-
-info@linkworldexpress.com
-
+Our logistics network connects businesses and individuals across major international destinations through trusted transportation partners and advanced shipment tracking.
 
 </p>
 
+<ul>
+
+<li>
+
+<i class="fa-solid fa-check"></i>
+
+Worldwide Shipping
+
+</li>
+
+<li>
+
+<i class="fa-solid fa-check"></i>
+
+Fast Customs Clearance
+
+</li>
+
+<li>
+
+<i class="fa-solid fa-check"></i>
+
+Professional Cargo Handling
+
+</li>
+
+<li>
+
+<i class="fa-solid fa-check"></i>
+
+Live Shipment Tracking
+
+</li>
+
+</ul>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
 
 
+<!-- ================================================= -->
+<!-- CALL TO ACTION -->
+<!-- ================================================= -->
 
+<section class="cta-section">
 
+<div class="container">
 
+<div
+class="cta-box"
+data-aos="zoom-in">
+
+<h2>
+
+Ready To Ship With LinkWorld Express?
+
+</h2>
 
 <p>
 
+Experience secure, fast, and reliable logistics solutions with worldwide shipment tracking.
+
+</p>
+
+<div class="cta-buttons">
+
+<a
+href="tracking.html"
+class="primary-btn">
+
+<i class="fa-solid fa-location-crosshairs"></i>
+
+Track Shipment
+
+</a>
+
+<a
+href="contact.html"
+class="secondary-btn">
+
+<i class="fa-solid fa-paper-plane"></i>
+
+Contact Us
+
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+<!-- ================================================= -->
+<!-- CONTACT SECTION -->
+<!-- ================================================= -->
+
+<section class="contact-preview">
+
+<div class="container">
+
+<div class="section-header">
+
+<span>
+
+Contact Us
+
+</span>
+
+<h2>
+
+We're Here To Help
+
+</h2>
+
+<p>
+
+Our logistics specialists are available to assist you with shipments, tracking, freight inquiries and customer support.
+
+</p>
+
+</div>
+
+<div class="contact-grid">
+
+<div
+class="contact-card"
+data-aos="fade-up">
 
 <i class="fa-solid fa-location-dot"></i>
 
+<h3>
 
-Worldwide Shipping Network
+Office Address
 
+</h3>
+
+<p>
+
+Global Logistics Headquarters
 
 </p>
 
+<p>
+
+Worldwide Operations Center
+
+</p>
+
+</div>
+
+<div
+class="contact-card"
+data-aos="fade-up"
+data-aos-delay="100">
+
+<i class="fa-solid fa-phone"></i>
+
+<h3>
+
+Phone
+
+</h3>
+
+<p>
+
++1 (800) 555-2478
+
+</p>
+
+<p>
+
+24 Hours Customer Support
+
+</p>
+
+</div>
+
+<div
+class="contact-card"
+data-aos="fade-up"
+data-aos-delay="200">
+
+<i class="fa-solid fa-envelope"></i>
+
+<h3>
+
+Email
+
+</h3>
+
+<p>
+
+support@linkworldexpress.com
+
+</p>
+
+<p>
+
+sales@linkworldexpress.com
+
+</p>
+
+</div>
+
+<div
+class="contact-card"
+data-aos="fade-up"
+data-aos-delay="300">
+
+<i class="fa-solid fa-clock"></i>
+
+<h3>
+
+Working Hours
+
+</h3>
+
+<p>
+
+Monday - Sunday
+
+</p>
+
+<p>
+
+24/7 Customer Support
+
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
 
 
+<!-- ================================================= -->
+<!-- FOOTER -->
+<!-- ================================================= -->
 
+<footer class="footer">
 
+<div class="container">
 
+<div class="footer-grid">
+
+<div class="footer-column">
+
+<img
+src="images/logo.png"
+alt="LinkWorld Express Logo"
+class="footer-logo">
+
+<h3>
+
+LinkWorld Express
+
+</h3>
+
+<p>
+
+Providing secure, reliable and professional courier, freight forwarding and logistics services across the globe.
+
+</p>
 
 </div>
 
 
+<div class="footer-column">
 
+<h4>
+
+Quick Links
+
+</h4>
+
+<ul>
+
+<li><a href="index.html">Home</a></li>
+
+<li><a href="about.html">About</a></li>
+
+<li><a href="services.html">Services</a></li>
+
+<li><a href="tracking.html">Track Shipment</a></li>
+
+<li><a href="contact.html">Contact</a></li>
+
+</ul>
 
 </div>
 
 
+<div class="footer-column">
 
+<h4>
 
+Our Services
 
+</h4>
 
+<ul>
+
+<li>Air Freight</li>
+
+<li>Ocean Freight</li>
+
+<li>Road Transport</li>
+
+<li>Express Delivery</li>
+
+<li>Warehousing</li>
+
+<li>Customs Clearance</li>
+
+</ul>
 
 </div>
 
 
+<div class="footer-column">
+
+<h4>
+
+Follow Us
+
+</h4>
+
+<div class="social-links">
+
+<a href="#">
+
+<i class="fab fa-facebook-f"></i>
+
+</a>
+
+<a href="#">
+
+<i class="fab fa-instagram"></i>
+
+</a>
+
+<a href="#">
+
+<i class="fab fa-linkedin-in"></i>
+
+</a>
+
+<a href="#">
+
+<i class="fab fa-x-twitter"></i>
+
+</a>
+
+<a href="#">
+
+<i class="fab fa-youtube"></i>
+
+</a>
+
+</div>
+
+</div>
+
+</div>
 
 
-
+<hr>
 
 
 <div class="footer-bottom">
 
-
+<p>
 
 © 2026 LinkWorld Express. All Rights Reserved.
 
+</p>
 
+<p>
+
+Designed for secure worldwide logistics operations.
+
+</p>
 
 </div>
 
-
-
+</div>
 
 </footer>
 
+</main>
 
 
+<!-- ================================================= -->
+<!-- JAVASCRIPT LIBRARIES -->
+<!-- ================================================= -->
+
+<script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+
+<script>
+
+AOS.init({
+
+duration:1000,
+
+once:true,
+
+offset:120
+
+});
+
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="js/index.js"></script>
 
 
+<!-- ================================================= -->
+<!-- MAIN JAVASCRIPT -->
+<!-- ================================================= -->
 
-
-
-<!-- ================= JAVASCRIPT ================= -->
-
-
-
-<script src="js/app.js"></script>
-
-
-
+<script src="js/index.js"></script>
 
 </body>
-
 
 </html>

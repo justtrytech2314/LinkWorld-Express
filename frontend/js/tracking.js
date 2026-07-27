@@ -1,241 +1,111 @@
 // ======================================================
 // LINKWORLD EXPRESS
-// LIVE TRACKING SYSTEM
 // tracking.js
 // PART 1
+// CONFIGURATION • GLOBALS • INITIALIZATION
 // ======================================================
 
-// ==============================
-// API
-// ==============================
+// ======================================================
+// API CONFIGURATION
+// ======================================================
 
-const API_URL =
-"https://linkworld-express2-1.onrender.com/api/shipments";
+const API_BASE_URL = "https://linkworld-express2-1.onrender.com";
+const API_URL = `${API_BASE_URL}/api/shipments`;
 
-// ==============================
+// ======================================================
 // GLOBAL VARIABLES
-// ==============================
+// ======================================================
 
 let shipment = null;
 
 let map = null;
+let truckMarker = null;
+let destinationMarker = null;
+let routeLine = null;
 
-let packageMarker = null;
+let animationTimer = null;
+let animationPoints = [];
+let animationIndex = 0;
 
-let refreshTimer = null;
+let trackingNumber = "";
 
-// ==============================
-// LOADER
-// ==============================
+const REFRESH_INTERVAL = 5000;
 
-const trackingLoader =
-document.getElementById("trackingLoader");
+// ======================================================
+// GET TRACKING NUMBER
+// ======================================================
 
-const loaderBar =
-document.getElementById("loaderBar");
+function getTrackingNumber(){
 
-const loaderPercent =
-document.getElementById("loaderPercent");
+    const params = new URLSearchParams(window.location.search);
 
-const loaderMessage =
-document.getElementById("loaderMessage");
+    trackingNumber = params.get("tracking") || "";
 
-// ==============================
-// LOCATION PERMISSION
-// ==============================
-
-const permissionPopup =
-document.getElementById("locationPermission");
-
-const allowLocation =
-document.getElementById("allowLocation");
-
-const skipLocation =
-document.getElementById("skipLocation");
-
-// ==============================
-// START
-// ==============================
-
-window.addEventListener("load", () => {
-
-    showLoader();
-
-});
-
-// ==============================
-// SHOW LOADER
-// ==============================
-
-function showLoader(){
-
-    trackingLoader.style.display="flex";
-
-    const steps=[
-
-        {
-            percent:15,
-            text:"Connecting to LinkWorld Server..."
-        },
-
-        {
-            percent:35,
-            text:"Loading Shipment..."
-        },
-
-        {
-            percent:55,
-            text:"Loading Timeline..."
-        },
-
-        {
-            percent:75,
-            text:"Preparing Live Map..."
-        },
-
-        {
-            percent:100,
-            text:"Starting Live Tracking..."
-        }
-
-    ];
-
-    let index=0;
-
-    const timer=setInterval(()=>{
-
-        loaderBar.style.width=
-        steps[index].percent+"%";
-
-        loaderPercent.innerHTML=
-        steps[index].percent+"%";
-
-        loaderMessage.innerHTML=
-        steps[index].text;
-
-        index++;
-
-        if(index===steps.length){
-
-            clearInterval(timer);
-
-            setTimeout(()=>{
-
-                trackingLoader.style.display="none";
-
-                askLocationPermission();
-
-            },700);
-
-        }
-
-    },500);
+    return trackingNumber;
 
 }
 
-// ==============================
-// LOCATION PERMISSION
-// ==============================
+// ======================================================
+// PAGE INITIALIZATION
+// ======================================================
 
-function askLocationPermission(){
+document.addEventListener(
 
-    permissionPopup.style.display="flex";
+    "DOMContentLoaded",
 
-}
+    async function(){
 
-allowLocation.onclick=()=>{
+        const number = getTrackingNumber();
 
-    permissionPopup.style.display="none";
+        if(number){
 
-    if(navigator.geolocation){
+            document.getElementById("trackingInput").value = number;
 
-        navigator.geolocation.getCurrentPosition(
+            await trackShipment(number);
 
-            ()=>{
-
-                loadShipment();
-
-            },
-
-            ()=>{
-
-                loadShipment();
-
-            }
-
-        );
+        }
 
     }
 
-    else{
+);
 
-        loadShipment();
+// ======================================================
+// TRACK SHIPMENT
+// ======================================================
 
-    }
-
-};
-
-skipLocation.onclick=()=>{
-
-    permissionPopup.style.display="none";
-
-    loadShipment();
-
-};
-
-// ==============================
-// LOAD SHIPMENT
-// ==============================
-
-async function loadShipment(){
+async function trackShipment(number = null){
 
     try{
 
-        const savedShipment =
-        JSON.parse(
-            localStorage.getItem("shipment")
-        );
+        const tracking =
 
-        if(!savedShipment){
+            number ||
 
-            alert("Shipment not found.");
+            document.getElementById("trackingInput").value.trim();
 
-            window.location.href="index.html";
+        if(tracking === ""){
 
-            return;
-
-        }
-
-        const trackingNumber =
-        savedShipment.trackingNumber;
-
-        const response =
-        await fetch(
-            `${API_URL}/track/${trackingNumber}`
-        );
-
-        const result =
-        await response.json();
-
-        if(!result.success){
-
-            alert(result.message);
-
-            window.location.href="index.html";
+            showError("Enter a tracking number.");
 
             return;
 
         }
 
-        shipment=result.data;
+        showLoading("Searching shipment...");
 
-        localStorage.setItem(
+        console.log("Calling:", `${API_URL}/track/${tracking}`);
 
-            "shipment",
+const response = await axios.get(
+    `${API_URL}/track/${tracking}`
+);
 
-            JSON.stringify(shipment)
+console.log("Server Response:", response.data);
 
-        );
+        shipment = response.data.data;
+
+        hideLoading();
+
+        displayShipment();
 
         initializeTracking();
 
@@ -243,510 +113,494 @@ async function loadShipment(){
 
     catch(error){
 
+        hideLoading();
+
         console.error(error);
 
-        alert("Unable to connect to server.");
+        showError(
 
-        window.location.href="index.html";
+            error.response?.data?.message ||
+
+            "Tracking number not found."
+
+        );
 
     }
 
 }
-// ======================================================
-// LINKWORLD EXPRESS
-// LIVE TRACKING SYSTEM
-// tracking.js
-// PART 2
-// ======================================================
 
-// ==============================
-// INITIALIZE PAGE
-// ==============================
+// ======================================================
+// INITIALIZE TRACKING
+// ======================================================
 
 function initializeTracking(){
 
-    updateShipmentInformation();
-
-    updateProgress();
-
-    updateStatusCards();
-
-    buildTimeline();
-
-    initializeMap();
+    initMap();
 
     startAutoRefresh();
 
 }
 
-// ==============================
-// UPDATE SHIPMENT DETAILS
-// ==============================
+// ======================================================
+// AUTO REFRESH
+// ======================================================
 
-function updateShipmentInformation(){
+function startAutoRefresh(){
 
-    setValue(
-        "summaryTrackingNumber",
-        shipment.trackingNumber
-    );
+    if(animationTimer){
 
-    setValue(
-        "summaryStatus",
-        shipment.status
-    );
+        clearInterval(animationTimer);
 
-    setValue(
-        "statusBadge",
-        shipment.status
-    );
+    }
 
-    setValue(
-        "sender",
-        shipment.sender
-    );
+    animationTimer = setInterval(
 
-    setValue(
-        "receiver",
-        shipment.receiver
-    );
+        async function(){
 
-    setValue(
-        "origin",
-        shipment.origin
-    );
+            if(!shipment) return;
 
-    setValue(
-        "currentLocation",
-        shipment.currentLocation
-    );
+            await trackShipment(
 
-    setValue(
-        "destination",
-        shipment.destination
-    );
+                shipment.trackingNumber
 
-    setValue(
-        "weight",
-        shipment.weight || "N/A"
-    );
+            );
 
-    setValue(
-        "deliveryDate",
-        shipment.expectedDelivery || "Pending"
-    );
+        },
 
-    setValue(
-        "deliveryMethod",
-        shipment.deliveryMethod || "Air Freight"
-    );
+        REFRESH_INTERVAL
 
-    setValue(
-        "customsOffice",
-        shipment.customsOffice || "Awaiting Customs"
-    );
-
-    setValue(
-        "packageType",
-        shipment.packageType || "Standard Shipment"
-    );
-
-    setValue(
-        "lastUpdated",
-        formatDate(
-            shipment.updatedAt
-        )
-    );
-
-    setValue(
-        "lastUpdatedTime",
-        formatDate(
-            shipment.updatedAt
-        )
     );
 
 }
 
-// ==============================
-// UPDATE PROGRESS
-// ==============================
+// ======================================================
+// STOP AUTO REFRESH
+// ======================================================
+
+function stopAutoRefresh(){
+
+    if(animationTimer){
+
+        clearInterval(animationTimer);
+
+        animationTimer = null;
+
+    }
+
+}
+
+// ======================================================
+// END PART 1
+// ======================================================
+// ======================================================
+// LINKWORLD EXPRESS
+// tracking.js
+// PART 2
+// DISPLAY SHIPMENT • PROGRESS • ETA • STATUS
+// ======================================================
+
+
+// ======================================================
+// DISPLAY SHIPMENT
+// ======================================================
+
+function displayShipment(){
+
+    if(!shipment) return;
+
+    setText("trackingNumber", shipment.trackingNumber);
+
+    setText("sender", shipment.sender);
+
+    setText("receiver", shipment.receiver);
+
+    setText("shipmentName", shipment.shipment);
+
+    setText("origin", shipment.origin);
+
+    setText("currentLocation", shipment.currentLocation);
+
+    setText("destination", shipment.destination);
+
+    setText("status", shipment.status);
+
+    setText(
+
+        "expectedDelivery",
+
+        shipment.expectedDelivery ?
+
+        new Date(
+
+            shipment.expectedDelivery
+
+        ).toLocaleDateString()
+
+        : "-"
+
+    );
+
+    updateProgress();
+
+    updateETA();
+
+    updateLastUpdated();
+
+    renderHistory();
+
+}
+
+
+// ======================================================
+// UPDATE PROGRESS BAR
+// ======================================================
 
 function updateProgress(){
 
     const progress =
-    Number(shipment.progress || 0);
 
-    document
-    .getElementById(
-        "progressFill"
-    )
-    .style.width =
-    progress + "%";
+        shipment.progress || 0;
 
-    setValue(
+    const bar =
 
-        "progressText",
+        document.getElementById(
 
-        progress + "%"
+            "progressBar"
 
-    );
+        );
 
-    setValue(
+    const text =
 
-        "currentStage",
+        document.getElementById(
 
-        shipment.status
+            "progressText"
 
-    );
+        );
 
-    setValue(
+    if(bar){
 
-        "eta",
+        bar.style.width =
 
-        shipment.expectedDelivery || "Pending"
+        progress + "%";
 
-    );
+    }
 
-}
+    if(text){
 
-// ==============================
-// STATUS CARDS
-// ==============================
+        text.textContent =
 
-function updateStatusCards(){
-
-    setValue(
-
-        "mapStatus",
-
-        shipment.status
-
-    );
-
-    setValue(
-
-        "mapLocation",
-
-        shipment.currentLocation
-
-    );
-
-    setValue(
-
-        "mapUpdated",
-
-        formatDate(
-            shipment.updatedAt
-        )
-
-    );
-
-    setValue(
-
-        "packageCountry",
-
-        shipment.currentLocation
-
-    );
-
-    setValue(
-
-        "packageCity",
-
-        shipment.currentLocation
-
-    );
-
-    setValue(
-
-        "currentCountry",
-
-        shipment.currentLocation
-
-    );
-
-    document
-    .getElementById(
-        "shipmentDescription"
-    )
-    .innerHTML =
-
-    "Your shipment is currently <b>" +
-
-    shipment.status +
-
-    "</b> and is located in <b>" +
-
-    shipment.currentLocation +
-
-    "</b>. Live tracking is active.";
-
-}
-
-// ==============================
-// HELPERS
-// ==============================
-
-function setValue(id,value){
-
-    const el =
-    document.getElementById(id);
-
-    if(el){
-
-        el.innerHTML =
-        value || "N/A";
+        progress + "% Completed";
 
     }
 
 }
 
-function formatDate(date){
 
-    if(!date){
+// ======================================================
+// ETA
+// ======================================================
 
-        return "Just Now";
+function updateETA(){
+
+    const eta =
+
+    document.getElementById(
+
+        "eta"
+
+    );
+
+    if(!eta) return;
+
+    eta.textContent =
+
+    calculateETA(
+
+        shipment.progress || 0
+
+    );
+
+}
+
+
+// ======================================================
+// CALCULATE ETA
+// ======================================================
+
+function calculateETA(progress){
+
+    if(progress >= 100){
+
+        return "Delivered";
 
     }
 
-    return new Date(date)
-    .toLocaleString();
+    const remaining =
+
+    100 - progress;
+
+    const hours =
+
+    Math.ceil(
+
+        remaining / 5
+
+    );
+
+    if(hours < 24){
+
+        return hours + " Hours";
+
+    }
+
+    return Math.ceil(
+
+        hours / 24
+
+    ) + " Days";
 
 }
+
+
 // ======================================================
-// LINKWORLD EXPRESS
-// LIVE TRACKING SYSTEM
-// tracking.js
-// PART 3
-// LIVE SHIPMENT JOURNEY
+// UPDATE LAST UPDATED
 // ======================================================
 
-// ==========================================
-// BUILD TIMELINE
-// ==========================================
+function updateLastUpdated(){
 
-function buildTimeline(){
+    const label =
 
-    const timeline =
-    document.getElementById("timeline");
+    document.getElementById(
 
-    if(!timeline) return;
+        "lastUpdated"
 
-    timeline.innerHTML = "";
+    );
 
-    // If no history exists create one
+    if(!label) return;
+
+    label.textContent =
+
+    "Last Updated: "
+
+    +
+
+    new Date().toLocaleString();
+
+}
+
+
+// ======================================================
+// ROUTE HISTORY
+// ======================================================
+
+function renderHistory(){
+
+    const history =
+
+    document.getElementById(
+
+        "routeHistory"
+
+    );
+
+    if(!history) return;
+
+    history.innerHTML = "";
+
     if(
-        !shipment.history ||
-        shipment.history.length===0
+
+        !shipment.route ||
+
+        shipment.route.length===0
+
     ){
 
-        shipment.history=[{
+        history.innerHTML =
 
-            location:
-            shipment.currentLocation,
-
-            status:
-            shipment.status,
-
-            date:
-            shipment.updatedAt
-
-        }];
-
-    }
-
-    shipment.history.forEach(
-
-        (item,index)=>{
-
-            const card =
-            document.createElement("div");
-
-            card.className =
-            "timeline-item active";
-
-            card.innerHTML=`
-
-            <div class="timeline-left">
-
-                <div class="timeline-circle">
-
-                    <i class="${getStatusIcon(item.status)}"></i>
-
-                </div>
-
-                ${
-                    index!==shipment.history.length-1
-                    ?
-                    '<div class="timeline-line"></div>'
-                    :
-                    ''
-                }
-
-            </div>
-
-            <div class="timeline-right">
-
-                <h3>
-
-                    ${item.status}
-
-                </h3>
-
-                <p>
-
-                    ${item.location}
-
-                </p>
-
-                <small>
-
-                    ${formatDate(item.date)}
-
-                </small>
-
-            </div>
-
-            `;
-
-            timeline.appendChild(card);
-
-        }
-
-    );
-
-}
-
-// ==========================================
-// STATUS ICON
-// ==========================================
-
-function getStatusIcon(status){
-
-    status =
-    (status || "").toLowerCase();
-
-    if(status.includes("created"))
-        return "fa-solid fa-box";
-
-    if(status.includes("picked"))
-        return "fa-solid fa-truck";
-
-    if(status.includes("processing"))
-        return "fa-solid fa-warehouse";
-
-    if(status.includes("transit"))
-        return "fa-solid fa-plane";
-
-    if(status.includes("custom"))
-        return "fa-solid fa-building-shield";
-
-    if(status.includes("destination"))
-        return "fa-solid fa-location-dot";
-
-    if(status.includes("delivery"))
-        return "fa-solid fa-truck-fast";
-
-    if(status.includes("delivered"))
-        return "fa-solid fa-circle-check";
-
-    if(status.includes("hold"))
-        return "fa-solid fa-circle-pause";
-
-    if(status.includes("cancel"))
-        return "fa-solid fa-circle-xmark";
-
-    return "fa-solid fa-box";
-
-}
-
-// ==========================================
-// AUTO UPDATE TIMELINE
-// ==========================================
-
-function refreshTimeline(){
-
-    buildTimeline();
-
-}
-
-// ==========================================
-// SHIPMENT STATUS COLOR
-// ==========================================
-
-function updateBadgeColor(){
-
-    const badge =
-    document.getElementById(
-        "statusBadge"
-    );
-
-    if(!badge) return;
-
-    badge.className =
-    "status-badge";
-
-    const status =
-    shipment.status.toLowerCase();
-
-    if(status.includes("transit")){
-
-        badge.classList.add(
-            "transit"
-        );
-
-    }
-
-    else if(status.includes("deliver")){
-
-        badge.classList.add(
-            "delivered"
-        );
-
-    }
-
-    else if(status.includes("hold")){
-
-        badge.classList.add(
-            "hold"
-        );
-
-    }
-
-    else{
-
-        badge.classList.add(
-            "processing"
-        );
-
-    }
-
-}
-// ======================================================
-// LINKWORLD EXPRESS
-// LIVE TRACKING SYSTEM
-// tracking.js
-// PART 4
-// LIVE PACKAGE MAP
-// ======================================================
-
-// ==========================================
-// INITIALIZE LIVE MAP
-// ==========================================
-
-function initializeMap(){
-
-    if(!shipment.currentLatitude ||
-       !shipment.currentLongitude){
-
-        document.getElementById("map").innerHTML =
-
-        "<div style='padding:40px;text-align:center;'>Current package location is unavailable.</div>";
+        "<p>No route history available.</p>";
 
         return;
 
     }
 
-    // Remove old map if refreshing
+    shipment.route
+
+    .slice()
+
+    .reverse()
+
+    .forEach(stop=>{
+
+        history.innerHTML += `
+
+        <div class="history-item">
+
+            <h4>${stop.location}</h4>
+
+            <p>${stop.status}</p>
+
+            <small>
+
+            ${new Date(
+
+                stop.time
+
+            ).toLocaleString()}
+
+            </small>
+
+        </div>
+
+        `;
+
+    });
+
+}
+
+
+// ======================================================
+// SET TEXT HELPER
+// ======================================================
+
+function setText(id,value){
+
+    const element =
+
+    document.getElementById(id);
+
+    if(element){
+
+        element.textContent =
+
+        value || "-";
+
+    }
+
+}
+
+
+// ======================================================
+// SHOW LOADING
+// ======================================================
+
+function showLoading(text){
+
+    const overlay =
+
+    document.getElementById(
+
+        "loadingOverlay"
+
+    );
+
+    const message =
+
+    document.getElementById(
+
+        "loadingText"
+
+    );
+
+    if(overlay){
+
+        overlay.style.display="flex";
+
+    }
+
+    if(message){
+
+        message.textContent=text;
+
+    }
+
+}
+
+
+// ======================================================
+// HIDE LOADING
+// ======================================================
+
+function hideLoading(){
+
+    const overlay =
+
+    document.getElementById(
+
+        "loadingOverlay"
+
+    );
+
+    if(overlay){
+
+        overlay.style.display="none";
+
+    }
+
+}
+
+
+// ======================================================
+// SUCCESS
+// ======================================================
+
+function showSuccess(message){
+
+    Swal.fire({
+
+        icon:"success",
+
+        toast:true,
+
+        timer:2500,
+
+        position:"top-end",
+
+        showConfirmButton:false,
+
+        title:message
+
+    });
+
+}
+
+
+// ======================================================
+// ERROR
+// ======================================================
+
+function showError(message){
+
+    Swal.fire({
+
+        icon:"error",
+
+        title:"Tracking Error",
+
+        text:message
+
+    });
+
+}
+
+
+// ======================================================
+// END PART 2
+// ======================================================
+// ======================================================
+// LINKWORLD EXPRESS
+// tracking.js
+// PART 3
+// PROFESSIONAL LIVE MAP
+// ======================================================
+
+
+// ======================================================
+// INITIALIZE LEAFLET MAP
+// ======================================================
+
+function initMap(){
+
+    if(!shipment) return;
 
     if(map){
 
@@ -754,29 +608,11 @@ function initializeMap(){
 
     }
 
-    // Create map
+    map = L.map("trackingMap",{
 
-    map = L.map("map",{
+        zoomControl:true
 
-        zoomControl:true,
-
-        attributionControl:true
-
-    }).setView(
-
-        [
-
-            Number(shipment.currentLatitude),
-
-            Number(shipment.currentLongitude)
-
-        ],
-
-        6
-
-    );
-
-    // OpenStreetMap
+    });
 
     L.tileLayer(
 
@@ -792,437 +628,721 @@ function initializeMap(){
 
     ).addTo(map);
 
-    // Build package marker
-
-    createPackageMarker();
+    drawShipmentRoute();
 
 }
 
-// ==========================================
-// CREATE RED PACKAGE MARKER
-// ==========================================
 
-function createPackageMarker(){
+// ======================================================
+// DRAW SHIPMENT ROUTE
+// ======================================================
 
-    const packageIcon =
+function drawShipmentRoute(){
 
-    L.divIcon({
+    if(
 
-        className:"",
+        !shipment.currentLatitude ||
 
-        html:`
+        !shipment.destinationLatitude
 
-        <div class="package-marker">
+    ){
 
-            <div class="pulse"></div>
+        return;
 
-            <div class="dot"></div>
+    }
 
-        </div>
+    const current = [
 
-        `,
+        shipment.currentLatitude,
 
-        iconSize:[26,26],
+        shipment.currentLongitude
 
-        iconAnchor:[13,13]
+    ];
 
-    });
+    const destination = [
 
-    packageMarker =
+        shipment.destinationLatitude,
 
-    L.marker(
+        shipment.destinationLongitude
+
+    ];
+
+    if(routeLine){
+
+        map.removeLayer(routeLine);
+
+    }
+
+    routeLine = L.polyline(
 
         [
 
-            Number(shipment.currentLatitude),
+            current,
 
-            Number(shipment.currentLongitude)
+            destination
 
         ],
 
         {
 
-            icon:packageIcon
+            color:"#0d6efd",
+
+            weight:5,
+
+            opacity:0.85
+
+        }
+
+    ).addTo(map);
+
+    addCurrentMarker(current);
+
+    addDestinationMarker(destination);
+
+    map.fitBounds(
+
+        routeLine.getBounds(),
+
+        {
+
+            padding:[60,60]
+
+        }
+
+    );
+
+}
+
+
+// ======================================================
+// CURRENT LOCATION MARKER
+// ======================================================
+
+function addCurrentMarker(position){
+
+    if(truckMarker){
+
+        map.removeLayer(truckMarker);
+
+    }
+
+    const truckIcon = L.divIcon({
+
+        html:`
+
+        <i
+
+        class="fa-solid fa-truck-fast"
+
+        style="
+
+        color:#0d6efd;
+
+        font-size:28px;
+
+        ">
+
+        </i>
+
+        `,
+
+        className:"",
+
+        iconSize:[30,30]
+
+    });
+
+    truckMarker =
+
+    L.marker(
+
+        position,
+
+        {
+
+            icon:truckIcon
 
         }
 
     )
 
-    .addTo(map);
+    .addTo(map)
 
-    packageMarker.bindPopup(
+    .bindPopup(
 
-        `
-
-        <div style="min-width:220px">
-
-            <h3 style="margin-bottom:8px">
-
-            📦 Package Location
-
-            </h3>
-
-            <b>Status:</b>
-
-            ${shipment.status}
-
-            <br><br>
-
-            <b>Current Location:</b>
-
-            ${shipment.currentLocation}
-
-            <br><br>
-
-            <b>Tracking Number:</b>
-
-            ${shipment.trackingNumber}
-
-        </div>
-
-        `
+        "<b>Current Shipment Location</b>"
 
     );
-
-    packageMarker.openPopup();
 
 }
 
-// ==========================================
-// MOVE PACKAGE WHEN ADMIN UPDATES LOCATION
-// ==========================================
 
-function updatePackageMarker(){
+// ======================================================
+// DESTINATION MARKER
+// ======================================================
 
-    if(!packageMarker) return;
+function addDestinationMarker(position){
 
-    packageMarker.setLatLng([
+    if(destinationMarker){
 
-        Number(shipment.currentLatitude),
+        map.removeLayer(destinationMarker);
 
-        Number(shipment.currentLongitude)
+    }
 
-    ]);
+    destinationMarker =
 
-    packageMarker.setPopupContent(
+    L.marker(position)
 
-        `
+    .addTo(map)
 
-        <div style="min-width:220px">
+    .bindPopup(
 
-            <h3 style="margin-bottom:8px">
-
-            📦 Package Location
-
-            </h3>
-
-            <b>Status:</b>
-
-            ${shipment.status}
-
-            <br><br>
-
-            <b>Current Location:</b>
-
-            ${shipment.currentLocation}
-
-            <br><br>
-
-            <b>Tracking Number:</b>
-
-            ${shipment.trackingNumber}
-
-        </div>
-
-        `
+        "<b>Destination</b>"
 
     );
 
-    map.panTo([
+}
 
-        Number(shipment.currentLatitude),
 
-        Number(shipment.currentLongitude)
+// ======================================================
+// UPDATE TRUCK POSITION
+// ======================================================
 
-    ],{
+function updateTruckPosition(){
 
-        animate:true,
+    if(
 
-        duration:1.2
+        !shipment ||
+
+        !truckMarker
+
+    ){
+
+        return;
+
+    }
+
+    const position=[
+
+        shipment.currentLatitude,
+
+        shipment.currentLongitude
+
+    ];
+
+    truckMarker.setLatLng(position);
+
+}
+
+
+// ======================================================
+// REFRESH MAP
+// ======================================================
+
+function refreshMap(){
+
+    if(!shipment) return;
+
+    updateTruckPosition();
+
+    drawShipmentRoute();
+
+}
+
+
+// ======================================================
+// ZOOM TO SHIPMENT
+// ======================================================
+
+function zoomToShipment(){
+
+    if(!truckMarker) return;
+
+    map.setView(
+
+        truckMarker.getLatLng(),
+
+        10,
+
+        {
+
+            animate:true
+
+        }
+
+    );
+
+}
+
+
+// ======================================================
+// ZOOM TO DESTINATION
+// ======================================================
+
+function zoomToDestination(){
+
+    if(!destinationMarker) return;
+
+    map.setView(
+
+        destinationMarker.getLatLng(),
+
+        10,
+
+        {
+
+            animate:true
+
+        }
+
+    );
+
+}
+
+
+// ======================================================
+// RESET MAP VIEW
+// ======================================================
+
+function resetMapView(){
+
+    if(routeLine){
+
+        map.fitBounds(
+
+            routeLine.getBounds(),
+
+            {
+
+                padding:[60,60]
+
+            }
+
+        );
+
+    }
+
+}
+
+
+// ======================================================
+// END PART 3
+// ======================================================
+// ======================================================
+// LINKWORLD EXPRESS
+// tracking.js
+// PART 4
+// LIVE TRUCK ANIMATION & REAL-TIME SYNCHRONIZATION
+// ======================================================
+
+
+// ======================================================
+// GLOBAL ANIMATION VARIABLES
+// ======================================================
+
+let truckRoute = [];
+
+let truckIndex = 0;
+
+let truckAnimation = null;
+
+
+// ======================================================
+// GENERATE ROUTE POINTS
+// ======================================================
+
+function generateRoutePoints(){
+
+    if(!shipment) return [];
+
+    const points=[];
+
+    const steps=120;
+
+    const startLat=Number(shipment.currentLatitude);
+
+    const startLng=Number(shipment.currentLongitude);
+
+    const endLat=Number(shipment.destinationLatitude);
+
+    const endLng=Number(shipment.destinationLongitude);
+
+    for(let i=0;i<=steps;i++){
+
+        const percent=i/steps;
+
+        points.push([
+
+            startLat+(endLat-startLat)*percent,
+
+            startLng+(endLng-startLng)*percent
+
+        ]);
+
+    }
+
+    return points;
+
+}
+
+
+// ======================================================
+// START TRUCK ANIMATION
+// ======================================================
+
+function startTruckAnimation(){
+
+    if(!shipment) return;
+
+    stopTruckAnimation();
+
+    truckRoute=generateRoutePoints();
+
+    truckIndex=0;
+
+    truckAnimation=setInterval(
+
+        animateTruck,
+
+        700
+
+    );
+
+}
+
+
+// ======================================================
+// ANIMATE TRUCK
+// ======================================================
+
+function animateTruck(){
+
+    if(!truckMarker) return;
+
+    if(truckIndex>=truckRoute.length){
+
+        stopTruckAnimation();
+
+        deliveryCompleted();
+
+        return;
+
+    }
+
+    truckMarker.setLatLng(
+
+        truckRoute[truckIndex]
+
+    );
+
+    truckIndex++;
+
+}
+
+
+// ======================================================
+// STOP TRUCK
+// ======================================================
+
+function stopTruckAnimation(){
+
+    if(truckAnimation){
+
+        clearInterval(truckAnimation);
+
+        truckAnimation=null;
+
+    }
+
+}
+
+
+// ======================================================
+// SYNCHRONIZE WITH DASHBOARD
+// ======================================================
+
+function synchronizeShipment(){
+
+    if(!shipment) return;
+
+    const stored=
+
+    JSON.parse(
+
+        localStorage.getItem(
+
+            "shipments"
+
+        ) || "[]"
+
+    );
+
+    const latest=
+
+    stored.find(
+
+        s=>
+
+        s.trackingNumber===
+
+        shipment.trackingNumber
+
+    );
+
+    if(!latest) return;
+
+    shipment=latest;
+
+    displayShipment();
+
+    refreshMap();
+
+}
+
+
+// ======================================================
+// LIVE SYNCHRONIZATION
+// ======================================================
+
+function startSynchronization(){
+
+    setInterval(function(){
+
+        synchronizeShipment();
+
+    },3000);
+
+}
+
+
+// ======================================================
+// DELIVERY COMPLETED
+// ======================================================
+
+function deliveryCompleted(){
+
+    shipment.progress=100;
+
+    shipment.status="Delivered";
+
+    shipment.currentLatitude=
+
+    shipment.destinationLatitude;
+
+    shipment.currentLongitude=
+
+    shipment.destinationLongitude;
+
+    shipment.currentLocation=
+
+    shipment.destination;
+
+    updateProgress();
+
+    updateETA();
+
+    Swal.fire({
+
+        icon:"success",
+
+        title:"Shipment Delivered",
+
+        text:"Your package has arrived."
 
     });
 
 }
 
-// ==========================================
-// AUTO REFRESH MAP
-// ==========================================
 
-function refreshMap(){
-
-    updatePackageMarker();
-
-}
 // ======================================================
-// LINKWORLD EXPRESS
-// LIVE TRACKING SYSTEM
-// tracking.js
-// PART 5
-// AUTO REFRESH & LIVE DATABASE UPDATES
+// REFRESH TRACKING DATA
 // ======================================================
 
-// ==========================================
-// START LIVE REFRESH
-// ==========================================
+async function refreshTracking(){
 
-function startAutoRefresh(){
-
-    // Prevent duplicate timers
-
-    if(refreshTimer){
-
-        clearInterval(refreshTimer);
-
-    }
-
-    refreshTimer = setInterval(
-
-        refreshShipment,
-
-        30000 // every 30 seconds
-
-    );
-
-}
-
-// ==========================================
-// REFRESH SHIPMENT
-// ==========================================
-
-async function refreshShipment(){
+    if(!shipment) return;
 
     try{
 
-        const response = await fetch(
+        const response=
+
+        await axios.get(
 
             `${API_URL}/track/${shipment.trackingNumber}`
 
         );
 
-        const result = await response.json();
+        shipment=response.data.data;
 
-        if(!result.success){
-
-            return;
-
-        }
-
-        shipment = result.data;
-
-        localStorage.setItem(
-
-            "shipment",
-
-            JSON.stringify(shipment)
-
-        );
-
-        // =============================
-        // UPDATE ENTIRE PAGE
-        // =============================
-
-        updateShipmentInformation();
-
-        updateProgress();
-
-        updateStatusCards();
-
-        refreshTimeline();
-
-        updateBadgeColor();
+        displayShipment();
 
         refreshMap();
-
-        animateProgressBar();
 
     }
 
     catch(error){
 
-        console.log(
-
-            "Live refresh failed.",
-
-            error
-
-        );
+        console.error(error);
 
     }
 
 }
 
-// ==========================================
-// ANIMATE PROGRESS BAR
-// ==========================================
 
-function animateProgressBar(){
+// ======================================================
+// AUTO REFRESH SERVER
+// ======================================================
 
-    const progressFill =
+setInterval(function(){
 
-    document.getElementById(
+    refreshTracking();
 
-        "progressFill"
+},5000);
 
-    );
 
-    if(!progressFill) return;
-
-    progressFill.style.transition =
-
-    "width .8s ease";
-
-    progressFill.style.width =
-
-    shipment.progress + "%";
-
-}
-
-// ==========================================
-// PAGE VISIBILITY
-// ==========================================
-
-// Pause refresh if page hidden
-
-document.addEventListener(
-
-    "visibilitychange",
-
-    ()=>{
-
-        if(document.hidden){
-
-            clearInterval(refreshTimer);
-
-        }
-
-        else{
-
-            startAutoRefresh();
-
-            refreshShipment();
-
-        }
-
-    }
-
-);
-
-// ==========================================
-// ONLINE STATUS
-// ==========================================
+// ======================================================
+// START EVERYTHING
+// ======================================================
 
 window.addEventListener(
 
-    "online",
+    "load",
 
-    ()=>{
+    function(){
 
-        refreshShipment();
+        if(shipment){
 
-    }
+            startTruckAnimation();
 
-);
+        }
 
-// ==========================================
-// BEFORE LEAVING PAGE
-// ==========================================
-
-window.addEventListener(
-
-    "beforeunload",
-
-    ()=>{
-
-        clearInterval(refreshTimer);
+        startSynchronization();
 
     }
 
 );
 
-// ==========================================
-// LIVE CLOCK
-// ==========================================
 
-setInterval(()=>{
-
-    const now = new Date();
-
-    const mapUpdated =
-
-    document.getElementById(
-
-        "mapUpdated"
-
-    );
-
-    if(mapUpdated && shipment){
-
-        mapUpdated.innerHTML =
-
-        formatDate(
-
-            shipment.updatedAt
-
-        );
-
-    }
-
-},1000);
+// ======================================================
+// END PART 4
+// ======================================================
 // ======================================================
 // LINKWORLD EXPRESS
-// LIVE TRACKING SYSTEM
 // tracking.js
-// PART 6
-// FINAL INITIALIZATION
+// PART 5
+// ROUTE HISTORY • DELIVERY EFFECTS • FINAL INITIALIZATION
 // ======================================================
 
-// ==========================================
-// PAGE ANIMATIONS
-// ==========================================
 
-function animateCards(){
+// ======================================================
+// FOLLOW TRUCK
+// ======================================================
 
-    const cards = document.querySelectorAll(
+function followTruck(){
 
-        ".info-card,.summary-box,.status-card,.progress-box,.timeline-item"
+    if(!map || !truckMarker) return;
+
+    map.panTo(
+
+        truckMarker.getLatLng(),
+
+        {
+
+            animate:true,
+
+            duration:1
+
+        }
 
     );
 
-    cards.forEach((card,index)=>{
+}
 
-        card.style.opacity="0";
 
-        card.style.transform="translateY(20px)";
+// ======================================================
+// UPDATE ROUTE HISTORY
+// ======================================================
 
-        setTimeout(()=>{
+function updateRouteHistory(){
 
-            card.style.transition=
+    if(!shipment) return;
 
-            "all .5s ease";
+    const container =
 
-            card.style.opacity="1";
+    document.getElementById(
 
-            card.style.transform="translateY(0px)";
+        "routeHistory"
 
-        },index*80);
+    );
+
+    if(!container) return;
+
+    container.innerHTML = "";
+
+    const history =
+
+    shipment.route ||
+
+    shipment.history ||
+
+    [];
+
+    if(history.length===0){
+
+        container.innerHTML =
+
+        "<p>No tracking history available.</p>";
+
+        return;
+
+    }
+
+    history
+
+    .slice()
+
+    .reverse()
+
+    .forEach(item=>{
+
+        container.innerHTML += `
+
+        <div class="history-card">
+
+            <div class="history-dot"></div>
+
+            <div>
+
+                <h4>${item.location}</h4>
+
+                <p>${item.status}</p>
+
+                <small>
+
+                ${new Date(
+
+                    item.time ||
+
+                    item.date
+
+                ).toLocaleString()}
+
+                </small>
+
+            </div>
+
+        </div>
+
+        `;
 
     });
 
 }
 
-// ==========================================
-// STATUS BADGE STYLES
-// ==========================================
+
+// ======================================================
+// LIVE STATUS BADGE
+// ======================================================
 
 function updateStatusBadge(){
 
@@ -1230,184 +1350,297 @@ function updateStatusBadge(){
 
     document.getElementById(
 
-        "statusBadge"
+        "status"
 
     );
 
     if(!badge) return;
 
-    badge.className="status-badge";
+    badge.textContent = shipment.status;
 
-    const status=
+    badge.className = "status-badge";
 
-    shipment.status.toLowerCase();
+    if(shipment.status==="Delivered"){
 
-    if(status.includes("delivered")){
+        badge.classList.add(
 
-        badge.style.background="#16a34a";
+            "delivered"
 
-    }
-
-    else if(status.includes("transit")){
-
-        badge.style.background="#2563eb";
+        );
 
     }
 
-    else if(status.includes("custom")){
+    else if(
 
-        badge.style.background="#ea580c";
+        shipment.status==="In Transit"
 
-    }
+    ){
 
-    else if(status.includes("hold")){
+        badge.classList.add(
 
-        badge.style.background="#dc2626";
+            "transit"
+
+        );
 
     }
 
     else{
 
-        badge.style.background="#0f766e";
+        badge.classList.add(
+
+            "pending"
+
+        );
 
     }
 
 }
 
-// ==========================================
-// PAGE TITLE
-// ==========================================
 
-function updatePageTitle(){
+// ======================================================
+// DELIVERY CELEBRATION
+// ======================================================
 
-    document.title=
+function playDeliveryAnimation(){
 
-    shipment.trackingNumber+
+    if(
 
-    " | LinkWorld Express";
+        shipment.status!=="Delivered"
+
+    ){
+
+        return;
+
+    }
+
+    Swal.fire({
+
+        icon:"success",
+
+        title:"Package Delivered",
+
+        html:`
+
+        <h2>
+
+        ${shipment.trackingNumber}
+
+        </h2>
+
+        <br>
+
+        Thank you for choosing
+
+        <b>LinkWorld Express</b>.
+
+        `,
+
+        confirmButtonText:"Close"
+
+    });
 
 }
 
-// ==========================================
-// SAVE LATEST SHIPMENT
-// ==========================================
 
-function saveShipment(){
+// ======================================================
+// LIVE CLOCK
+// ======================================================
 
-    localStorage.setItem(
+function updateClock(){
 
-        "shipment",
+    const clock =
 
-        JSON.stringify(shipment)
+    document.getElementById(
+
+        "liveClock"
 
     );
 
+    if(!clock) return;
+
+    clock.innerHTML =
+
+    new Date().toLocaleString();
+
 }
 
-// ==========================================
-// COMPLETE REFRESH
-// ==========================================
+setInterval(
 
-function refreshEntirePage(){
+    updateClock,
 
-    updateShipmentInformation();
+    1000
+
+);
+
+
+// ======================================================
+// AUTO FOLLOW TRUCK
+// ======================================================
+
+setInterval(function(){
+
+    followTruck();
+
+},1500);
+
+
+// ======================================================
+// COMPLETE UI REFRESH
+// ======================================================
+
+function refreshTrackingUI(){
+
+    if(!shipment) return;
+
+    displayShipment();
 
     updateProgress();
 
-    updateStatusCards();
-
-    buildTimeline();
+    updateETA();
 
     updateStatusBadge();
 
+    updateRouteHistory();
+
     refreshMap();
-
-    animateProgressBar();
-
-    saveShipment();
 
 }
 
-// ==========================================
-// INITIALIZATION
-// ==========================================
+
+// ======================================================
+// STORAGE SYNC
+// ======================================================
+
+window.addEventListener(
+
+    "storage",
+
+    function(){
+
+        synchronizeShipment();
+
+    }
+
+);
+
+
+// ======================================================
+// INITIAL LOAD
+// ======================================================
 
 window.addEventListener(
 
     "load",
 
-    ()=>{
+    function(){
 
-        animateCards();
+        updateClock();
 
-        updatePageTitle();
+        if(shipment){
+
+            refreshTrackingUI();
+
+            startTruckAnimation();
+
+        }
 
     }
 
 );
 
-// ==========================================
-// ESC CLOSES POPUPS
-// ==========================================
 
-document.addEventListener(
+// ======================================================
+// CLEANUP
+// ======================================================
 
-    "keydown",
+window.addEventListener(
 
-    e=>{
+    "beforeunload",
 
-        if(e.key==="Escape"){
+    function(){
 
-            if(packageMarker){
+        stopTruckAnimation();
 
-                packageMarker.closePopup();
+        stopAutoRefresh();
+
+    }
+
+);
+
+
+// ======================================================
+// TRACK BUTTON
+// ======================================================
+
+const trackButton =
+
+document.getElementById(
+
+    "trackButton"
+
+);
+
+if(trackButton){
+
+    trackButton.addEventListener(
+
+        "click",
+
+        function(){
+
+            trackShipment();
+
+        }
+
+    );
+
+}
+
+
+// ======================================================
+// ENTER KEY SUPPORT
+// ======================================================
+
+const trackingInput =
+
+document.getElementById(
+
+    "trackingInput"
+
+);
+
+if(trackingInput){
+
+    trackingInput.addEventListener(
+
+        "keypress",
+
+        function(e){
+
+            if(e.key==="Enter"){
+
+                trackShipment();
 
             }
 
         }
 
-    }
+    );
 
-);
+}
 
-// ==========================================
-// MAP RESIZE FIX
-// ==========================================
 
-window.addEventListener(
-
-    "resize",
-
-    ()=>{
-
-        if(map){
-
-            setTimeout(()=>{
-
-                map.invalidateSize();
-
-            },300);
-
-        }
-
-    }
-
-);
-
-// ==========================================
-// FINAL SUCCESS MESSAGE
-// ==========================================
+// ======================================================
+// FINAL STARTUP
+// ======================================================
 
 console.log(
 
-    "%cLinkWorld Express Live Tracking Loaded",
-
-    "color:#0f62fe;font-size:16px;font-weight:bold;"
+    "✅ LinkWorld Express Tracking System Ready"
 
 );
 
-console.log(
 
-    "Live Shipment Tracking Ready."
-
-);
+// ======================================================
+// END OF tracking.js
+// ======================================================

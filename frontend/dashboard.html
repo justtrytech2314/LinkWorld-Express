@@ -1133,6 +1133,24 @@ src="https://cdn.jsdelivr.net/npm/sweetalert2@11">
 src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js">
 </script>
 
+
+<script>
+
+// ======================================================
+// LINKWORLD EXPRESS
+// DASHBOARD SECURITY
+// ======================================================
+
+const token = localStorage.getItem("adminToken");
+
+if (!token) {
+
+    window.location.replace("login.html");
+
+}
+
+</script>
+
 <!-- ===================================================== -->
 <!-- DASHBOARD SCRIPT -->
 <!-- ===================================================== -->
