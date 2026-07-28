@@ -1,21 +1,51 @@
 // ======================================================
 // LINKWORLD EXPRESS
-// PROFESSIONAL ADMIN DASHBOARD
-// dashboard.js
+// PROFESSIONAL DASHBOARD
 // PART 1
 // ======================================================
 
+"use strict";
 
 // ======================================================
-// API CONFIGURATION
+// API
 // ======================================================
 
-const API_BASE_URL = "https://linkworld-express2-1.onrender.com";
+const API_BASE =
+"https://linkworld-express2-1.onrender.com";
 
-const API_URL = `${API_BASE_URL}/api/shipments`;
+const API = {
 
-const AUTH_URL = `${API_BASE_URL}/api/auth`;
+    login:
+    `${API_BASE}/api/auth/login`,
 
+    shipments:
+    `${API_BASE}/api/shipments`
+
+};
+
+// ======================================================
+// TOKEN
+// ======================================================
+
+const TOKEN =
+localStorage.getItem("adminToken");
+
+if (!TOKEN) {
+
+    window.location.href = "admin.html";
+
+}
+
+// ======================================================
+// AXIOS
+// ======================================================
+
+axios.defaults.baseURL = API_BASE;
+
+axios.defaults.headers.common.Authorization =
+`Bearer ${TOKEN}`;
+
+axios.defaults.timeout = 30000;
 
 // ======================================================
 // GLOBAL VARIABLES
@@ -23,348 +53,288 @@ const AUTH_URL = `${API_BASE_URL}/api/auth`;
 
 let shipments = [];
 
-let filteredShipments = [];
-
 let selectedShipment = null;
 
-let currentPage = 1;
+let selectedShipmentId = null;
 
-const rowsPerPage = 10;
-
-let searchKeyword = "";
-
-let statusFilter = "All";
-
-let sortDirection = "newest";
-
-let map = null;
-
-let marker = null;
-
-let destinationMarker = null;
-
-let truckMarker = null;
-
-let truckRoute = [];
-
-let truckIndex = 0;
-
-let truckTimer = null;
-
-let selectedLatitude = null;
-
-let selectedLongitude = null;
-
-let locationTarget = null;
-
+let deleteShipmentId = null;
 
 // ======================================================
-// AUTH TOKEN
+// MAP VARIABLES
 // ======================================================
 
-function getToken(){
+let adminMap = null;
 
-    return localStorage.getItem("adminToken");
+let mapMarker = null;
+
+let mapMode = "current";
+
+// ======================================================
+// ELEMENTS
+// ======================================================
+
+const shipmentTable =
+document.getElementById("shipmentTable");
+
+const shipmentCount =
+document.getElementById("shipmentCount");
+
+const transitCount =
+document.getElementById("transitCount");
+
+const deliveredCount =
+document.getElementById("deliveredCount");
+
+const pendingCount =
+document.getElementById("pendingCount");
+
+const loadingOverlay =
+document.getElementById("loadingOverlay");
+
+const loadingText =
+document.getElementById("loadingText");
+
+// ======================================================
+// LOADING
+// ======================================================
+
+function showLoading(text = "Loading...") {
+
+    if (!loadingOverlay) return;
+
+    loadingOverlay.style.display = "flex";
+
+    if (loadingText) {
+
+        loadingText.innerHTML = text;
+
+    }
 
 }
 
+function hideLoading() {
+
+    if (!loadingOverlay) return;
+
+    loadingOverlay.style.display = "none";
+
+}
+
+// ======================================================
+// SUCCESS
+// ======================================================
+
+function showSuccess(message) {
+
+    Swal.fire({
+
+        icon: "success",
+
+        title: "Success",
+
+        text: message,
+
+        timer: 1800,
+
+        showConfirmButton: false
+
+    });
+
+}
+
+// ======================================================
+// ERROR
+// ======================================================
+
+function showError(message) {
+
+    Swal.fire({
+
+        icon: "error",
+
+        title: "Error",
+
+        text: message
+
+    });
+
+}
 
 // ======================================================
 // LOGOUT
 // ======================================================
 
-function logout(showMessage = true){
+function logout() {
 
-    localStorage.removeItem("adminToken");
+    Swal.fire({
 
-    if(showMessage){
+        icon: "question",
 
-        Swal.fire({
+        title: "Logout",
 
-            icon:"success",
+        text: "Are you sure?",
 
-            title:"Logged Out",
+        showCancelButton: true,
 
-            text:"You have been logged out."
+        confirmButtonText: "Logout"
 
-        }).then(()=>{
+    })
 
-            window.location.href="admin.html";
+    .then(result => {
 
-        });
+        if (!result.isConfirmed) return;
 
-    }
+        localStorage.removeItem("adminToken");
 
-    else{
+        window.location.href = "admin.html";
 
-        window.location.href="admin.html";
-
-    }
+    });
 
 }
 
-
 // ======================================================
-// HANDLE 401
-// ======================================================
-
-function handleUnauthorized(error){
-
-    if(
-
-        error.response &&
-
-        error.response.status===401
-
-    ){
-
-        logout(false);
-
-        return true;
-
-    }
-
-    return false;
-
-}
-
-
-// ======================================================
-// AXIOS CONFIG
+// NAVIGATION
 // ======================================================
 
-axios.defaults.baseURL = API_BASE_URL;
-
-axios.defaults.timeout = 30000;
-
-
-// ======================================================
-// REQUEST INTERCEPTOR
-// ======================================================
-
-axios.interceptors.request.use(
-
-(config)=>{
-
-    const token = getToken();
-
-    if(token){
-
-        config.headers.Authorization =
-
-        `Bearer ${token}`;
-
-    }
-
-    return config;
-
-},
-
-(error)=>Promise.reject(error)
-
-);
-
-
-// ======================================================
-// RESPONSE INTERCEPTOR
-// ======================================================
-
-axios.interceptors.response.use(
-
-(response)=>response,
-
-(error)=>{
-
-    if(
-
-        error.response &&
-
-        error.response.status===401
-
-    ){
-
-        logout(false);
-
-    }
-
-    return Promise.reject(error);
-
-}
-
-);
-
-
-// ======================================================
-// LOGIN CHECK
-// ======================================================
-
-document.addEventListener(
-
-"DOMContentLoaded",
-
-async()=>{
-
-    if(!getToken()){
-
-        window.location.href="admin.html";
-
-        return;
-
-    }
-
-    await initializeDashboard();
-
-}
-
-);
-
-
-// ======================================================
-// INITIALIZE DASHBOARD
-// ======================================================
-
-async function initializeDashboard(){
-
-    try{
-
-        showLoading(
-
-            "Loading Dashboard..."
-
-        );
-
-        await loadShipments();
-
-        hideLoading();
-
-    }
-
-    catch(error){
-
-        hideLoading();
-
-        console.error(error);
-
-        showError(
-
-            "Unable to load dashboard."
-
-        );
-
-    }
-
-}
-
-
-// ======================================================
-// REFRESH DASHBOARD
-// ======================================================
-
-async function refreshDashboard(){
-
-    await loadShipments();
-
-}
-
-
-// ======================================================
-// SHOW DASHBOARD
-// ======================================================
-
-function showDashboard(){
+function showDashboard() {
 
     window.scrollTo({
 
-        top:0,
+        top: 0,
 
-        behavior:"smooth"
+        behavior: "smooth"
 
     });
 
 }
 
-
-// ======================================================
-// SHOW CREATE SHIPMENT
-// ======================================================
-
-function showCreateShipment(){
+function showCreateShipment() {
 
     document
 
-    .getElementById(
-
-        "createShipment"
-
-    )
+    .getElementById("createShipment")
 
     .scrollIntoView({
 
-        behavior:"smooth"
+        behavior: "smooth"
 
     });
 
 }
 
+// ======================================================
+// TRACKING NUMBER
+// ======================================================
+
+function generateTrackingNumber() {
+
+    const year = new Date().getFullYear();
+
+    const random = Math.floor(
+
+        100000 + Math.random() * 900000
+
+    );
+
+    return `LWX${year}${random}`;
+
+}
 
 // ======================================================
-// AUTO REFRESH
+// FORMAT DATE
 // ======================================================
 
-setInterval(()=>{
+function formatDate(date) {
 
-    if(getToken()){
+    if (!date) return "-";
 
-        refreshDashboard();
+    return new Date(date)
+
+    .toLocaleDateString("en-US", {
+
+        year: "numeric",
+
+        month: "short",
+
+        day: "numeric"
+
+    });
+
+}
+
+// ======================================================
+// PAGE START
+// ======================================================
+
+window.addEventListener(
+
+    "load",
+
+    async () => {
+
+        try {
+
+            showLoading(
+
+                "Loading Dashboard..."
+
+            );
+
+            await loadShipments();
+
+            hideLoading();
+
+        }
+
+        catch (err) {
+
+            hideLoading();
+
+            console.error(err);
+
+            showError(
+
+                "Unable to load dashboard."
+
+            );
+
+        }
 
     }
 
-},60000);
+);
 
-
 // ======================================================
-// END OF PART 1
+// END PART 1
 // ======================================================
 // ======================================================
-// LINKWORLD EXPRESS
-// PROFESSIONAL ADMIN DASHBOARD
-// dashboard.js
 // PART 2
-// Load Shipments + Dashboard Cards + Search + Filter
+// LOAD SHIPMENTS
+// DASHBOARD CARDS
+// SHIPMENT TABLE
 // ======================================================
-
 
 // ======================================================
 // LOAD SHIPMENTS
 // ======================================================
 
-async function loadShipments(){
+async function loadShipments() {
 
-    try{
+    try {
 
-        showLoading("Loading Shipments...");
-
-        const response = await axios.get(API_URL);
+        const response = await axios.get(API.shipments);
 
         shipments = response.data.data || [];
 
-        filteredShipments = [...shipments];
-
         updateDashboardCards();
 
-        applyFilters();
-
-        hideLoading();
+        renderShipmentTable();
 
     }
 
-    catch(error){
-
-        hideLoading();
+    catch (error) {
 
         console.error(error);
-
-        if(handleUnauthorized(error)) return;
 
         showError(
 
@@ -378,459 +348,195 @@ async function loadShipments(){
 
 }
 
-
 // ======================================================
 // DASHBOARD CARDS
 // ======================================================
 
-function updateDashboardCards(){
+function updateDashboardCards() {
 
-    const total = shipments.length;
+    shipmentCount.textContent = shipments.length;
 
-    const delivered = shipments.filter(
+    transitCount.textContent =
 
-        s=>s.status==="Delivered"
+        shipments.filter(
 
-    ).length;
+            s => s.status === "In Transit"
 
-    const transit = shipments.filter(
+        ).length;
 
-        s=>s.status==="In Transit"
+    deliveredCount.textContent =
 
-    ).length;
+        shipments.filter(
 
-    const pending = shipments.filter(
+            s => s.status === "Delivered"
 
-        s=>s.status!=="Delivered"
+        ).length;
 
-    ).length;
+    pendingCount.textContent =
 
-    document.getElementById(
+        shipments.filter(
 
-        "shipmentCount"
+            s =>
 
-    ).textContent = total;
+            s.status !== "Delivered" &&
 
-    document.getElementById(
+            s.status !== "Cancelled"
 
-        "transitCount"
-
-    ).textContent = transit;
-
-    document.getElementById(
-
-        "deliveredCount"
-
-    ).textContent = delivered;
-
-    document.getElementById(
-
-        "pendingCount"
-
-    ).textContent = pending;
+        ).length;
 
 }
 
-
 // ======================================================
-// SEARCH
-// ======================================================
-
-function searchShipments(keyword){
-
-    searchKeyword = keyword.toLowerCase();
-
-    applyFilters();
-
-}
-
-
-// ======================================================
-// FILTER
+// SHIPMENT TABLE
 // ======================================================
 
-function filterShipments(status){
+function renderShipmentTable() {
 
-    statusFilter = status;
+    shipmentTable.innerHTML = "";
 
-    applyFilters();
+    if (shipments.length === 0) {
 
-}
-
-
-// ======================================================
-// SORT
-// ======================================================
-
-function sortShipments(direction){
-
-    sortDirection = direction;
-
-    applyFilters();
-
-}
-
-
-// ======================================================
-// APPLY FILTERS
-// ======================================================
-
-function applyFilters(){
-
-    filteredShipments = shipments.filter(shipment=>{
-
-        const keywordMatch =
-
-        shipment.trackingNumber
-
-        ?.toLowerCase()
-
-        .includes(searchKeyword)
-
-        ||
-
-        shipment.sender
-
-        ?.toLowerCase()
-
-        .includes(searchKeyword)
-
-        ||
-
-        shipment.receiver
-
-        ?.toLowerCase()
-
-        .includes(searchKeyword)
-
-        ||
-
-        shipment.origin
-
-        ?.toLowerCase()
-
-        .includes(searchKeyword)
-
-        ||
-
-        shipment.destination
-
-        ?.toLowerCase()
-
-        .includes(searchKeyword);
-
-        const statusMatch =
-
-        statusFilter==="All"
-
-        ||
-
-        shipment.status===statusFilter;
-
-        return keywordMatch && statusMatch;
-
-    });
-
-    sortFilteredShipments();
-
-}
-
-
-// ======================================================
-// SORT FILTERED DATA
-// ======================================================
-
-function sortFilteredShipments(){
-
-    filteredShipments.sort((a,b)=>{
-
-        if(sortDirection==="oldest"){
-
-            return new Date(a.createdAt)-
-
-            new Date(b.createdAt);
-
-        }
-
-        return new Date(b.createdAt)-
-
-        new Date(a.createdAt);
-
-    });
-
-    currentPage = 1;
-
-    renderShipments();
-
-}
-
-
-// ======================================================
-// SEARCH LISTENER
-// ======================================================
-
-const shipmentSearch =
-
-document.getElementById(
-
-    "shipmentSearch"
-
-);
-
-if(shipmentSearch){
-
-    shipmentSearch.addEventListener(
-
-        "input",
-
-        function(){
-
-            searchShipments(
-
-                this.value
-
-            );
-
-        }
-
-    );
-
-}
-
-
-// ======================================================
-// STATUS FILTER LISTENER
-// ======================================================
-
-const statusDropdown =
-
-document.getElementById(
-
-    "statusFilter"
-
-);
-
-if(statusDropdown){
-
-    statusDropdown.addEventListener(
-
-        "change",
-
-        function(){
-
-            filterShipments(
-
-                this.value
-
-            );
-
-        }
-
-    );
-
-}
-
-
-// ======================================================
-// SORT LISTENER
-// ======================================================
-
-const sortDropdown =
-
-document.getElementById(
-
-    "sortShipments"
-
-);
-
-if(sortDropdown){
-
-    sortDropdown.addEventListener(
-
-        "change",
-
-        function(){
-
-            sortShipments(
-
-                this.value
-
-            );
-
-        }
-
-    );
-
-}
-
-
-// ======================================================
-// END OF PART 2
-// ======================================================
-// ======================================================
-// LINKWORLD EXPRESS
-// PROFESSIONAL ADMIN DASHBOARD
-// dashboard.js
-// PART 3
-// Render Table + Pagination + View Shipment
-// ======================================================
-
-
-// ======================================================
-// RENDER SHIPMENTS
-// ======================================================
-
-function renderShipments(){
-
-    const table =
-
-    document.getElementById(
-
-        "shipmentTable"
-
-    );
-
-    if(!table) return;
-
-    table.innerHTML = "";
-
-    if(filteredShipments.length===0){
-
-        table.innerHTML = `
+        shipmentTable.innerHTML = `
 
         <tr>
 
-            <td colspan="9"
+        <td colspan="9"
 
-            style="text-align:center;padding:40px;">
+        style="text-align:center;padding:40px;">
 
-            No Shipments Found
+        <i class="fa-solid fa-box-open"
 
-            </td>
+        style="font-size:45px;color:#999;"></i>
+
+        <br><br>
+
+        No Shipments Available
+
+        </td>
 
         </tr>
 
         `;
-
-        updatePagination();
 
         return;
 
     }
 
-    const start =
+    shipments.forEach(shipment => {
 
-    (currentPage-1) * rowsPerPage;
-
-    const end =
-
-    start + rowsPerPage;
-
-    const pageData =
-
-    filteredShipments.slice(
-
-        start,
-
-        end
-
-    );
-
-    pageData.forEach(shipment=>{
-
-        table.innerHTML += `
+        shipmentTable.innerHTML += `
 
         <tr>
 
-            <td>
+        <td>
 
-                <b>${shipment.trackingNumber}</b>
+        <strong>
 
-            </td>
+        ${shipment.trackingNumber}
 
-            <td>${shipment.sender}</td>
+        </strong>
 
-            <td>${shipment.receiver}</td>
+        </td>
 
-            <td>${shipment.origin}</td>
+        <td>
 
-            <td>${shipment.currentLocation || "-"}</td>
+        ${shipment.senderName || "-"}
 
-            <td>${shipment.destination}</td>
+        </td>
 
-            <td>
+        <td>
 
-                <span class="status">
+        ${shipment.receiverName || "-"}
 
-                ${shipment.status}
+        </td>
 
-                </span>
+        <td>
 
-            </td>
+        ${shipment.origin || "-"}
 
-            <td>
+        </td>
 
-            ${shipment.progress || 0}%
+        <td>
 
-            </td>
+        ${shipment.currentLocation || "-"}
 
-            <td>
+        </td>
 
-                <div class="action-buttons">
+        <td>
 
-                    <button
+        ${shipment.destination || "-"}
 
-                    class="view-btn"
+        </td>
 
-                    onclick="viewShipment('${shipment._id}')">
+        <td>
 
-                    <i class="fa fa-eye"></i>
+        ${statusBadge(shipment.status)}
 
-                    </button>
+        </td>
 
-                    <button
+        <td>
 
-                    class="edit-btn"
+        ${formatDate(
 
-                    onclick="editShipment('${shipment._id}')">
+            shipment.expectedDelivery
 
-                    <i class="fa fa-pen"></i>
+        )}
 
-                    </button>
+        </td>
 
-                    <button
+        <td>
 
-                    class="location-btn"
+        <button
 
-                    onclick="updateLocation('${shipment._id}')">
+        class="action-btn"
 
-                    <i class="fa fa-location-dot"></i>
+        onclick="viewShipment('${shipment._id}')">
 
-                    </button>
+        <i class="fa-solid fa-eye"></i>
 
-                    <button
+        </button>
 
-                    class="receipt-btn-small"
+        <button
 
-                    onclick="getReceipt('${shipment.trackingNumber}')">
+        class="action-btn"
 
-                    <i class="fa fa-file-invoice"></i>
+        onclick="editShipment('${shipment._id}')">
 
-                    </button>
+        <i class="fa-solid fa-pen"></i>
 
-                    <button
+        </button>
 
-                    class="delete-btn"
+        <button
 
-                    onclick="deleteShipment('${shipment._id}')">
+        class="action-btn"
 
-                    <i class="fa fa-trash"></i>
+        onclick="updateLocation('${shipment._id}')">
 
-                    </button>
+        <i class="fa-solid fa-location-dot"></i>
 
-                </div>
+        </button>
 
-            </td>
+        <button
+
+        class="action-btn"
+
+        onclick="previewReceipt('${shipment._id}')">
+
+        <i class="fa-solid fa-file-invoice"></i>
+
+        </button>
+
+        <button
+
+        class="action-btn delete"
+
+        onclick="deleteShipment('${shipment._id}')">
+
+        <i class="fa-solid fa-trash"></i>
+
+        </button>
+
+        </td>
 
         </tr>
 
@@ -838,155 +544,325 @@ function renderShipments(){
 
     });
 
-    updatePagination();
-
 }
 
-
 // ======================================================
-// UPDATE PAGINATION
+// STATUS BADGE
 // ======================================================
 
-function updatePagination(){
+function statusBadge(status) {
 
-    let holder =
+    let color = "#0d6efd";
 
-    document.getElementById(
+    switch (status) {
 
-        "pageInfo"
+        case "Delivered":
 
-    );
+            color = "#198754";
 
-    if(!holder){
+            break;
 
-        holder =
+        case "Cancelled":
 
-        document.createElement("div");
+            color = "#dc3545";
 
-        holder.id="pageInfo";
+            break;
 
-        holder.style.marginTop="20px";
+        case "On Hold":
 
-        holder.style.textAlign="center";
+            color = "#ffc107";
 
-        document
+            break;
 
-        .querySelector(".table-responsive")
+        case "Processing":
 
-        ?.appendChild(holder);
+            color = "#6f42c1";
+
+            break;
+
+        case "Customs Clearance":
+
+            color = "#fd7e14";
+
+            break;
+
+        case "Out for Delivery":
+
+            color = "#20c997";
+
+            break;
+
+        case "In Transit":
+
+            color = "#0d6efd";
+
+            break;
 
     }
 
-    const totalPages =
+    return `
 
-    Math.max(
+    <span style="
 
-        1,
+    background:${color};
 
-        Math.ceil(
+    color:#fff;
 
-            filteredShipments.length /
+    padding:6px 12px;
 
-            rowsPerPage
+    border-radius:20px;
 
-        )
+    font-size:12px;
 
-    );
+    font-weight:600;
 
-    holder.innerHTML = `
+    display:inline-block;
 
-    <button
+    ">
 
-    onclick="previousPage()"
+    ${status}
 
-    ${currentPage===1?"disabled":""}>
-
-    ◀ Previous
-
-    </button>
-
-    &nbsp;
-
-    Page ${currentPage}
-
-    of ${totalPages}
-
-    &nbsp;
-
-    <button
-
-    onclick="nextPage()"
-
-    ${currentPage===totalPages?"disabled":""}>
-
-    Next ▶
-
-    </button>
+    </span>
 
     `;
 
 }
 
-
 // ======================================================
-// NEXT PAGE
+// END PART 2
+// ======================================================
+// ======================================================
+// PART 3
+// CREATE SHIPMENT
 // ======================================================
 
-function nextPage(){
+async function createShipment() {
 
-    const totalPages =
+    try {
 
-    Math.ceil(
+        showLoading("Saving Shipment...");
 
-        filteredShipments.length /
+        const shipmentData = {
 
-        rowsPerPage
+            trackingNumber: generateTrackingNumber(),
 
-    );
+            senderName:
+            document.getElementById("senderName").value.trim(),
 
-    if(currentPage<totalPages){
+            senderPhone:
+            document.getElementById("senderPhone").value.trim(),
 
-        currentPage++;
+            senderEmail:
+            document.getElementById("senderEmail").value.trim(),
 
-        renderShipments();
+            receiverName:
+            document.getElementById("receiverName").value.trim(),
+
+            receiverPhone:
+            document.getElementById("receiverPhone").value.trim(),
+
+            receiverEmail:
+            document.getElementById("receiverEmail").value.trim(),
+
+            receiverAddress:
+            document.getElementById("receiverAddress").value.trim(),
+
+            shipment:
+            document.getElementById("shipment").value.trim(),
+
+            origin:
+            document.getElementById("origin").value.trim(),
+
+            currentLocation:
+            document.getElementById("currentLocation").value.trim(),
+
+            destination:
+            document.getElementById("destination").value.trim(),
+
+            currentLatitude:
+            parseFloat(
+                document.getElementById("currentLatitude").value
+            ) || 0,
+
+            currentLongitude:
+            parseFloat(
+                document.getElementById("currentLongitude").value
+            ) || 0,
+
+            destinationLatitude:
+            parseFloat(
+                document.getElementById("destinationLatitude").value
+            ) || 0,
+
+            destinationLongitude:
+            parseFloat(
+                document.getElementById("destinationLongitude").value
+            ) || 0,
+
+            status:
+            document.getElementById("status").value,
+
+            expectedDelivery:
+            document.getElementById("expectedDelivery").value
+
+        };
+
+        // ==========================================
+        // REQUIRED FIELDS
+        // ==========================================
+
+        if (
+
+            !shipmentData.senderName ||
+
+            !shipmentData.receiverName ||
+
+            !shipmentData.shipment ||
+
+            !shipmentData.origin ||
+
+            !shipmentData.destination
+
+        ) {
+
+            hideLoading();
+
+            return showError(
+                "Please complete all required fields."
+            );
+
+        }
+
+        // ==========================================
+        // SAVE
+        // ==========================================
+
+        await axios.post(
+
+            API.shipments,
+
+            shipmentData
+
+        );
+
+        hideLoading();
+
+        showSuccess(
+            "Shipment created successfully."
+        );
+
+        clearShipmentForm();
+
+        await loadShipments();
+
+    }
+
+    catch (error) {
+
+        hideLoading();
+
+        console.error(error);
+
+        showError(
+
+            error.response?.data?.message ||
+
+            "Unable to save shipment."
+
+        );
 
     }
 
 }
 
-
 // ======================================================
-// PREVIOUS PAGE
+// CLEAR FORM
 // ======================================================
 
-function previousPage(){
+function clearShipmentForm() {
 
-    if(currentPage>1){
+    const ids = [
 
-        currentPage--;
+        "senderName",
 
-        renderShipments();
+        "senderPhone",
 
-    }
+        "senderEmail",
+
+        "receiverName",
+
+        "receiverPhone",
+
+        "receiverEmail",
+
+        "receiverAddress",
+
+        "shipment",
+
+        "origin",
+
+        "currentLocation",
+
+        "destination",
+
+        "currentLatitude",
+
+        "currentLongitude",
+
+        "destinationLatitude",
+
+        "destinationLongitude",
+
+        "expectedDelivery"
+
+    ];
+
+    ids.forEach(id => {
+
+        const el = document.getElementById(id);
+
+        if (el) {
+
+            el.value = "";
+
+        }
+
+    });
+
+    document.getElementById("status").selectedIndex = 0;
 
 }
 
+// ======================================================
+// END PART 3
+// ======================================================
+// ======================================================
+// PART 4
+// VIEW SHIPMENT
+// EDIT SHIPMENT
+// ======================================================
 
 // ======================================================
 // VIEW SHIPMENT
 // ======================================================
 
-function viewShipment(id){
+function viewShipment(id) {
 
-    const shipment =
+    const shipment = shipments.find(
 
-    shipments.find(
-
-        s=>s._id===id
+        s => s._id === id
 
     );
 
-    if(!shipment) return;
+    if (!shipment) {
+
+        return showError(
+
+            "Shipment not found."
+
+        );
+
+    }
 
     selectedShipment = shipment;
 
@@ -998,7 +874,7 @@ function viewShipment(id){
 
     <div class="detail-card">
 
-        <h4>Tracking Number</h4>
+        <h3>Tracking Number</h3>
 
         <p>${shipment.trackingNumber}</p>
 
@@ -1006,23 +882,23 @@ function viewShipment(id){
 
     <div class="detail-card">
 
-        <h4>Sender</h4>
+        <h3>Sender</h3>
 
-        <p>${shipment.sender}</p>
-
-    </div>
-
-    <div class="detail-card">
-
-        <h4>Receiver</h4>
-
-        <p>${shipment.receiver}</p>
+        <p>${shipment.senderName}</p>
 
     </div>
 
     <div class="detail-card">
 
-        <h4>Shipment</h4>
+        <h3>Receiver</h3>
+
+        <p>${shipment.receiverName}</p>
+
+    </div>
+
+    <div class="detail-card">
+
+        <h3>Shipment</h3>
 
         <p>${shipment.shipment}</p>
 
@@ -1030,7 +906,7 @@ function viewShipment(id){
 
     <div class="detail-card">
 
-        <h4>Origin</h4>
+        <h3>Origin</h3>
 
         <p>${shipment.origin}</p>
 
@@ -1038,7 +914,7 @@ function viewShipment(id){
 
     <div class="detail-card">
 
-        <h4>Current Location</h4>
+        <h3>Current Location</h3>
 
         <p>${shipment.currentLocation}</p>
 
@@ -1046,7 +922,7 @@ function viewShipment(id){
 
     <div class="detail-card">
 
-        <h4>Destination</h4>
+        <h3>Destination</h3>
 
         <p>${shipment.destination}</p>
 
@@ -1054,7 +930,7 @@ function viewShipment(id){
 
     <div class="detail-card">
 
-        <h4>Status</h4>
+        <h3>Status</h3>
 
         <p>${shipment.status}</p>
 
@@ -1062,49 +938,13 @@ function viewShipment(id){
 
     <div class="detail-card">
 
-        <h4>Progress</h4>
+        <h3>Expected Delivery</h3>
 
-        <p>
+        <p>${formatDate(
 
-        ${shipment.progress || 0}%
+            shipment.expectedDelivery
 
-        </p>
-
-    </div>
-
-    <div class="detail-card">
-
-        <h4>Estimated Arrival</h4>
-
-        <p>
-
-        ${calculateETA(
-
-        shipment.progress || 0
-
-        )}
-
-        </p>
-
-    </div>
-
-    <div class="detail-card">
-
-        <h4>Expected Delivery</h4>
-
-        <p>
-
-        ${shipment.expectedDelivery ?
-
-        new Date(
-
-        shipment.expectedDelivery
-
-        ).toLocaleDateString()
-
-        : "-"}
-
-        </p>
+        )}</p>
 
     </div>
 
@@ -1114,85 +954,412 @@ function viewShipment(id){
 
         "shipmentModal"
 
-    ).style.display="flex";
+    ).style.display = "flex";
 
 }
 
-
 // ======================================================
-// CLOSE SHIPMENT MODAL
+// CLOSE VIEW MODAL
 // ======================================================
 
-function closeShipmentModal(){
+function closeShipmentModal() {
 
     document.getElementById(
 
         "shipmentModal"
 
-    ).style.display="none";
+    ).style.display = "none";
 
 }
 
-
 // ======================================================
-// RECEIPT
+// EDIT SHIPMENT
 // ======================================================
 
-function getReceipt(trackingNumber){
+function editShipment(id) {
 
-    window.open(
+    const shipment = shipments.find(
 
-        `receipt.html?tracking=${trackingNumber}`,
+        s => s._id === id
 
-        "_blank"
+    );
+
+    if (!shipment) {
+
+        return showError(
+
+            "Shipment not found."
+
+        );
+
+    }
+
+    selectedShipmentId = id;
+
+    document.getElementById("senderName").value =
+    shipment.senderName || "";
+
+    document.getElementById("senderPhone").value =
+    shipment.senderPhone || "";
+
+    document.getElementById("senderEmail").value =
+    shipment.senderEmail || "";
+
+    document.getElementById("receiverName").value =
+    shipment.receiverName || "";
+
+    document.getElementById("receiverPhone").value =
+    shipment.receiverPhone || "";
+
+    document.getElementById("receiverEmail").value =
+    shipment.receiverEmail || "";
+
+    document.getElementById("receiverAddress").value =
+    shipment.receiverAddress || "";
+
+    document.getElementById("shipment").value =
+    shipment.shipment || "";
+
+    document.getElementById("origin").value =
+    shipment.origin || "";
+
+    document.getElementById("currentLocation").value =
+    shipment.currentLocation || "";
+
+    document.getElementById("destination").value =
+    shipment.destination || "";
+
+    document.getElementById("currentLatitude").value =
+    shipment.currentLatitude || "";
+
+    document.getElementById("currentLongitude").value =
+    shipment.currentLongitude || "";
+
+    document.getElementById("destinationLatitude").value =
+    shipment.destinationLatitude || "";
+
+    document.getElementById("destinationLongitude").value =
+    shipment.destinationLongitude || "";
+
+    document.getElementById("status").value =
+    shipment.status || "Shipment Created";
+
+    document.getElementById("expectedDelivery").value =
+    shipment.expectedDelivery
+    ? shipment.expectedDelivery.substring(0, 10)
+    : "";
+
+    document.getElementById(
+
+        "createShipment"
+
+    ).scrollIntoView({
+
+        behavior: "smooth"
+
+    });
+
+    showSuccess(
+
+        "Shipment loaded for editing."
 
     );
 
 }
 
-
 // ======================================================
-// END OF PART 3
+// END PART 4
 // ======================================================
 // ======================================================
-// LINKWORLD EXPRESS
-// DASHBOARD.JS
-// PART 4A-1
-// LEAFLET MAP FUNCTIONS
+// PART 5
+// DELETE SHIPMENT
+// UPDATE LOCATION
 // ======================================================
 
-
 // ======================================================
-// PICK CURRENT LOCATION
+// DELETE SHIPMENT
 // ======================================================
 
-function pickCurrentLocation(){
+function deleteShipment(id) {
 
-    locationTarget = "current";
+    deleteShipmentId = id;
 
-    openMap();
+    document.getElementById(
+
+        "deleteModal"
+
+    ).style.display = "flex";
 
 }
 
-
 // ======================================================
-// PICK DESTINATION
+// CLOSE DELETE MODAL
 // ======================================================
 
-function pickDestination(){
+function closeDeleteModal() {
 
-    locationTarget = "destination";
+    deleteShipmentId = null;
 
-    openMap();
+    document.getElementById(
+
+        "deleteModal"
+
+    ).style.display = "none";
 
 }
 
+// ======================================================
+// CONFIRM DELETE
+// ======================================================
+
+document.getElementById(
+
+    "confirmDelete"
+
+).addEventListener(
+
+    "click",
+
+    async function () {
+
+        if (!deleteShipmentId) return;
+
+        try {
+
+            showLoading(
+
+                "Deleting Shipment..."
+
+            );
+
+            await axios.delete(
+
+                `${API.shipments}/${deleteShipmentId}`
+
+            );
+
+            hideLoading();
+
+            closeDeleteModal();
+
+            showSuccess(
+
+                "Shipment deleted successfully."
+
+            );
+
+            await loadShipments();
+
+        }
+
+        catch (error) {
+
+            hideLoading();
+
+            console.error(error);
+
+            showError(
+
+                error.response?.data?.message ||
+
+                "Unable to delete shipment."
+
+            );
+
+        }
+
+    }
+
+);
+
+// ======================================================
+// UPDATE LOCATION
+// ======================================================
+
+function updateLocation(id) {
+
+    const shipment = shipments.find(
+
+        s => s._id === id
+
+    );
+
+    if (!shipment) {
+
+        return showError(
+
+            "Shipment not found."
+
+        );
+
+    }
+
+    selectedShipment = shipment;
+
+    document.getElementById(
+
+        "newLocation"
+
+    ).value = shipment.currentLocation || "";
+
+    document.getElementById(
+
+        "newLatitude"
+
+    ).value = shipment.currentLatitude || "";
+
+    document.getElementById(
+
+        "newLongitude"
+
+    ).value = shipment.currentLongitude || "";
+
+    document.getElementById(
+
+        "newStatus"
+
+    ).value = shipment.status || "Shipment Created";
+
+    document.getElementById(
+
+        "locationModal"
+
+    ).style.display = "flex";
+
+}
+
+// ======================================================
+// CLOSE LOCATION MODAL
+// ======================================================
+
+function closeLocationModal() {
+
+    document.getElementById(
+
+        "locationModal"
+
+    ).style.display = "none";
+
+}
+
+// ======================================================
+// SAVE LOCATION UPDATE
+// ======================================================
+
+async function saveLocationUpdate() {
+
+    if (!selectedShipment) {
+
+        return;
+
+    }
+
+    try {
+
+        showLoading(
+
+            "Updating Shipment..."
+
+        );
+
+        await axios.put(
+
+            `${API.shipments}/${selectedShipment._id}`,
+
+            {
+
+                currentLocation:
+
+                document.getElementById(
+
+                    "newLocation"
+
+                ).value.trim(),
+
+                currentLatitude:
+
+                Number(
+
+                    document.getElementById(
+
+                        "newLatitude"
+
+                    ).value
+
+                ),
+
+                currentLongitude:
+
+                Number(
+
+                    document.getElementById(
+
+                        "newLongitude"
+
+                    ).value
+
+                ),
+
+                status:
+
+                document.getElementById(
+
+                    "newStatus"
+
+                ).value
+
+            }
+
+        );
+
+        hideLoading();
+
+        closeLocationModal();
+
+        showSuccess(
+
+            "Shipment updated successfully."
+
+        );
+
+        await loadShipments();
+
+    }
+
+    catch (error) {
+
+        hideLoading();
+
+        console.error(error);
+
+        showError(
+
+            error.response?.data?.message ||
+
+            "Unable to update shipment."
+
+        );
+
+    }
+
+}
+
+// ======================================================
+// END PART 5
+// ======================================================
+// ======================================================
+// PART 6
+// LEAFLET MAP
+// LOCATION PICKER
+// ======================================================
 
 // ======================================================
 // OPEN MAP
 // ======================================================
 
-function openMap(){
+function openMap(mode) {
+
+    mapMode = mode;
 
     document.getElementById(
 
@@ -1200,20 +1367,45 @@ function openMap(){
 
     ).style.display = "flex";
 
-    setTimeout(()=>{
-
-        initMap();
-
-    },300);
+    setTimeout(initMap, 200);
 
 }
 
+// ======================================================
+// CURRENT LOCATION
+// ======================================================
+
+function pickCurrentLocation() {
+
+    openMap("current");
+
+}
+
+// ======================================================
+// DESTINATION
+// ======================================================
+
+function pickDestination() {
+
+    openMap("destination");
+
+}
+
+// ======================================================
+// UPDATE LOCATION
+// ======================================================
+
+function pickUpdateLocation() {
+
+    openMap("update");
+
+}
 
 // ======================================================
 // CLOSE MAP
 // ======================================================
 
-function closeMapModal(){
+function closeMapModal() {
 
     document.getElementById(
 
@@ -1221,32 +1413,37 @@ function closeMapModal(){
 
     ).style.display = "none";
 
-}
+    if (adminMap) {
 
+        adminMap.remove();
+
+        adminMap = null;
+
+        mapMarker = null;
+
+    }
+
+}
 
 // ======================================================
 // INITIALIZE MAP
 // ======================================================
 
-function initMap(){
+function initMap() {
 
-    if(map){
+    if (adminMap) {
 
-        map.remove();
+        adminMap.remove();
 
     }
 
-    map = L.map(
+    adminMap = L.map("adminMap").setView(
 
-        "adminMap",
+        [20, 0],
 
-        {
+        2
 
-            zoomControl:true
-
-        }
-
-    ).setView([20,0],2);
+    );
 
     L.tileLayer(
 
@@ -1254,266 +1451,113 @@ function initMap(){
 
         {
 
-            attribution:"© OpenStreetMap",
+            attribution:
 
-            maxZoom:19
+            "&copy; OpenStreetMap",
+
+            maxZoom: 19
 
         }
 
-    ).addTo(map);
+    ).addTo(adminMap);
 
-    const currentLat = Number(
+    adminMap.on("click", function (e) {
 
-        document.getElementById(
+        if (mapMarker) {
 
-            "currentLatitude"
+            adminMap.removeLayer(
 
-        ).value
+                mapMarker
 
-    );
-
-    const currentLng = Number(
-
-        document.getElementById(
-
-            "currentLongitude"
-
-        ).value
-
-    );
-
-    const destinationLat = Number(
-
-        document.getElementById(
-
-            "destinationLatitude"
-
-        ).value
-
-    );
-
-    const destinationLng = Number(
-
-        document.getElementById(
-
-            "destinationLongitude"
-
-        ).value
-
-    );
-
-    if(currentLat && currentLng){
-
-        marker = L.marker(
-
-            [
-
-                currentLat,
-
-                currentLng
-
-            ]
-
-        ).addTo(map);
-
-        marker.bindPopup(
-
-            "Current Location"
-
-        );
-
-    }
-
-    if(destinationLat && destinationLng){
-
-        destinationMarker = L.marker(
-
-            [
-
-                destinationLat,
-
-                destinationLng
-
-            ]
-
-        ).addTo(map);
-
-        destinationMarker.bindPopup(
-
-            "Destination"
-
-        );
-
-    }
-
-    if(
-
-        currentLat &&
-
-        currentLng &&
-
-        destinationLat &&
-
-        destinationLng
-
-    ){
-
-        const route = [
-
-            [
-
-                currentLat,
-
-                currentLng
-
-            ],
-
-            [
-
-                destinationLat,
-
-                destinationLng
-
-            ]
-
-        ];
-
-        L.polyline(
-
-            route,
-
-            {
-
-                color:"#0d6efd",
-
-                weight:4,
-
-                opacity:0.8
-
-            }
-
-        ).addTo(map);
-
-        map.fitBounds(
-
-            route,
-
-            {
-
-                padding:[50,50]
-
-            }
-
-        );
-
-    }
-
-    map.on(
-
-        "click",
-
-        function(e){
-
-            selectedLatitude =
-
-            e.latlng.lat;
-
-            selectedLongitude =
-
-            e.latlng.lng;
-
-            if(marker){
-
-                map.removeLayer(marker);
-
-            }
-
-            marker = L.marker(
-
-                [
-
-                    selectedLatitude,
-
-                    selectedLongitude
-
-                ]
-
-            ).addTo(map);
-
-            marker.bindPopup(
-
-                "Selected Location"
-
-            ).openPopup();
+            );
 
         }
 
-    );
+        mapMarker = L.marker(
+
+            e.latlng
+
+        ).addTo(adminMap);
+
+    });
 
 }
 
-
 // ======================================================
-// SAVE PICKED LOCATION
+// SAVE LOCATION
 // ======================================================
 
-function savePickedLocation(){
+function savePickedLocation() {
 
-    if(selectedLatitude===null){
+    if (!mapMarker) {
 
-        showError(
+        return showError(
 
             "Please select a location."
 
         );
 
-        return;
-
     }
 
-    if(locationTarget==="current"){
+    const lat =
+
+    mapMarker.getLatLng().lat.toFixed(6);
+
+    const lng =
+
+    mapMarker.getLatLng().lng.toFixed(6);
+
+    if (mapMode === "current") {
 
         document.getElementById(
 
             "currentLatitude"
 
-        ).value =
-
-        selectedLatitude.toFixed(6);
+        ).value = lat;
 
         document.getElementById(
 
             "currentLongitude"
 
-        ).value =
-
-        selectedLongitude.toFixed(6);
+        ).value = lng;
 
     }
 
-    else if(locationTarget==="destination"){
+    else if (mapMode === "destination") {
 
         document.getElementById(
 
             "destinationLatitude"
 
-        ).value =
-
-        selectedLatitude.toFixed(6);
+        ).value = lat;
 
         document.getElementById(
 
             "destinationLongitude"
 
-        ).value =
+        ).value = lng;
 
-        selectedLongitude.toFixed(6);
+    }
+
+    else {
+
+        document.getElementById(
+
+            "newLatitude"
+
+        ).value = lat;
+
+        document.getElementById(
+
+            "newLongitude"
+
+        ).value = lng;
 
     }
 
     showSuccess(
 
-        "Coordinates selected successfully."
+        "Coordinates selected."
 
     );
 
@@ -1521,1395 +1565,690 @@ function savePickedLocation(){
 
 }
 
-
 // ======================================================
-// END OF PART 4A-1
-// ======================================================
-// ======================================================
-// VIEW SHIPMENT
-// PART 4A-2
+// USE CURRENT LOCATION
 // ======================================================
 
-function viewShipment(id){
+function useCurrentLocation() {
 
-    const shipment = shipments.find(
+    if (!navigator.geolocation) {
 
-        s => s._id === id
+        return showError(
 
-    );
+            "Geolocation is not supported."
 
-    if(!shipment){
-
-        showError("Shipment not found.");
-
-        return;
+        );
 
     }
 
-    selectedShipment = shipment;
+    showLoading(
 
-    const progress = shipment.progress || 0;
+        "Detecting your location..."
 
-    const eta = calculateETA(progress);
+    );
 
-    document.getElementById(
+    navigator.geolocation.getCurrentPosition(
 
-        "shipmentDetails"
+        function (position) {
 
-    ).innerHTML = `
+            hideLoading();
 
-    <div class="detail-card">
+            document.getElementById(
 
-        <h4>Tracking Number</h4>
+                "currentLatitude"
 
-        <p>${shipment.trackingNumber}</p>
+            ).value =
 
-    </div>
+            position.coords.latitude.toFixed(6);
 
-    <div class="detail-card">
+            document.getElementById(
 
-        <h4>Sender</h4>
+                "currentLongitude"
 
-        <p>${shipment.sender}</p>
+            ).value =
 
-    </div>
+            position.coords.longitude.toFixed(6);
 
-    <div class="detail-card">
+            showSuccess(
 
-        <h4>Receiver</h4>
-
-        <p>${shipment.receiver}</p>
-
-    </div>
-
-    <div class="detail-card">
-
-        <h4>Shipment</h4>
-
-        <p>${shipment.shipment}</p>
-
-    </div>
-
-    <div class="detail-card">
-
-        <h4>Origin</h4>
-
-        <p>${shipment.origin}</p>
-
-    </div>
-
-    <div class="detail-card">
-
-        <h4>Current Location</h4>
-
-        <p>${shipment.currentLocation}</p>
-
-    </div>
-
-    <div class="detail-card">
-
-        <h4>Destination</h4>
-
-        <p>${shipment.destination}</p>
-
-    </div>
-
-    <div class="detail-card">
-
-        <h4>Status</h4>
-
-        <p>${shipment.status}</p>
-
-    </div>
-
-    <div class="detail-card">
-
-        <h4>Expected Delivery</h4>
-
-        <p>
-
-        ${shipment.expectedDelivery ?
-
-        new Date(
-
-        shipment.expectedDelivery
-
-        ).toLocaleDateString()
-
-        : "-"}
-
-        </p>
-
-    </div>
-
-    <div class="detail-card">
-
-        <h4>Progress</h4>
-
-        <p>${progress}%</p>
-
-    </div>
-
-    <div class="detail-card">
-
-        <h4>Estimated Arrival</h4>
-
-        <p>${eta}</p>
-
-    </div>
-
-    <div class="detail-card"
-
-    style="grid-column:1/-1;">
-
-        <h4>Live Route</h4>
-
-        <p>
-
-        ${shipment.origin}
-
-        →
-
-        ${shipment.currentLocation}
-
-        →
-
-        ${shipment.destination}
-
-        </p>
-
-    </div>
-
-    <div class="detail-card"
-
-    style="grid-column:1/-1;">
-
-        <h4>Delivery Progress</h4>
-
-        <div
-
-        style="
-
-        width:100%;
-
-        height:12px;
-
-        background:#ddd;
-
-        border-radius:50px;
-
-        overflow:hidden;
-
-        ">
-
-            <div
-
-            style="
-
-            width:${progress}%;
-
-            height:100%;
-
-            background:#0d6efd;
-
-            transition:.4s;
-
-            ">
-
-            </div>
-
-        </div>
-
-        <small>${progress}% Complete</small>
-
-    </div>
-
-    <div class="detail-card"
-
-    style="grid-column:1/-1;">
-
-        <h4>Route History</h4>
-
-        <div>
-
-        ${
-
-        shipment.route && shipment.route.length
-
-        ?
-
-        shipment.route.map(stop=>`
-
-            <div style="margin-bottom:10px;">
-
-                <b>${stop.location}</b>
-
-                <br>
-
-                ${stop.status}
-
-                <br>
-
-                <small>
-
-                ${new Date(stop.time)
-
-                .toLocaleString()}
-
-                </small>
-
-            </div>
-
-        `).join("")
-
-        :
-
-        "No movement recorded."
-
-        }
-
-        </div>
-
-    </div>
-
-    `;
-
-    document.getElementById(
-
-        "shipmentModal"
-
-    ).style.display = "flex";
-
-    if(
-
-        shipment.currentLatitude &&
-
-        shipment.destinationLatitude
-
-    ){
-
-        setTimeout(()=>{
-
-            startTruckAnimation(
-
-                shipment
+                "Current location detected."
 
             );
 
-        },500);
+        },
+
+        function () {
+
+            hideLoading();
+
+            showError(
+
+                "Unable to detect location."
+
+            );
+
+        }
+
+    );
+
+}
+
+// ======================================================
+// USE CURRENT LOCATION (UPDATE)
+// ======================================================
+
+function useCurrentLocationUpdate() {
+
+    if (!navigator.geolocation) {
+
+        return showError(
+
+            "Geolocation is not supported."
+
+        );
 
     }
 
-}
-// ======================================================
-// LINKWORLD EXPRESS
-// DASHBOARD
-// PART 4B
-// PROFESSIONAL VIEW SHIPMENT
-// ======================================================
+    navigator.geolocation.getCurrentPosition(
 
-function viewShipment(id){
+        function (position) {
 
-    const shipment = shipments.find(
-        s => s._id === id
+            document.getElementById(
+
+                "newLatitude"
+
+            ).value =
+
+            position.coords.latitude.toFixed(6);
+
+            document.getElementById(
+
+                "newLongitude"
+
+            ).value =
+
+            position.coords.longitude.toFixed(6);
+
+            showSuccess(
+
+                "Location updated."
+
+            );
+
+        },
+
+        function () {
+
+            showError(
+
+                "Unable to detect location."
+
+            );
+
+        }
+
     );
 
-    if(!shipment){
-        showError("Shipment not found.");
-        return;
+}
+
+// ======================================================
+// END PART 6
+// ======================================================
+// ======================================================
+// PART 7
+// RECEIPT SYSTEM
+// ======================================================
+
+// ======================================================
+// PREVIEW RECEIPT
+// ======================================================
+
+function previewReceipt(id = null) {
+
+    let shipment;
+
+    if (id) {
+
+        shipment = shipments.find(
+
+            s => s._id === id
+
+        );
+
+    } else {
+
+        shipment = {
+
+            trackingNumber:
+            generateTrackingNumber(),
+
+            senderName:
+            document.getElementById("senderName").value,
+
+            senderPhone:
+            document.getElementById("senderPhone").value,
+
+            senderEmail:
+            document.getElementById("senderEmail").value,
+
+            receiverName:
+            document.getElementById("receiverName").value,
+
+            receiverPhone:
+            document.getElementById("receiverPhone").value,
+
+            receiverEmail:
+            document.getElementById("receiverEmail").value,
+
+            receiverAddress:
+            document.getElementById("receiverAddress").value,
+
+            shipment:
+            document.getElementById("shipment").value,
+
+            origin:
+            document.getElementById("origin").value,
+
+            destination:
+            document.getElementById("destination").value,
+
+            status:
+            document.getElementById("status").value,
+
+            expectedDelivery:
+            document.getElementById("expectedDelivery").value
+
+        };
+
+    }
+
+    if (!shipment) {
+
+        return showError(
+
+            "Shipment not found."
+
+        );
+
     }
 
     selectedShipment = shipment;
 
-    const progress =
-        shipment.progress ||
-        calculateProgress(
-            shipment.currentLatitude || 0,
-            shipment.currentLongitude || 0,
-            shipment.destinationLatitude || 0,
-            shipment.destinationLongitude || 0
-        );
-
     document.getElementById(
-        "shipmentDetails"
+
+        "receiptContent"
+
     ).innerHTML = `
 
-    <div class="detail-card">
-        <h4>Tracking Number</h4>
-        <p>${shipment.trackingNumber}</p>
-    </div>
+<table class="receipt-table">
 
-    <div class="detail-card">
-        <h4>Sender</h4>
-        <p>${shipment.sender}</p>
-    </div>
+<tr>
 
-    <div class="detail-card">
-        <h4>Receiver</h4>
-        <p>${shipment.receiver}</p>
-    </div>
+<td><strong>Tracking Number</strong></td>
 
-    <div class="detail-card">
-        <h4>Shipment</h4>
-        <p>${shipment.shipment}</p>
-    </div>
+<td>${shipment.trackingNumber}</td>
 
-    <div class="detail-card">
-        <h4>Origin</h4>
-        <p>${shipment.origin}</p>
-    </div>
+</tr>
 
-    <div class="detail-card">
-        <h4>Current Location</h4>
-        <p>${shipment.currentLocation}</p>
-    </div>
+<tr>
 
-    <div class="detail-card">
-        <h4>Destination</h4>
-        <p>${shipment.destination}</p>
-    </div>
+<td><strong>Sender</strong></td>
 
-    <div class="detail-card">
-        <h4>Status</h4>
-        <p>${shipment.status}</p>
-    </div>
+<td>${shipment.senderName}</td>
 
-    <div class="detail-card">
-        <h4>Expected Delivery</h4>
-        <p>
-        ${
-            shipment.expectedDelivery
-            ?
-            new Date(
-                shipment.expectedDelivery
-            ).toLocaleDateString()
-            :
-            "-"
-        }
-        </p>
-    </div>
+</tr>
 
-    <div class="detail-card">
-        <h4>Progress</h4>
-        <p>${progress}%</p>
-    </div>
+<tr>
 
-    <div class="detail-card">
-        <h4>Estimated Arrival</h4>
-        <p>${calculateETA(progress)}</p>
-    </div>
+<td><strong>Sender Phone</strong></td>
 
-    <div style="grid-column:1/-1;margin-top:20px;">
+<td>${shipment.senderPhone}</td>
 
-        <h4>Shipment Progress</h4>
+</tr>
 
-        <div style="
-            width:100%;
-            height:18px;
-            background:#e5e5e5;
-            border-radius:20px;
-            overflow:hidden;
-            margin-top:10px;
-        ">
+<tr>
 
-            <div style="
-                width:${progress}%;
-                height:100%;
-                background:#0d6efd;
-                transition:.5s;
-            ">
-            </div>
+<td><strong>Sender Email</strong></td>
 
-        </div>
+<td>${shipment.senderEmail}</td>
 
-        <p style="
-            margin-top:10px;
-            font-weight:bold;
-            color:#0d6efd;
-        ">
-            ${progress}% Completed
-        </p>
+</tr>
 
-    </div>
+<tr>
 
-    <div id="liveRouteContainer"
-         style="grid-column:1/-1;height:350px;margin-top:20px;">
-    </div>
+<td><strong>Receiver</strong></td>
 
-    <div
-        id="routeHistory"
-        style="grid-column:1/-1;margin-top:20px;">
-    </div>
+<td>${shipment.receiverName}</td>
 
-    `;
+</tr>
+
+<tr>
+
+<td><strong>Receiver Phone</strong></td>
+
+<td>${shipment.receiverPhone}</td>
+
+</tr>
+
+<tr>
+
+<td><strong>Receiver Email</strong></td>
+
+<td>${shipment.receiverEmail}</td>
+
+</tr>
+
+<tr>
+
+<td><strong>Receiver Address</strong></td>
+
+<td>${shipment.receiverAddress}</td>
+
+</tr>
+
+<tr>
+
+<td><strong>Shipment</strong></td>
+
+<td>${shipment.shipment}</td>
+
+</tr>
+
+<tr>
+
+<td><strong>Origin</strong></td>
+
+<td>${shipment.origin}</td>
+
+</tr>
+
+<tr>
+
+<td><strong>Destination</strong></td>
+
+<td>${shipment.destination}</td>
+
+</tr>
+
+<tr>
+
+<td><strong>Status</strong></td>
+
+<td>${shipment.status}</td>
+
+</tr>
+
+<tr>
+
+<td><strong>Expected Delivery</strong></td>
+
+<td>${formatDate(
+
+shipment.expectedDelivery
+
+)}</td>
+
+</tr>
+
+</table>
+
+<br>
+
+<div
+id="barcode"
+style="text-align:center;">
+</div>
+
+<br>
+
+<div
+id="qrcode"
+style="display:flex;
+justify-content:center;">
+</div>
+
+`;
 
     document.getElementById(
-        "shipmentModal"
+
+        "receiptModal"
+
     ).style.display = "flex";
 
-    setTimeout(function(){
-
-        loadShipmentRouteMap(shipment);
-
-        displayRouteHistory(shipment);
-
-        startTruckAnimation(shipment);
-
-    },300);
-
-}
-// ======================================================
-// LINKWORLD EXPRESS
-// DASHBOARD
-// PART 4C
-// LIVE ROUTE MAP + ROUTE HISTORY
-// ======================================================
-
-// ======================================================
-// LOAD SHIPMENT ROUTE MAP
-// ======================================================
-
-function loadShipmentRouteMap(shipment){
-
-    const container =
     document.getElementById(
-        "liveRouteContainer"
-    );
 
-    if(!container) return;
+        "barcode"
 
-    container.innerHTML = `
-        <div id="liveShipmentMap"
-        style="
-        width:100%;
-        height:350px;
-        border-radius:12px;
-        overflow:hidden;
-        ">
-        </div>
-    `;
+    ).innerHTML =
 
-    const liveMap = L.map(
-        "liveShipmentMap"
-    );
+    `<svg id="barcodeSVG"></svg>`;
 
-    L.tileLayer(
-        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-        {
-            attribution:"© OpenStreetMap"
-        }
-    ).addTo(liveMap);
+    JsBarcode(
 
-    const current = [
+        "#barcodeSVG",
 
-        shipment.currentLatitude || 0,
-
-        shipment.currentLongitude || 0
-
-    ];
-
-    const destination = [
-
-        shipment.destinationLatitude || 0,
-
-        shipment.destinationLongitude || 0
-
-    ];
-
-    const currentMarker =
-
-    L.marker(current)
-
-    .addTo(liveMap)
-
-    .bindPopup("Current Location");
-
-    const destinationMarker =
-
-    L.marker(destination)
-
-    .addTo(liveMap)
-
-    .bindPopup("Destination");
-
-    L.polyline(
-
-        [
-
-            current,
-
-            destination
-
-        ],
+        shipment.trackingNumber,
 
         {
 
-            color:"#0d6efd",
+            format: "CODE128",
 
-            weight:5
+            width: 2,
 
-        }
+            height: 60,
 
-    ).addTo(liveMap);
-
-    liveMap.fitBounds(
-
-        [
-
-            current,
-
-            destination
-
-        ],
-
-        {
-
-            padding:[40,40]
+            displayValue: true
 
         }
 
     );
-
-}
-
-
-
-// ======================================================
-// DISPLAY ROUTE HISTORY
-// ======================================================
-
-function displayRouteHistory(shipment){
-
-    const container =
 
     document.getElementById(
 
-        "routeHistory"
+        "qrcode"
 
-    );
+    ).innerHTML = "";
 
-    if(!container) return;
+    new QRCode(
 
-    let history =
+        document.getElementById(
 
-    shipment.history || [];
+            "qrcode"
 
-    if(history.length===0){
-
-        history=[
-
-            {
-
-                location:
-
-                shipment.origin,
-
-                status:
-
-                "Shipment Created",
-
-                date:
-
-                new Date()
-
-            }
-
-        ];
-
-    }
-
-    let html =
-
-    `
-
-    <h3 style="margin-bottom:15px;">
-
-    Route History
-
-    </h3>
-
-    `;
-
-    history.forEach(item=>{
-
-        html += `
-
-        <div style="
-
-        border-left:4px solid #0d6efd;
-
-        padding-left:15px;
-
-        margin-bottom:18px;
-
-        ">
-
-            <strong>
-
-            ${item.location}
-
-            </strong>
-
-            <br>
-
-            ${item.status}
-
-            <br>
-
-            <small>
-
-            ${new Date(
-
-                item.date
-
-            ).toLocaleString()}
-
-            </small>
-
-        </div>
-
-        `;
-
-    });
-
-    container.innerHTML = html;
-
-}
-
-
-
-// ======================================================
-// ADD ROUTE HISTORY
-// ======================================================
-
-function addRouteHistory(
-
-    shipment,
-
-    location,
-
-    status,
-
-    latitude,
-
-    longitude
-
-){
-
-    if(!shipment.history){
-
-        shipment.history=[];
-
-    }
-
-    shipment.history.push({
-
-        location,
-
-        status,
-
-        latitude,
-
-        longitude,
-
-        date:new Date()
-
-    });
-
-}
-
-
-
-// ======================================================
-// REFRESH VIEW
-// ======================================================
-
-function refreshShipmentView(){
-
-    if(!selectedShipment) return;
-
-    if(typeof selectedShipment==="object"){
-
-        viewShipment(selectedShipment._id);
-
-        return;
-
-    }
-
-    viewShipment(selectedShipment);
-
-}
-
-
-
-// ======================================================
-// END PART 4C
-// ======================================================
-// ======================================================
-// LINKWORLD EXPRESS
-// DASHBOARD
-// PART 5A
-// LIVE TRUCK ANIMATION ENGINE
-// ======================================================
-
-// ======================================================
-// GLOBAL TRUCK VARIABLES
-// ======================================================
-
-let truckMarker = null;
-let truckRoute = [];
-let truckIndex = 0;
-let truckTimer = null;
-
-// ======================================================
-// GENERATE ROUTE POINTS
-// ======================================================
-
-function generateRoutePoints(startLat, startLng, endLat, endLng) {
-
-    const points = [];
-
-    const totalSteps = 120;
-
-    for (let i = 0; i <= totalSteps; i++) {
-
-        const percent = i / totalSteps;
-
-        const lat =
-            startLat + ((endLat - startLat) * percent);
-
-        const lng =
-            startLng + ((endLng - startLng) * percent);
-
-        points.push([lat, lng]);
-
-    }
-
-    return points;
-
-}
-
-// ======================================================
-// START TRUCK ANIMATION
-// ======================================================
-
-function startTruckAnimation(shipment) {
-
-    if (!shipment) return;
-
-    if (
-        !shipment.currentLatitude ||
-        !shipment.currentLongitude ||
-        !shipment.destinationLatitude ||
-        !shipment.destinationLongitude
-    ) {
-
-        showError("Shipment coordinates are missing.");
-
-        return;
-
-    }
-
-    if (truckTimer) {
-
-        clearInterval(truckTimer);
-
-    }
-
-    truckRoute = generateRoutePoints(
-
-        Number(shipment.currentLatitude),
-        Number(shipment.currentLongitude),
-
-        Number(shipment.destinationLatitude),
-        Number(shipment.destinationLongitude)
-
-    );
-
-    truckIndex = 0;
-
-    if (truckMarker && map) {
-
-        map.removeLayer(truckMarker);
-
-    }
-
-    const truckIcon = L.divIcon({
-
-        className: "",
-
-        html: `
-
-        <i
-        class="fa-solid fa-truck-fast"
-        style="
-            color:#0d6efd;
-            font-size:30px;
-            text-shadow:0 0 10px rgba(0,0,0,.35);
-        ">
-        </i>
-
-        `,
-
-        iconSize: [30,30]
-
-    });
-
-    truckMarker = L.marker(
-
-        truckRoute[0],
+        ),
 
         {
 
-            icon: truckIcon
+            text: shipment.trackingNumber,
+
+            width: 140,
+
+            height: 140
 
         }
 
-    ).addTo(map);
-
-    truckTimer = setInterval(
-
-        moveTruck,
-
-        800
-
     );
 
 }
 
 // ======================================================
-// MOVE TRUCK
+// CLOSE RECEIPT
 // ======================================================
 
-function moveTruck() {
+function closeReceiptModal() {
 
-    if (!truckMarker) return;
+    document.getElementById(
 
-    truckIndex++;
+        "receiptModal"
 
-    if (truckIndex >= truckRoute.length) {
-
-        clearInterval(truckTimer);
-
-        truckTimer = null;
-
-        return;
-
-    }
-
-    truckMarker.setLatLng(
-
-        truckRoute[truckIndex]
-
-    );
+    ).style.display = "none";
 
 }
 
 // ======================================================
-// STOP TRUCK
+// PRINT RECEIPT
 // ======================================================
 
-function stopTruckAnimation() {
+function printReceipt() {
 
-    if (truckTimer) {
+    const printWindow =
 
-        clearInterval(truckTimer);
+    window.open("", "PRINT");
 
-        truckTimer = null;
+    printWindow.document.write(`
 
-    }
+<html>
+
+<head>
+
+<title>
+
+Shipment Receipt
+
+</title>
+
+<style>
+
+body{
+
+font-family:Poppins,sans-serif;
+
+padding:40px;
+
+}
+
+table{
+
+width:100%;
+
+border-collapse:collapse;
+
+}
+
+td{
+
+border:1px solid #ddd;
+
+padding:10px;
+
+}
+
+h2{
+
+color:#0d6efd;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+${document.getElementById(
+
+"receiptPreview"
+
+).innerHTML}
+
+</body>
+
+</html>
+
+`);
+
+    printWindow.document.close();
+
+    printWindow.focus();
+
+    printWindow.print();
+
+    printWindow.close();
 
 }
 
 // ======================================================
-// RESET TRUCK
+// OPEN RECEIPT PAGE
 // ======================================================
 
-function resetTruckAnimation() {
+function openReceiptPage() {
 
-    stopTruckAnimation();
+    if (!selectedShipment) {
 
-    if (truckMarker && map) {
+        return showError(
 
-        map.removeLayer(truckMarker);
-
-        truckMarker = null;
-
-    }
-
-    truckRoute = [];
-
-    truckIndex = 0;
-
-}
-
-// ======================================================
-// END PART 5A
-// ======================================================
-// ======================================================
-// LINKWORLD EXPRESS
-// DASHBOARD
-// PART 5B
-// LIVE SYNCHRONIZATION
-// ======================================================
-
-
-// ======================================================
-// UPDATE SHIPMENT PROGRESS
-// ======================================================
-
-function updateShipmentProgress(shipment){
-
-    if(!shipment) return;
-
-    const progress = calculateProgress(
-
-        Number(shipment.currentLatitude),
-
-        Number(shipment.currentLongitude),
-
-        Number(shipment.destinationLatitude),
-
-        Number(shipment.destinationLongitude)
-
-    );
-
-    shipment.progress = progress;
-
-    return progress;
-
-}
-
-
-// ======================================================
-// AUTO UPDATE STATUS
-// ======================================================
-
-function autoUpdateStatus(shipment){
-
-    if(!shipment) return;
-
-    const progress = shipment.progress || 0;
-
-    if(progress >= 100){
-
-        shipment.status = "Delivered";
-
-    }
-
-    else if(progress >= 90){
-
-        shipment.status = "Out for Delivery";
-
-    }
-
-    else if(progress >= 70){
-
-        shipment.status = "Arrived at Destination";
-
-    }
-
-    else if(progress >= 50){
-
-        shipment.status = "Customs Clearance";
-
-    }
-
-    else if(progress >= 25){
-
-        shipment.status = "In Transit";
-
-    }
-
-    else if(progress >= 10){
-
-        shipment.status = "Picked Up";
-
-    }
-
-    else{
-
-        shipment.status = "Shipment Created";
-
-    }
-
-}
-
-
-// ======================================================
-// SAVE ROUTE HISTORY
-// ======================================================
-
-function appendRouteHistory(shipment){
-
-    if(!shipment) return;
-
-    if(!shipment.route){
-
-        shipment.route = [];
-
-    }
-
-    shipment.route.push({
-
-        location: shipment.currentLocation,
-
-        latitude: shipment.currentLatitude,
-
-        longitude: shipment.currentLongitude,
-
-        status: shipment.status,
-
-        time: new Date().toISOString()
-
-    });
-
-}
-
-
-// ======================================================
-// SYNC TRACKING PAGE
-// ======================================================
-
-function syncTrackingPage(){
-
-    localStorage.setItem(
-
-        "shipments",
-
-        JSON.stringify(shipments)
-
-    );
-
-}
-
-
-// ======================================================
-// UPDATE TRUCK POSITION
-// ======================================================
-
-function synchronizeTruck(shipment){
-
-    if(!shipment) return;
-
-    if(truckIndex >= truckRoute.length){
-
-        return;
-
-    }
-
-    shipment.currentLatitude =
-
-        truckRoute[truckIndex][0];
-
-    shipment.currentLongitude =
-
-        truckRoute[truckIndex][1];
-
-    updateShipmentProgress(shipment);
-
-    autoUpdateStatus(shipment);
-
-    appendRouteHistory(shipment);
-
-    syncTrackingPage();
-
-}
-
-
-// ======================================================
-// SAVE LIVE POSITION TO SERVER
-// ======================================================
-
-async function saveTruckPosition(shipment){
-
-    if(!shipment) return;
-
-    try{
-
-        await axios.put(
-
-            `${API_URL}/${shipment._id}`,
-
-            {
-
-                currentLatitude: shipment.currentLatitude,
-
-                currentLongitude: shipment.currentLongitude,
-
-                currentLocation: shipment.currentLocation,
-
-                progress: shipment.progress,
-
-                status: shipment.status,
-
-                route: shipment.route
-
-            }
+            "Please select a shipment."
 
         );
 
     }
 
-    catch(error){
+    window.open(
 
-        console.error(
+        `receipt.html?tracking=${selectedShipment.trackingNumber}`,
 
-            "Unable to save live position.",
-
-            error
-
-        );
-
-    }
-
-}
-
-
-// ======================================================
-// OVERRIDE TRUCK MOVEMENT
-// ======================================================
-
-const originalMoveTruck = moveTruck;
-
-moveTruck = async function(){
-
-    originalMoveTruck();
-
-    if(!selectedShipment) return;
-
-    const shipment = shipments.find(
-
-        s => s._id === selectedShipment ||
-
-             s === selectedShipment
+        "_blank"
 
     );
 
-    if(!shipment) return;
-
-    synchronizeTruck(shipment);
-
-    await saveTruckPosition(shipment);
-
-};
-
+}
 
 // ======================================================
-// END PART 5B
-// ======================================================
-// ======================================================
-// LINKWORLD EXPRESS
-// DASHBOARD
-// PART 5C
-// DELIVERY COMPLETION & FINAL INITIALIZATION
+// RECEIPT HISTORY
 // ======================================================
 
-
-// ======================================================
-// DELIVERY SUCCESS ALERT
-// ======================================================
-
-function celebrateDelivery(shipment){
+function showReceiptHistory() {
 
     Swal.fire({
 
-        icon: "success",
+        icon: "info",
 
-        title: "Shipment Delivered",
+        title: "Receipt History",
 
-        html: `
+        text:
 
-        <h3>${shipment.trackingNumber}</h3>
-
-        <br>
-
-        <b>The shipment has successfully reached its destination.</b>
-
-        `,
-
-        confirmButtonText: "OK"
+        "Receipt history will be available in a future update."
 
     });
 
 }
 
-
 // ======================================================
-// COMPLETE DELIVERY
+// END PART 7
 // ======================================================
-
-async function completeDelivery(shipment){
-
-    if(!shipment) return;
-
-    shipment.progress = 100;
-
-    shipment.status = "Delivered";
-
-    shipment.currentLatitude = shipment.destinationLatitude;
-
-    shipment.currentLongitude = shipment.destinationLongitude;
-
-    shipment.currentLocation = shipment.destination;
-
-    appendRouteHistory(shipment);
-
-    syncTrackingPage();
-
-    try{
-
-        await axios.put(
-
-            `${API_URL}/${shipment._id}`,
-
-            {
-
-                currentLocation: shipment.currentLocation,
-
-                currentLatitude: shipment.currentLatitude,
-
-                currentLongitude: shipment.currentLongitude,
-
-                status: shipment.status,
-
-                progress: shipment.progress,
-
-                route: shipment.route
-
-            }
-
-        );
-
-    }
-
-    catch(error){
-
-        console.error(error);
-
-    }
-
-    celebrateDelivery(shipment);
-
-    renderShipments();
-
-}
-
-
 // ======================================================
-// WATCH TRUCK MOVEMENT
+// PART 8
+// FINAL UTILITIES
 // ======================================================
 
-const previousMoveTruck = moveTruck;
+// ======================================================
+// CLOSE MODALS WHEN CLICKING OUTSIDE
+// ======================================================
 
-moveTruck = async function(){
+window.onclick = function (event) {
 
-    previousMoveTruck();
+    const modals = [
 
-    if(!selectedShipment) return;
+        "shipmentModal",
 
-    const shipment = shipments.find(
+        "mapModal",
 
-        s => s._id === selectedShipment ||
+        "receiptModal",
 
-             s === selectedShipment
+        "deleteModal",
 
-    );
+        "locationModal"
 
-    if(!shipment) return;
+    ];
 
-    if(truckIndex >= truckRoute.length){
+    modals.forEach(id => {
 
-        stopTruckAnimation();
+        const modal = document.getElementById(id);
 
-        await completeDelivery(shipment);
+        if (
 
-    }
+            modal &&
+
+            event.target === modal
+
+        ) {
+
+            modal.style.display = "none";
+
+        }
+
+    });
 
 };
 
-
 // ======================================================
-// AUTO SAVE LOCAL STORAGE
-// ======================================================
-
-setInterval(function(){
-
-    syncTrackingPage();
-
-},3000);
-
-
-// ======================================================
-// REFRESH TRACKING PAGE
+// ESC KEY CLOSE
 // ======================================================
 
-window.addEventListener(
+document.addEventListener(
 
-    "storage",
+    "keydown",
 
-    function(){
+    function (e) {
 
-        syncTrackingPage();
+        if (e.key !== "Escape") return;
+
+        closeShipmentModal();
+
+        closeMapModal();
+
+        closeReceiptModal();
+
+        closeDeleteModal();
+
+        closeLocationModal();
 
     }
 
 );
 
+// ======================================================
+// AUTO SCROLL TO TOP
+// ======================================================
+
+function scrollTopSmooth() {
+
+    window.scrollTo({
+
+        top: 0,
+
+        behavior: "smooth"
+
+    });
+
+}
 
 // ======================================================
-// DASHBOARD READY
+// RESET SELECTIONS
 // ======================================================
 
-window.addEventListener(
+function resetSelections() {
 
-    "load",
+    selectedShipment = null;
 
-    function(){
+    selectedShipmentId = null;
 
-        console.log(
+    deleteShipmentId = null;
 
-            "✅ LinkWorld Express Dashboard Ready"
-
-        );
-
-        syncTrackingPage();
-
-        updateLastRefresh();
-
-    }
-
-);
-
+}
 
 // ======================================================
-// CLEANUP BEFORE EXIT
+// PAGE EXIT
 // ======================================================
 
 window.addEventListener(
 
     "beforeunload",
 
-    function(){
+    function () {
 
-        stopTruckAnimation();
+        if (adminMap) {
+
+            adminMap.remove();
+
+            adminMap = null;
+
+        }
 
     }
 
 );
 
-
 // ======================================================
-// FINAL SUCCESS MESSAGE
+// DASHBOARD READY
 // ======================================================
 
 console.log(
 
-    "🚚 Live Tracking Engine Loaded Successfully"
+    "✅ LinkWorld Express Dashboard Ready"
 
 );
 
-
 // ======================================================
-// END OF dashboard.js
+// END OF DASHBOARD.JS
 // ======================================================
