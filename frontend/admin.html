@@ -1,261 +1,509 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
 
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
 
-    <title>LinkWorld Express | Administrator Login</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <meta name="description" content="LinkWorld Express Secure Administrator Portal">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
+<title>
+LinkWorld Express | Administrator Login
+</title>
 
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<meta name="description"
+content="Secure LinkWorld Express Administrator Portal">
 
-    <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 
-    <link rel="stylesheet" href="css/admin.css">
+
+<!-- GOOGLE FONT -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+
+
+
+
+<!-- FONT AWESOME -->
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+
+
+
+
+
+<!-- ADMIN LOGIN CSS -->
+
+<link rel="stylesheet"
+href="css/admin.css">
+
 
 </head>
 
+
+
+
 <body>
 
-    <!-- ========================================================= -->
-    <!-- Animated Background -->
-    <!-- ========================================================= -->
 
-    <div class="background">
 
-        <div class="overlay"></div>
 
-        <div class="floating-circle circle1"></div>
-        <div class="floating-circle circle2"></div>
-        <div class="floating-circle circle3"></div>
-        <div class="floating-circle circle4"></div>
 
-    </div>
+<!-- BACKGROUND -->
 
-    <!-- ========================================================= -->
-    <!-- Login Container -->
-    <!-- ========================================================= -->
+<div class="background">
 
-    <main class="login-container">
 
-        <section class="login-card">
+<div class="overlay"></div>
 
-            <div class="logo-area">
 
-                <img src="images/plane.web.png"
-                    alt="LinkWorld Express">
+<div class="floating-circle circle1"></div>
 
-                <h1>LinkWorld Express</h1>
+<div class="floating-circle circle2"></div>
 
-                <p>Global Logistics Administration</p>
+<div class="floating-circle circle3"></div>
 
-            </div>
 
-            <div class="login-form">
+</div>
 
-                <h2>
 
-                    <i class="fa-solid fa-user-shield"></i>
 
-                    Administrator Login
 
-                </h2>
 
-                <div id="errorMessage" class="error-message"></div>
 
-                <form id="loginForm">
 
-                    <!-- Email -->
 
-                    <div class="input-group">
+<!-- LOGIN CONTAINER -->
 
-                        <label>
+<main class="login-container">
 
-                            <i class="fa-solid fa-envelope"></i>
 
-                            Email Address
 
-                        </label>
+<section class="login-card">
 
-                        <input
 
-                            type="email"
 
-                            id="email"
 
-                            placeholder="Enter administrator email"
 
-                            autocomplete="email"
 
-                            required
+<!-- LOGO -->
 
-                        >
+<div class="logo-area">
 
-                    </div>
 
-                    <!-- Password -->
+<img src="images/plane.web.png"
+alt="LinkWorld Express">
 
-                    <div class="input-group">
 
-                        <label>
 
-                            <i class="fa-solid fa-lock"></i>
+<h1>
 
-                            Password
+LinkWorld Express
 
-                        </label>
+</h1>
 
-                        <div class="password-box">
 
-                            <input
+<p>
 
-                                type="password"
+Global Logistics Administration
 
-                                id="password"
+</p>
 
-                                placeholder="Enter password"
 
-                                autocomplete="current-password"
 
-                                required
+</div>
 
-                            >
 
-                            <button
 
-                                type="button"
 
-                                id="togglePassword"
 
-                                class="toggle-password"
 
-                            >
 
-                                <i class="fa-solid fa-eye"></i>
 
-                            </button>
 
-                        </div>
+<!-- LOGIN FORM -->
 
-                    </div>
+<div class="login-form">
 
-                    <button
 
-                        type="submit"
 
-                        id="loginButton"
+<h2>
 
-                        class="login-btn"
+<i class="fa-solid fa-user-shield"></i>
 
-                    >
+Administrator Login
 
-                        <i class="fa-solid fa-right-to-bracket"></i>
+</h2>
 
-                        Login
 
-                    </button>
 
-                </form>
 
-            </div>
 
-        </section>
 
-    </main>
 
-    <!-- ========================================================= -->
-    <!-- Loading Screen -->
-    <!-- ========================================================= -->
+<div id="errorMessage"
+class="error-message">
 
-    <section id="loadingScreen" class="loading-screen">
+</div>
 
-        <div class="loading-card">
 
-            <img src="images/plane.web.png"
-                alt="Logo">
 
-            <h2>LinkWorld Express</h2>
 
-            <p id="loadingText">
 
-                Connecting to secure server...
 
-            </p>
 
-            <div class="progress">
 
-                <div
-                    id="progressBar"
-                    class="progress-bar">
-                </div>
+<form id="loginForm">
 
-            </div>
 
-            <span id="progressPercent">
 
-                0%
 
-            </span>
 
-        </div>
 
-    </section>
-        <!-- ========================================================= -->
-    <!-- Toast Notification -->
-    <!-- ========================================================= -->
+<div class="input-group">
 
-    <div id="toast" class="toast">
 
-        <i id="toastIcon" class="fa-solid fa-circle-check"></i>
+<label>
 
-        <span id="toastMessage">
-            Login Successful
-        </span>
+<i class="fa-solid fa-envelope"></i>
 
-    </div>
+Email Address
 
-    <!-- ========================================================= -->
-    <!-- Footer -->
-    <!-- ========================================================= -->
+</label>
 
-    <footer class="login-footer">
 
-        <p>
 
-            <i class="fa-regular fa-copyright"></i>
+<input
 
-            <span id="year"></span>
+type="email"
 
-            LinkWorld Express.
+id="email"
 
-            All Rights Reserved.
+placeholder="Enter administrator email"
 
-        </p>
+autocomplete="email"
 
-    </footer>
+required
 
-    <!-- ========================================================= -->
-    <!-- JavaScript -->
-    <!-- ========================================================= -->
+>
 
-    <script>
 
-        // Current Year
-        document.getElementById("year").textContent =
-            new Date().getFullYear();
 
-    </script>
+</div>
 
-    <script src="js/login.js"></script>
+
+
+
+
+
+
+
+
+<div class="input-group">
+
+
+<label>
+
+
+<i class="fa-solid fa-lock"></i>
+
+
+Password
+
+
+</label>
+
+
+
+
+
+
+<div class="password-box">
+
+
+
+<input
+
+type="password"
+
+id="password"
+
+placeholder="Enter password"
+
+autocomplete="current-password"
+
+required
+
+>
+
+
+
+
+<button
+
+type="button"
+
+id="togglePassword"
+
+class="toggle-password"
+
+>
+
+
+<i class="fa-solid fa-eye"></i>
+
+
+</button>
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<button
+
+type="submit"
+
+id="loginButton"
+
+class="login-btn"
+
+>
+
+
+<i class="fa-solid fa-right-to-bracket"></i>
+
+
+Login
+
+
+</button>
+
+
+
+
+
+</form>
+
+
+
+
+</div>
+
+
+
+
+
+</section>
+
+
+
+
+</main>
+
+
+
+
+
+
+
+
+
+<!-- LOADING SCREEN -->
+
+<section
+
+id="loadingScreen"
+
+class="loading-screen"
+
+>
+
+
+
+<div class="loading-card">
+
+
+
+<img src="images/plane.web.png"
+alt="LinkWorld Express">
+
+
+
+<h2>
+
+LinkWorld Express
+
+</h2>
+
+
+
+
+<p id="loadingText">
+
+Connecting to secure server...
+
+</p>
+
+
+
+
+
+
+
+<div class="progress">
+
+
+
+<div
+
+id="progressBar"
+
+class="progress-bar">
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+<span id="progressPercent">
+
+0%
+
+</span>
+
+
+
+
+
+</div>
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- TOAST -->
+
+<div id="toast"
+class="toast">
+
+
+<i id="toastIcon"
+class="fa-solid fa-circle-check">
+
+</i>
+
+
+
+<span id="toastMessage">
+
+Login Successful
+
+</span>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+<!-- FOOTER -->
+
+
+<footer class="login-footer">
+
+
+<p>
+
+
+<i class="fa-regular fa-copyright"></i>
+
+
+<span id="year"></span>
+
+
+LinkWorld Express.
+
+
+All Rights Reserved.
+
+
+
+</p>
+
+
+
+</footer>
+
+
+
+
+
+
+
+
+
+<script>
+
+
+document.getElementById("year").textContent =
+
+new Date().getFullYear();
+
+
+</script>
+
+
+
+
+<!-- LOGIN JS -->
+
+<script src="js/login.js"></script>
+
+
+
 
 </body>
 
+
 </html>
+```

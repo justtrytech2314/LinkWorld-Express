@@ -1,2254 +1,3681 @@
-// ======================================================
-// LINKWORLD EXPRESS
-// PROFESSIONAL DASHBOARD
-// PART 1
-// ======================================================
+/* ======================================================
+LINKWORLD EXPRESS
+ADMIN DASHBOARD JS
+PART 1
+AUTH + API + INITIALIZATION + LOAD SHIPMENTS
+MATCHES DASHBOARD.HTML IDS
+====================================================== */
+
 
 "use strict";
 
-// ======================================================
-// API
-// ======================================================
 
-const API_BASE =
-"https://linkworld-express2-1.onrender.com";
-
-const API = {
-
-    login:
-    `${API_BASE}/api/auth/login`,
-
-    shipments:
-    `${API_BASE}/api/shipments`
-
-};
 
 // ======================================================
-// TOKEN
+// API CONFIGURATION
 // ======================================================
 
-const TOKEN =
-localStorage.getItem("adminToken");
 
-if (!TOKEN) {
+const API_URL = "http://localhost:5000/api";
 
-    window.location.href = "admin.html";
 
-}
 
-// ======================================================
-// AXIOS
-// ======================================================
-
-axios.defaults.baseURL = API_BASE;
-
-axios.defaults.headers.common.Authorization =
-`Bearer ${TOKEN}`;
-
-axios.defaults.timeout = 30000;
 
 // ======================================================
 // GLOBAL VARIABLES
 // ======================================================
 
+
 let shipments = [];
 
 let selectedShipment = null;
 
-let selectedShipmentId = null;
+let adminToken = null;
 
-let deleteShipmentId = null;
 
-// ======================================================
-// MAP VARIABLES
-// ======================================================
 
-let adminMap = null;
-
-let mapMarker = null;
-
-let mapMode = "current";
 
 // ======================================================
-// ELEMENTS
+// CHECK ADMIN LOGIN
 // ======================================================
 
-const shipmentTable =
-document.getElementById("shipmentTable");
 
-const shipmentCount =
-document.getElementById("shipmentCount");
+adminToken = localStorage.getItem(
+"adminToken"
+);
 
-const transitCount =
-document.getElementById("transitCount");
 
-const deliveredCount =
-document.getElementById("deliveredCount");
 
-const pendingCount =
-document.getElementById("pendingCount");
+if(!adminToken){
 
-const loadingOverlay =
-document.getElementById("loadingOverlay");
 
-const loadingText =
-document.getElementById("loadingText");
+window.location.href =
+"admin-login.html";
 
-// ======================================================
-// LOADING
-// ======================================================
-
-function showLoading(text = "Loading...") {
-
-    if (!loadingOverlay) return;
-
-    loadingOverlay.style.display = "flex";
-
-    if (loadingText) {
-
-        loadingText.innerHTML = text;
-
-    }
 
 }
 
-function hideLoading() {
 
-    if (!loadingOverlay) return;
 
-    loadingOverlay.style.display = "none";
+
+
+
+// ======================================================
+// AUTH HEADERS
+// ======================================================
+
+
+function getHeaders(){
+
+
+return {
+
+
+"Content-Type":
+"application/json",
+
+
+"Authorization":
+`Bearer ${adminToken}`
+
+
+};
+
 
 }
 
+
+
+
+
+
 // ======================================================
-// SUCCESS
+// DOM READY
 // ======================================================
 
-function showSuccess(message) {
 
-    Swal.fire({
+document.addEventListener(
+"DOMContentLoaded",
+()=>{
 
-        icon: "success",
 
-        title: "Success",
+initializeDashboard();
 
-        text: message,
 
-        timer: 1800,
+});
 
-        showConfirmButton: false
 
-    });
+
+
+
+
+
+// ======================================================
+// INITIALIZE DASHBOARD
+// ======================================================
+
+
+async function initializeDashboard(){
+
+
+
+try{
+
+
+await loadShipments();
+
+
+updateStats();
+
+
+setupDashboardEvents();
+
+
 
 }
 
-// ======================================================
-// ERROR
-// ======================================================
+catch(error){
 
-function showError(message) {
 
-    Swal.fire({
 
-        icon: "error",
+console.error(
+"Dashboard Error:",
+error
+);
 
-        title: "Error",
 
-        text: message
 
-    });
+Swal.fire({
+
+icon:"error",
+
+title:"Dashboard Error",
+
+text:error.message
+
+});
+
 
 }
+
+
+
+}
+
+
+
+
+
+
+
+// ======================================================
+// LOAD ALL SHIPMENTS
+// GET /api/shipments
+// ======================================================
+
+
+async function loadShipments(){
+
+
+
+const response =
+await fetch(
+
+`${API_URL}/shipments`,
+
+{
+
+
+method:"GET",
+
+
+headers:getHeaders()
+
+
+}
+
+
+);
+
+
+
+
+
+
+
+const data =
+await response.json();
+
+
+
+
+
+
+
+
+if(!data.success){
+
+
+throw new Error(
+
+data.message ||
+"Unable to load shipments"
+
+);
+
+
+}
+
+
+
+
+
+
+
+shipments =
+data.shipments || [];
+
+
+
+
+
+
+renderShipments();
+
+
+
+}
+
+
+
+
+
+
+
+
+// ======================================================
+// UPDATE DASHBOARD STATISTICS
+// ======================================================
+
+
+function updateStats(){
+
+
+
+const total =
+document.getElementById(
+"totalShipments"
+);
+
+
+
+const transit =
+document.getElementById(
+"transitShipments"
+);
+
+
+
+const delivered =
+document.getElementById(
+"deliveredShipments"
+);
+
+
+
+const pending =
+document.getElementById(
+"pendingShipments"
+);
+
+
+
+
+
+
+
+
+if(total)
+
+total.textContent =
+shipments.length;
+
+
+
+
+
+
+
+
+
+if(transit)
+
+
+transit.textContent =
+
+shipments.filter(
+
+shipment =>
+
+shipment.status === "In Transit"
+
+||
+
+shipment.status === "Picked Up"
+
+
+).length;
+
+
+
+
+
+
+
+
+
+if(delivered)
+
+
+delivered.textContent =
+
+shipments.filter(
+
+shipment =>
+
+shipment.status === "Delivered"
+
+
+).length;
+
+
+
+
+
+
+
+
+
+if(pending)
+
+
+pending.textContent =
+
+shipments.filter(
+
+shipment =>
+
+shipment.status === "Created"
+
+
+).length;
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+// ======================================================
+// DASHBOARD EVENTS
+// ======================================================
+
+
+function setupDashboardEvents(){
+
+
+
+const form =
+document.getElementById(
+"shipmentForm"
+);
+
+
+
+
+if(form){
+
+
+form.addEventListener(
+
+"submit",
+
+createShipment
+
+);
+
+
+}
+
+
+
+
+
+
+const logout =
+document.getElementById(
+"logoutBtn"
+);
+
+
+
+if(logout){
+
+
+logout.addEventListener(
+
+"click",
+
+logoutAdmin
+
+);
+
+
+}
+
+
+
+
+
+
+const updateBtn =
+document.getElementById(
+"updateShipmentBtn"
+);
+
+
+
+if(updateBtn){
+
+
+updateBtn.addEventListener(
+
+"click",
+
+updateShipment
+
+);
+
+
+}
+
+
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
 
 // ======================================================
 // LOGOUT
 // ======================================================
 
-function logout() {
 
-    Swal.fire({
+async function logoutAdmin(){
 
-        icon: "question",
 
-        title: "Logout",
 
-        text: "Are you sure?",
+localStorage.removeItem(
+"adminToken"
+);
 
-        showCancelButton: true,
 
-        confirmButtonText: "Logout"
+localStorage.removeItem(
+"admin"
+);
 
-    })
 
-    .then(result => {
 
-        if (!result.isConfirmed) return;
+window.location.href =
+"admin-login.html";
 
-        localStorage.removeItem("adminToken");
-
-        window.location.href = "admin.html";
-
-    });
 
 }
 
+
+
+
+
+
+
+
 // ======================================================
-// NAVIGATION
+// DATE FORMAT
 // ======================================================
 
-function showDashboard() {
 
-    window.scrollTo({
+function formatDate(date){
 
-        top: 0,
 
-        behavior: "smooth"
 
-    });
+if(!date)
+
+return "-";
+
+
+
+return new Date(date)
+
+.toLocaleDateString(
+
+"en-US",
+
+{
+
+
+year:"numeric",
+
+month:"short",
+
+day:"numeric"
+
 
 }
 
-function showCreateShipment() {
-
-    document
-
-    .getElementById("createShipment")
-
-    .scrollIntoView({
-
-        behavior: "smooth"
-
-    });
-
-}
-
-// ======================================================
-// TRACKING NUMBER
-// ======================================================
-
-function generateTrackingNumber() {
-
-    const year = new Date().getFullYear();
-
-    const random = Math.floor(
-
-        100000 + Math.random() * 900000
-
-    );
-
-    return `LWX${year}${random}`;
-
-}
-
-// ======================================================
-// FORMAT DATE
-// ======================================================
-
-function formatDate(date) {
-
-    if (!date) return "-";
-
-    return new Date(date)
-
-    .toLocaleDateString("en-US", {
-
-        year: "numeric",
-
-        month: "short",
-
-        day: "numeric"
-
-    });
-
-}
-
-// ======================================================
-// PAGE START
-// ======================================================
-
-window.addEventListener(
-
-    "load",
-
-    async () => {
-
-        try {
-
-            showLoading(
-
-                "Loading Dashboard..."
-
-            );
-
-            await loadShipments();
-
-            hideLoading();
-
-        }
-
-        catch (err) {
-
-            hideLoading();
-
-            console.error(err);
-
-            showError(
-
-                "Unable to load dashboard."
-
-            );
-
-        }
-
-    }
 
 );
+
+
+
+}
+
+
+
+
+
+
+// ======================================================
+// STATUS CLASS
+// ======================================================
+
+
+function statusClass(status){
+
+
+
+if(!status)
+
+return "";
+
+
+
+status =
+status.toLowerCase();
+
+
+
+
+
+if(status.includes("deliver"))
+
+return "status-delivered";
+
+
+
+
+
+if(
+status.includes("transit")
+||
+status.includes("pickup")
+)
+
+return "status-transit";
+
+
+
+
+
+return "status-created";
+
+
+}
+
+
+
+
+
 
 // ======================================================
 // END PART 1
 // ======================================================
-// ======================================================
-// PART 2
-// LOAD SHIPMENTS
-// DASHBOARD CARDS
-// SHIPMENT TABLE
-// ======================================================
+/* ======================================================
+LINKWORLD EXPRESS
+ADMIN DASHBOARD JS
+PART 2
+CREATE SHIPMENT SYSTEM
+MATCHES DASHBOARD.HTML IDS
+====================================================== */
+
+
+
+
 
 // ======================================================
-// LOAD SHIPMENTS
+// CREATE NEW SHIPMENT
+// POST /api/shipments
 // ======================================================
 
-async function loadShipments() {
 
-    try {
+async function createShipment(event){
 
-        const response = await axios.get(API.shipments);
 
-        shipments = response.data.data || [];
 
-        updateDashboardCards();
+event.preventDefault();
 
-        renderShipmentTable();
 
-    }
 
-    catch (error) {
 
-        console.error(error);
 
-        showError(
+try{
 
-            error.response?.data?.message ||
 
-            "Unable to load shipments."
 
-        );
 
-    }
+
+const shipmentData = {
+
+
+
+
+// ================================
+// SENDER
+// ================================
+
+
+sender:{
+
+
+name:
+document.getElementById(
+"senderName"
+).value.trim(),
+
+
+
+phone:
+document.getElementById(
+"senderPhone"
+).value.trim(),
+
+
+
+email:
+document.getElementById(
+"senderEmail"
+).value.trim(),
+
+
+
+address:
+document.getElementById(
+"senderAddress"
+).value.trim()
+
+
+
+},
+
+
+
+
+
+
+
+// ================================
+// RECEIVER
+// ================================
+
+
+receiver:{
+
+
+name:
+document.getElementById(
+"receiverName"
+).value.trim(),
+
+
+
+phone:
+document.getElementById(
+"receiverPhone"
+).value.trim(),
+
+
+
+email:
+document.getElementById(
+"receiverEmail"
+).value.trim(),
+
+
+
+address:
+document.getElementById(
+"receiverAddress"
+).value.trim()
+
+
+
+},
+
+
+
+
+
+
+
+// ================================
+// SHIPMENT INFORMATION
+// ================================
+
+
+shipmentDescription:
+
+document.getElementById(
+"shipmentDescription"
+).value.trim(),
+
+
+
+
+
+shipmentType:
+
+document.getElementById(
+"shipmentType"
+).value,
+
+
+
+
+
+packageWeight:
+
+Number(
+
+document.getElementById(
+"packageWeight"
+).value
+
+) || 0,
+
+
+
+
+
+packageValue:
+
+Number(
+
+document.getElementById(
+"packageValue"
+).value
+
+) || 0,
+
+
+
+
+
+
+
+
+
+// ================================
+// ROUTE
+// ================================
+
+
+origin:
+
+document.getElementById(
+"origin"
+).value.trim(),
+
+
+
+
+
+currentLocation:
+
+document.getElementById(
+"currentLocation"
+).value.trim(),
+
+
+
+
+
+destination:
+
+document.getElementById(
+"destination"
+).value.trim(),
+
+
+
+
+
+
+
+// ================================
+// GPS
+// ================================
+
+
+currentLatitude:
+
+Number(
+
+document.getElementById(
+"currentLatitude"
+).value
+
+) || 0,
+
+
+
+
+
+currentLongitude:
+
+Number(
+
+document.getElementById(
+"currentLongitude"
+).value
+
+) || 0,
+
+
+
+
+
+
+
+destinationLatitude:
+
+Number(
+
+document.getElementById(
+"destinationLatitude"
+).value
+
+) || 0,
+
+
+
+
+
+
+
+destinationLongitude:
+
+Number(
+
+document.getElementById(
+"destinationLongitude"
+).value
+
+) || 0,
+
+
+
+
+
+
+
+
+// ================================
+// CONTROL
+// ================================
+
+
+status:
+
+document.getElementById(
+"shipmentStatus"
+).value,
+
+
+
+
+
+
+
+paymentStatus:
+
+document.getElementById(
+"paymentStatus"
+).value,
+
+
+
+
+
+
+
+
+progress:
+
+Number(
+
+document.getElementById(
+"shipmentProgress"
+).value
+
+) || 0,
+
+
+
+
+
+
+
+expectedDelivery:
+
+document.getElementById(
+"expectedDelivery"
+).value
+
+
+
+
+
+};
+
+
+
+
+
+
+
+
+
+// =================================
+// BASIC VALIDATION
+// =================================
+
+
+if(
+
+!shipmentData.sender.name ||
+
+!shipmentData.sender.phone ||
+
+!shipmentData.receiver.name ||
+
+!shipmentData.receiver.phone ||
+
+!shipmentData.receiver.address
+
+
+){
+
+
+
+Swal.fire({
+
+icon:"warning",
+
+title:"Missing Information",
+
+text:
+"Please complete sender and receiver required fields."
+
+});
+
+
+return;
+
 
 }
 
-// ======================================================
-// DASHBOARD CARDS
-// ======================================================
 
-function updateDashboardCards() {
 
-    shipmentCount.textContent = shipments.length;
 
-    transitCount.textContent =
 
-        shipments.filter(
 
-            s => s.status === "In Transit"
 
-        ).length;
 
-    deliveredCount.textContent =
 
-        shipments.filter(
 
-            s => s.status === "Delivered"
+// =================================
+// SEND TO BACKEND
+// =================================
 
-        ).length;
 
-    pendingCount.textContent =
+const response =
 
-        shipments.filter(
+await fetch(
 
-            s =>
 
-            s.status !== "Delivered" &&
+`${API_URL}/shipments`,
 
-            s.status !== "Cancelled"
+{
 
-        ).length;
+
+method:"POST",
+
+
+headers:getHeaders(),
+
+
+
+body:
+
+JSON.stringify(
+shipmentData
+)
+
+
 
 }
 
-// ======================================================
-// SHIPMENT TABLE
-// ======================================================
 
-function renderShipmentTable() {
+);
 
-    shipmentTable.innerHTML = "";
 
-    if (shipments.length === 0) {
 
-        shipmentTable.innerHTML = `
 
-        <tr>
 
-        <td colspan="9"
 
-        style="text-align:center;padding:40px;">
 
-        <i class="fa-solid fa-box-open"
 
-        style="font-size:45px;color:#999;"></i>
 
-        <br><br>
+const data =
 
-        No Shipments Available
+await response.json();
 
-        </td>
 
-        </tr>
 
-        `;
 
-        return;
 
-    }
 
-    shipments.forEach(shipment => {
 
-        shipmentTable.innerHTML += `
 
-        <tr>
+if(!data.success){
 
-        <td>
 
-        <strong>
+throw new Error(
 
-        ${shipment.trackingNumber}
+data.message ||
 
-        </strong>
+"Shipment creation failed"
 
-        </td>
+);
 
-        <td>
-
-        ${shipment.senderName || "-"}
-
-        </td>
-
-        <td>
-
-        ${shipment.receiverName || "-"}
-
-        </td>
-
-        <td>
-
-        ${shipment.origin || "-"}
-
-        </td>
-
-        <td>
-
-        ${shipment.currentLocation || "-"}
-
-        </td>
-
-        <td>
-
-        ${shipment.destination || "-"}
-
-        </td>
-
-        <td>
-
-        ${statusBadge(shipment.status)}
-
-        </td>
-
-        <td>
-
-        ${formatDate(
-
-            shipment.expectedDelivery
-
-        )}
-
-        </td>
-
-        <td>
-
-        <button
-
-        class="action-btn"
-
-        onclick="viewShipment('${shipment._id}')">
-
-        <i class="fa-solid fa-eye"></i>
-
-        </button>
-
-        <button
-
-        class="action-btn"
-
-        onclick="editShipment('${shipment._id}')">
-
-        <i class="fa-solid fa-pen"></i>
-
-        </button>
-
-        <button
-
-        class="action-btn"
-
-        onclick="updateLocation('${shipment._id}')">
-
-        <i class="fa-solid fa-location-dot"></i>
-
-        </button>
-
-        <button
-
-        class="action-btn"
-
-        onclick="previewReceipt('${shipment._id}')">
-
-        <i class="fa-solid fa-file-invoice"></i>
-
-        </button>
-
-        <button
-
-        class="action-btn delete"
-
-        onclick="deleteShipment('${shipment._id}')">
-
-        <i class="fa-solid fa-trash"></i>
-
-        </button>
-
-        </td>
-
-        </tr>
-
-        `;
-
-    });
 
 }
 
-// ======================================================
-// STATUS BADGE
-// ======================================================
 
-function statusBadge(status) {
 
-    let color = "#0d6efd";
 
-    switch (status) {
 
-        case "Delivered":
 
-            color = "#198754";
 
-            break;
 
-        case "Cancelled":
 
-            color = "#dc3545";
 
-            break;
+// =================================
+// DISPLAY GENERATED TRACKING NUMBER
+// =================================
 
-        case "On Hold":
 
-            color = "#ffc107";
+const trackingDisplay =
 
-            break;
+document.getElementById(
+"generatedTrackingNumber"
+);
 
-        case "Processing":
 
-            color = "#6f42c1";
 
-            break;
 
-        case "Customs Clearance":
 
-            color = "#fd7e14";
 
-            break;
+if(trackingDisplay){
 
-        case "Out for Delivery":
 
-            color = "#20c997";
 
-            break;
+trackingDisplay.textContent =
 
-        case "In Transit":
+data.shipment.trackingNumber;
 
-            color = "#0d6efd";
 
-            break;
-
-    }
-
-    return `
-
-    <span style="
-
-    background:${color};
-
-    color:#fff;
-
-    padding:6px 12px;
-
-    border-radius:20px;
-
-    font-size:12px;
-
-    font-weight:600;
-
-    display:inline-block;
-
-    ">
-
-    ${status}
-
-    </span>
-
-    `;
 
 }
+
+
+
+
+
+
+
+
+
+// =================================
+// SUCCESS MESSAGE
+// =================================
+
+
+Swal.fire({
+
+icon:"success",
+
+title:"Shipment Created",
+
+html:`
+
+<p>
+Shipment successfully added to LinkWorld Express network.
+</p>
+
+<strong>
+Tracking Number:
+</strong>
+
+<br>
+
+<span style="font-size:22px">
+
+${data.shipment.trackingNumber}
+
+</span>
+
+`
+
+});
+
+
+
+
+
+
+
+
+
+// =================================
+// RESET FORM
+// =================================
+
+
+document.getElementById(
+"shipmentForm"
+).reset();
+
+
+
+
+
+
+
+// =================================
+// REFRESH TABLE
+// =================================
+
+
+await loadShipments();
+
+
+
+updateStats();
+
+
+
+
+
+
+}
+
+
+
+
+
+catch(error){
+
+
+
+console.error(
+
+"CREATE SHIPMENT ERROR:",
+
+error
+
+);
+
+
+
+
+
+Swal.fire({
+
+icon:"error",
+
+title:"Failed",
+
+text:error.message
+
+});
+
+
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// ======================================================
+// GENERATE LOCAL TRACKING PREVIEW
+// ======================================================
+
+
+function generateTrackingPreview(){
+
+
+
+const box =
+
+document.getElementById(
+"generatedTrackingNumber"
+);
+
+
+
+if(!box)
+
+return;
+
+
+
+
+
+
+const year =
+
+new Date()
+
+.getFullYear();
+
+
+
+
+
+
+const random =
+
+Math.floor(
+
+Math.random()*900000
+
+)+100000;
+
+
+
+
+
+
+
+box.textContent =
+
+`LWX${year}${random}`;
+
+
+
+}
+
+
+
+
+
+
+
+
+// ======================================================
+// AUTO TRACKING PREVIEW WHEN FORM OPENS
+// ======================================================
+
+
+const shipmentForm =
+
+document.getElementById(
+"shipmentForm"
+);
+
+
+
+if(shipmentForm){
+
+
+
+shipmentForm.addEventListener(
+
+"input",
+
+()=>{
+
+
+const tracking =
+
+document.getElementById(
+"generatedTrackingNumber"
+);
+
+
+
+if(
+
+tracking &&
+
+tracking.textContent.includes(
+"generate"
+)
+
+){
+
+
+generateTrackingPreview();
+
+
+}
+
+
+
+}
+
+
+);
+
+
+
+}
+
+
+
+
+
+
+
+
 
 // ======================================================
 // END PART 2
 // ======================================================
+/* ======================================================
+LINKWORLD EXPRESS
+ADMIN DASHBOARD JS
+PART 3
+SHIPMENT TABLE + VIEW + RECEIPT + DELETE
+MATCHES DASHBOARD.HTML IDS
+====================================================== */
+
+
+
+
+
+
 // ======================================================
-// PART 3
-// CREATE SHIPMENT
+// RENDER SHIPMENT TABLE
 // ======================================================
 
-async function createShipment() {
 
-    try {
+function renderShipments(){
 
-        showLoading("Saving Shipment...");
 
-        const shipmentData = {
 
-            trackingNumber: generateTrackingNumber(),
+const tableBody =
 
-            senderName:
-            document.getElementById("senderName").value.trim(),
+document.getElementById(
+"shipmentTableBody"
+);
 
-            senderPhone:
-            document.getElementById("senderPhone").value.trim(),
 
-            senderEmail:
-            document.getElementById("senderEmail").value.trim(),
 
-            receiverName:
-            document.getElementById("receiverName").value.trim(),
 
-            receiverPhone:
-            document.getElementById("receiverPhone").value.trim(),
+if(!tableBody)
 
-            receiverEmail:
-            document.getElementById("receiverEmail").value.trim(),
+return;
 
-            receiverAddress:
-            document.getElementById("receiverAddress").value.trim(),
 
-            shipment:
-            document.getElementById("shipment").value.trim(),
 
-            origin:
-            document.getElementById("origin").value.trim(),
 
-            currentLocation:
-            document.getElementById("currentLocation").value.trim(),
 
-            destination:
-            document.getElementById("destination").value.trim(),
 
-            currentLatitude:
-            parseFloat(
-                document.getElementById("currentLatitude").value
-            ) || 0,
 
-            currentLongitude:
-            parseFloat(
-                document.getElementById("currentLongitude").value
-            ) || 0,
+tableBody.innerHTML = "";
 
-            destinationLatitude:
-            parseFloat(
-                document.getElementById("destinationLatitude").value
-            ) || 0,
 
-            destinationLongitude:
-            parseFloat(
-                document.getElementById("destinationLongitude").value
-            ) || 0,
 
-            status:
-            document.getElementById("status").value,
 
-            expectedDelivery:
-            document.getElementById("expectedDelivery").value
 
-        };
 
-        // ==========================================
-        // REQUIRED FIELDS
-        // ==========================================
 
-        if (
+if(shipments.length === 0){
 
-            !shipmentData.senderName ||
 
-            !shipmentData.receiverName ||
 
-            !shipmentData.shipment ||
+tableBody.innerHTML = `
 
-            !shipmentData.origin ||
 
-            !shipmentData.destination
+<tr>
 
-        ) {
 
-            hideLoading();
+<td colspan="7" class="empty-table">
 
-            return showError(
-                "Please complete all required fields."
-            );
 
-        }
+<i class="fa-solid fa-box-open"></i>
 
-        // ==========================================
-        // SAVE
-        // ==========================================
 
-        await axios.post(
+<h3>
+No Shipments Found
+</h3>
 
-            API.shipments,
 
-            shipmentData
+<p>
+Create your first shipment.
+</p>
 
-        );
 
-        hideLoading();
 
-        showSuccess(
-            "Shipment created successfully."
-        );
+</td>
 
-        clearShipmentForm();
 
-        await loadShipments();
+</tr>
 
-    }
 
-    catch (error) {
+`;
 
-        hideLoading();
 
-        console.error(error);
 
-        showError(
+return;
 
-            error.response?.data?.message ||
-
-            "Unable to save shipment."
-
-        );
-
-    }
 
 }
 
-// ======================================================
-// CLEAR FORM
-// ======================================================
 
-function clearShipmentForm() {
 
-    const ids = [
 
-        "senderName",
 
-        "senderPhone",
 
-        "senderEmail",
 
-        "receiverName",
 
-        "receiverPhone",
 
-        "receiverEmail",
 
-        "receiverAddress",
+shipments.forEach(
 
-        "shipment",
+shipment=>{
 
-        "origin",
 
-        "currentLocation",
 
-        "destination",
 
-        "currentLatitude",
 
-        "currentLongitude",
+const row =
 
-        "destinationLatitude",
+document.createElement(
+"tr"
+);
 
-        "destinationLongitude",
 
-        "expectedDelivery"
 
-    ];
 
-    ids.forEach(id => {
 
-        const el = document.getElementById(id);
 
-        if (el) {
 
-            el.value = "";
 
-        }
 
-    });
+row.innerHTML = `
 
-    document.getElementById("status").selectedIndex = 0;
+
+
+<td>
+
+${shipment.trackingNumber || "-"}
+
+</td>
+
+
+
+
+
+
+<td>
+
+${shipment.sender?.name || "-"}
+
+</td>
+
+
+
+
+
+
+<td>
+
+${shipment.receiver?.name || "-"}
+
+</td>
+
+
+
+
+
+
+
+<td>
+
+${shipment.currentLocation || "-"}
+
+</td>
+
+
+
+
+
+
+
+<td>
+
+
+<span class="status-badge ${statusClass(shipment.status)}">
+
+
+${shipment.status || "Created"}
+
+
+</span>
+
+
+</td>
+
+
+
+
+
+
+
+<td>
+
+
+<div class="table-progress">
+
+
+<div
+
+class="progress-fill"
+
+style="width:${shipment.progress || 0}%">
+
+</div>
+
+
+</div>
+
+
+
+<small>
+
+${shipment.progress || 0}%
+
+</small>
+
+
+
+</td>
+
+
+
+
+
+
+
+
+<td>
+
+
+<div class="action-buttons">
+
+
+
+
+
+<button
+
+class="action-btn view-btn"
+
+onclick="viewShipment('${shipment._id}')"
+
+title="View Shipment">
+
+
+<i class="fa-solid fa-eye"></i>
+
+
+</button>
+
+
+
+
+
+
+
+<button
+
+class="action-btn edit-btn"
+
+onclick="openEditShipment('${shipment._id}')"
+
+title="Edit Shipment">
+
+
+<i class="fa-solid fa-pen"></i>
+
+
+</button>
+
+
+
+
+
+
+
+<button
+
+class="action-btn receipt-btn"
+
+onclick="openReceipt('${shipment.trackingNumber}')"
+
+title="Print Receipt">
+
+
+<i class="fa-solid fa-file-invoice"></i>
+
+
+</button>
+
+
+
+
+
+
+
+<button
+
+class="action-btn delete-btn"
+
+onclick="deleteShipment('${shipment._id}')"
+
+title="Delete Shipment">
+
+
+<i class="fa-solid fa-trash"></i>
+
+
+</button>
+
+
+
+
+</div>
+
+
+</td>
+
+
+
+`;
+
+
+
+
+
+
+
+tableBody.appendChild(row);
+
+
+
+
+});
+
+
+
+
 
 }
 
+
+
+
+
+
+
+
+
+
+
+
 // ======================================================
-// END PART 3
-// ======================================================
-// ======================================================
-// PART 4
 // VIEW SHIPMENT
-// EDIT SHIPMENT
 // ======================================================
 
-// ======================================================
-// VIEW SHIPMENT
-// ======================================================
 
-function viewShipment(id) {
+function viewShipment(id){
 
-    const shipment = shipments.find(
 
-        s => s._id === id
 
-    );
 
-    if (!shipment) {
 
-        return showError(
+const shipment =
 
-            "Shipment not found."
+shipments.find(
 
-        );
+item => item._id === id
 
-    }
+);
 
-    selectedShipment = shipment;
 
-    document.getElementById(
 
-        "shipmentDetails"
 
-    ).innerHTML = `
 
-    <div class="detail-card">
 
-        <h3>Tracking Number</h3>
+if(!shipment)
 
-        <p>${shipment.trackingNumber}</p>
+return;
 
-    </div>
 
-    <div class="detail-card">
 
-        <h3>Sender</h3>
 
-        <p>${shipment.senderName}</p>
 
-    </div>
 
-    <div class="detail-card">
 
-        <h3>Receiver</h3>
+selectedShipment = shipment;
 
-        <p>${shipment.receiverName}</p>
 
-    </div>
 
-    <div class="detail-card">
 
-        <h3>Shipment</h3>
 
-        <p>${shipment.shipment}</p>
 
-    </div>
 
-    <div class="detail-card">
+const modal =
 
-        <h3>Origin</h3>
+document.getElementById(
+"viewShipmentModal"
+);
 
-        <p>${shipment.origin}</p>
 
-    </div>
 
-    <div class="detail-card">
 
-        <h3>Current Location</h3>
 
-        <p>${shipment.currentLocation}</p>
 
-    </div>
+if(!modal)
 
-    <div class="detail-card">
+return;
 
-        <h3>Destination</h3>
 
-        <p>${shipment.destination}</p>
 
-    </div>
 
-    <div class="detail-card">
 
-        <h3>Status</h3>
 
-        <p>${shipment.status}</p>
 
-    </div>
 
-    <div class="detail-card">
 
-        <h3>Expected Delivery</h3>
+document.getElementById(
+"viewTracking"
+).textContent =
 
-        <p>${formatDate(
+shipment.trackingNumber || "-";
 
-            shipment.expectedDelivery
 
-        )}</p>
 
-    </div>
 
-    `;
 
-    document.getElementById(
 
-        "shipmentModal"
+document.getElementById(
+"viewSender"
+).textContent =
 
-    ).style.display = "flex";
+shipment.sender?.name || "-";
+
+
+
+
+
+
+document.getElementById(
+"viewReceiver"
+).textContent =
+
+shipment.receiver?.name || "-";
+
+
+
+
+
+
+document.getElementById(
+"viewRoute"
+).textContent =
+
+
+`${shipment.origin || "-"} → ${shipment.destination || "-"}`;
+
+
+
+
+
+
+
+
+document.getElementById(
+"viewStatus"
+).textContent =
+
+shipment.status || "-";
+
+
+
+
+
+
+
+
+document.getElementById(
+"viewProgress"
+).textContent =
+
+`${shipment.progress || 0}%`;
+
+
+
+
+
+
+
+
+
+modal.classList.add(
+"active"
+);
+
+
+
+
 
 }
+
+
+
+
+
+
+
+
+
+
+
 
 // ======================================================
 // CLOSE VIEW MODAL
 // ======================================================
 
-function closeShipmentModal() {
 
-    document.getElementById(
-
-        "shipmentModal"
-
-    ).style.display = "none";
-
-}
-
-// ======================================================
-// EDIT SHIPMENT
-// ======================================================
-
-function editShipment(id) {
-
-    const shipment = shipments.find(
-
-        s => s._id === id
-
-    );
-
-    if (!shipment) {
-
-        return showError(
-
-            "Shipment not found."
-
-        );
-
-    }
-
-    selectedShipmentId = id;
-
-    document.getElementById("senderName").value =
-    shipment.senderName || "";
-
-    document.getElementById("senderPhone").value =
-    shipment.senderPhone || "";
-
-    document.getElementById("senderEmail").value =
-    shipment.senderEmail || "";
-
-    document.getElementById("receiverName").value =
-    shipment.receiverName || "";
-
-    document.getElementById("receiverPhone").value =
-    shipment.receiverPhone || "";
-
-    document.getElementById("receiverEmail").value =
-    shipment.receiverEmail || "";
-
-    document.getElementById("receiverAddress").value =
-    shipment.receiverAddress || "";
-
-    document.getElementById("shipment").value =
-    shipment.shipment || "";
-
-    document.getElementById("origin").value =
-    shipment.origin || "";
-
-    document.getElementById("currentLocation").value =
-    shipment.currentLocation || "";
-
-    document.getElementById("destination").value =
-    shipment.destination || "";
-
-    document.getElementById("currentLatitude").value =
-    shipment.currentLatitude || "";
-
-    document.getElementById("currentLongitude").value =
-    shipment.currentLongitude || "";
-
-    document.getElementById("destinationLatitude").value =
-    shipment.destinationLatitude || "";
-
-    document.getElementById("destinationLongitude").value =
-    shipment.destinationLongitude || "";
-
-    document.getElementById("status").value =
-    shipment.status || "Shipment Created";
-
-    document.getElementById("expectedDelivery").value =
-    shipment.expectedDelivery
-    ? shipment.expectedDelivery.substring(0, 10)
-    : "";
-
-    document.getElementById(
-
-        "createShipment"
-
-    ).scrollIntoView({
-
-        behavior: "smooth"
-
-    });
-
-    showSuccess(
-
-        "Shipment loaded for editing."
-
-    );
-
-}
-
-// ======================================================
-// END PART 4
-// ======================================================
-// ======================================================
-// PART 5
-// DELETE SHIPMENT
-// UPDATE LOCATION
-// ======================================================
-
-// ======================================================
-// DELETE SHIPMENT
-// ======================================================
-
-function deleteShipment(id) {
-
-    deleteShipmentId = id;
-
-    document.getElementById(
-
-        "deleteModal"
-
-    ).style.display = "flex";
-
-}
-
-// ======================================================
-// CLOSE DELETE MODAL
-// ======================================================
-
-function closeDeleteModal() {
-
-    deleteShipmentId = null;
-
-    document.getElementById(
-
-        "deleteModal"
-
-    ).style.display = "none";
-
-}
-
-// ======================================================
-// CONFIRM DELETE
-// ======================================================
+const closeView =
 
 document.getElementById(
-
-    "confirmDelete"
-
-).addEventListener(
-
-    "click",
-
-    async function () {
-
-        if (!deleteShipmentId) return;
-
-        try {
-
-            showLoading(
-
-                "Deleting Shipment..."
-
-            );
-
-            await axios.delete(
-
-                `${API.shipments}/${deleteShipmentId}`
-
-            );
-
-            hideLoading();
-
-            closeDeleteModal();
-
-            showSuccess(
-
-                "Shipment deleted successfully."
-
-            );
-
-            await loadShipments();
-
-        }
-
-        catch (error) {
-
-            hideLoading();
-
-            console.error(error);
-
-            showError(
-
-                error.response?.data?.message ||
-
-                "Unable to delete shipment."
-
-            );
-
-        }
-
-    }
-
+"closeViewModal"
 );
 
-// ======================================================
-// UPDATE LOCATION
-// ======================================================
 
-function updateLocation(id) {
 
-    const shipment = shipments.find(
 
-        s => s._id === id
 
-    );
+if(closeView){
 
-    if (!shipment) {
 
-        return showError(
 
-            "Shipment not found."
+closeView.onclick = ()=>{
 
-        );
 
-    }
+document.getElementById(
+"viewShipmentModal"
+)
 
-    selectedShipment = shipment;
+.classList.remove(
+"active"
+);
 
-    document.getElementById(
 
-        "newLocation"
 
-    ).value = shipment.currentLocation || "";
+};
 
-    document.getElementById(
-
-        "newLatitude"
-
-    ).value = shipment.currentLatitude || "";
-
-    document.getElementById(
-
-        "newLongitude"
-
-    ).value = shipment.currentLongitude || "";
-
-    document.getElementById(
-
-        "newStatus"
-
-    ).value = shipment.status || "Shipment Created";
-
-    document.getElementById(
-
-        "locationModal"
-
-    ).style.display = "flex";
 
 }
 
-// ======================================================
-// CLOSE LOCATION MODAL
-// ======================================================
 
-function closeLocationModal() {
 
-    document.getElementById(
 
-        "locationModal"
 
-    ).style.display = "none";
 
-}
 
-// ======================================================
-// SAVE LOCATION UPDATE
-// ======================================================
 
-async function saveLocationUpdate() {
 
-    if (!selectedShipment) {
 
-        return;
 
-    }
-
-    try {
-
-        showLoading(
-
-            "Updating Shipment..."
-
-        );
-
-        await axios.put(
-
-            `${API.shipments}/${selectedShipment._id}`,
-
-            {
-
-                currentLocation:
-
-                document.getElementById(
-
-                    "newLocation"
-
-                ).value.trim(),
-
-                currentLatitude:
-
-                Number(
-
-                    document.getElementById(
-
-                        "newLatitude"
-
-                    ).value
-
-                ),
-
-                currentLongitude:
-
-                Number(
-
-                    document.getElementById(
-
-                        "newLongitude"
-
-                    ).value
-
-                ),
-
-                status:
-
-                document.getElementById(
-
-                    "newStatus"
-
-                ).value
-
-            }
-
-        );
-
-        hideLoading();
-
-        closeLocationModal();
-
-        showSuccess(
-
-            "Shipment updated successfully."
-
-        );
-
-        await loadShipments();
-
-    }
-
-    catch (error) {
-
-        hideLoading();
-
-        console.error(error);
-
-        showError(
-
-            error.response?.data?.message ||
-
-            "Unable to update shipment."
-
-        );
-
-    }
-
-}
-
-// ======================================================
-// END PART 5
-// ======================================================
-// ======================================================
-// PART 6
-// LEAFLET MAP
-// LOCATION PICKER
-// ======================================================
-
-// ======================================================
-// OPEN MAP
-// ======================================================
-
-function openMap(mode) {
-
-    mapMode = mode;
-
-    document.getElementById(
-
-        "mapModal"
-
-    ).style.display = "flex";
-
-    setTimeout(initMap, 200);
-
-}
-
-// ======================================================
-// CURRENT LOCATION
-// ======================================================
-
-function pickCurrentLocation() {
-
-    openMap("current");
-
-}
-
-// ======================================================
-// DESTINATION
-// ======================================================
-
-function pickDestination() {
-
-    openMap("destination");
-
-}
-
-// ======================================================
-// UPDATE LOCATION
-// ======================================================
-
-function pickUpdateLocation() {
-
-    openMap("update");
-
-}
-
-// ======================================================
-// CLOSE MAP
-// ======================================================
-
-function closeMapModal() {
-
-    document.getElementById(
-
-        "mapModal"
-
-    ).style.display = "none";
-
-    if (adminMap) {
-
-        adminMap.remove();
-
-        adminMap = null;
-
-        mapMarker = null;
-
-    }
-
-}
-
-// ======================================================
-// INITIALIZE MAP
-// ======================================================
-
-function initMap() {
-
-    if (adminMap) {
-
-        adminMap.remove();
-
-    }
-
-    adminMap = L.map("adminMap").setView(
-
-        [20, 0],
-
-        2
-
-    );
-
-    L.tileLayer(
-
-        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-
-        {
-
-            attribution:
-
-            "&copy; OpenStreetMap",
-
-            maxZoom: 19
-
-        }
-
-    ).addTo(adminMap);
-
-    adminMap.on("click", function (e) {
-
-        if (mapMarker) {
-
-            adminMap.removeLayer(
-
-                mapMarker
-
-            );
-
-        }
-
-        mapMarker = L.marker(
-
-            e.latlng
-
-        ).addTo(adminMap);
-
-    });
-
-}
-
-// ======================================================
-// SAVE LOCATION
-// ======================================================
-
-function savePickedLocation() {
-
-    if (!mapMarker) {
-
-        return showError(
-
-            "Please select a location."
-
-        );
-
-    }
-
-    const lat =
-
-    mapMarker.getLatLng().lat.toFixed(6);
-
-    const lng =
-
-    mapMarker.getLatLng().lng.toFixed(6);
-
-    if (mapMode === "current") {
-
-        document.getElementById(
-
-            "currentLatitude"
-
-        ).value = lat;
-
-        document.getElementById(
-
-            "currentLongitude"
-
-        ).value = lng;
-
-    }
-
-    else if (mapMode === "destination") {
-
-        document.getElementById(
-
-            "destinationLatitude"
-
-        ).value = lat;
-
-        document.getElementById(
-
-            "destinationLongitude"
-
-        ).value = lng;
-
-    }
-
-    else {
-
-        document.getElementById(
-
-            "newLatitude"
-
-        ).value = lat;
-
-        document.getElementById(
-
-            "newLongitude"
-
-        ).value = lng;
-
-    }
-
-    showSuccess(
-
-        "Coordinates selected."
-
-    );
-
-    closeMapModal();
-
-}
-
-// ======================================================
-// USE CURRENT LOCATION
-// ======================================================
-
-function useCurrentLocation() {
-
-    if (!navigator.geolocation) {
-
-        return showError(
-
-            "Geolocation is not supported."
-
-        );
-
-    }
-
-    showLoading(
-
-        "Detecting your location..."
-
-    );
-
-    navigator.geolocation.getCurrentPosition(
-
-        function (position) {
-
-            hideLoading();
-
-            document.getElementById(
-
-                "currentLatitude"
-
-            ).value =
-
-            position.coords.latitude.toFixed(6);
-
-            document.getElementById(
-
-                "currentLongitude"
-
-            ).value =
-
-            position.coords.longitude.toFixed(6);
-
-            showSuccess(
-
-                "Current location detected."
-
-            );
-
-        },
-
-        function () {
-
-            hideLoading();
-
-            showError(
-
-                "Unable to detect location."
-
-            );
-
-        }
-
-    );
-
-}
-
-// ======================================================
-// USE CURRENT LOCATION (UPDATE)
-// ======================================================
-
-function useCurrentLocationUpdate() {
-
-    if (!navigator.geolocation) {
-
-        return showError(
-
-            "Geolocation is not supported."
-
-        );
-
-    }
-
-    navigator.geolocation.getCurrentPosition(
-
-        function (position) {
-
-            document.getElementById(
-
-                "newLatitude"
-
-            ).value =
-
-            position.coords.latitude.toFixed(6);
-
-            document.getElementById(
-
-                "newLongitude"
-
-            ).value =
-
-            position.coords.longitude.toFixed(6);
-
-            showSuccess(
-
-                "Location updated."
-
-            );
-
-        },
-
-        function () {
-
-            showError(
-
-                "Unable to detect location."
-
-            );
-
-        }
-
-    );
-
-}
-
-// ======================================================
-// END PART 6
-// ======================================================
-// ======================================================
-// PART 7
-// RECEIPT SYSTEM
-// ======================================================
-
-// ======================================================
-// PREVIEW RECEIPT
-// ======================================================
-
-function previewReceipt(id = null) {
-
-    let shipment;
-
-    if (id) {
-
-        shipment = shipments.find(
-
-            s => s._id === id
-
-        );
-
-    } else {
-
-        shipment = {
-
-            trackingNumber:
-            generateTrackingNumber(),
-
-            senderName:
-            document.getElementById("senderName").value,
-
-            senderPhone:
-            document.getElementById("senderPhone").value,
-
-            senderEmail:
-            document.getElementById("senderEmail").value,
-
-            receiverName:
-            document.getElementById("receiverName").value,
-
-            receiverPhone:
-            document.getElementById("receiverPhone").value,
-
-            receiverEmail:
-            document.getElementById("receiverEmail").value,
-
-            receiverAddress:
-            document.getElementById("receiverAddress").value,
-
-            shipment:
-            document.getElementById("shipment").value,
-
-            origin:
-            document.getElementById("origin").value,
-
-            destination:
-            document.getElementById("destination").value,
-
-            status:
-            document.getElementById("status").value,
-
-            expectedDelivery:
-            document.getElementById("expectedDelivery").value
-
-        };
-
-    }
-
-    if (!shipment) {
-
-        return showError(
-
-            "Shipment not found."
-
-        );
-
-    }
-
-    selectedShipment = shipment;
-
-    document.getElementById(
-
-        "receiptContent"
-
-    ).innerHTML = `
-
-<table class="receipt-table">
-
-<tr>
-
-<td><strong>Tracking Number</strong></td>
-
-<td>${shipment.trackingNumber}</td>
-
-</tr>
-
-<tr>
-
-<td><strong>Sender</strong></td>
-
-<td>${shipment.senderName}</td>
-
-</tr>
-
-<tr>
-
-<td><strong>Sender Phone</strong></td>
-
-<td>${shipment.senderPhone}</td>
-
-</tr>
-
-<tr>
-
-<td><strong>Sender Email</strong></td>
-
-<td>${shipment.senderEmail}</td>
-
-</tr>
-
-<tr>
-
-<td><strong>Receiver</strong></td>
-
-<td>${shipment.receiverName}</td>
-
-</tr>
-
-<tr>
-
-<td><strong>Receiver Phone</strong></td>
-
-<td>${shipment.receiverPhone}</td>
-
-</tr>
-
-<tr>
-
-<td><strong>Receiver Email</strong></td>
-
-<td>${shipment.receiverEmail}</td>
-
-</tr>
-
-<tr>
-
-<td><strong>Receiver Address</strong></td>
-
-<td>${shipment.receiverAddress}</td>
-
-</tr>
-
-<tr>
-
-<td><strong>Shipment</strong></td>
-
-<td>${shipment.shipment}</td>
-
-</tr>
-
-<tr>
-
-<td><strong>Origin</strong></td>
-
-<td>${shipment.origin}</td>
-
-</tr>
-
-<tr>
-
-<td><strong>Destination</strong></td>
-
-<td>${shipment.destination}</td>
-
-</tr>
-
-<tr>
-
-<td><strong>Status</strong></td>
-
-<td>${shipment.status}</td>
-
-</tr>
-
-<tr>
-
-<td><strong>Expected Delivery</strong></td>
-
-<td>${formatDate(
-
-shipment.expectedDelivery
-
-)}</td>
-
-</tr>
-
-</table>
-
-<br>
-
-<div
-id="barcode"
-style="text-align:center;">
-</div>
-
-<br>
-
-<div
-id="qrcode"
-style="display:flex;
-justify-content:center;">
-</div>
-
-`;
-
-    document.getElementById(
-
-        "receiptModal"
-
-    ).style.display = "flex";
-
-    document.getElementById(
-
-        "barcode"
-
-    ).innerHTML =
-
-    `<svg id="barcodeSVG"></svg>`;
-
-    JsBarcode(
-
-        "#barcodeSVG",
-
-        shipment.trackingNumber,
-
-        {
-
-            format: "CODE128",
-
-            width: 2,
-
-            height: 60,
-
-            displayValue: true
-
-        }
-
-    );
-
-    document.getElementById(
-
-        "qrcode"
-
-    ).innerHTML = "";
-
-    new QRCode(
-
-        document.getElementById(
-
-            "qrcode"
-
-        ),
-
-        {
-
-            text: shipment.trackingNumber,
-
-            width: 140,
-
-            height: 140
-
-        }
-
-    );
-
-}
-
-// ======================================================
-// CLOSE RECEIPT
-// ======================================================
-
-function closeReceiptModal() {
-
-    document.getElementById(
-
-        "receiptModal"
-
-    ).style.display = "none";
-
-}
-
-// ======================================================
-// PRINT RECEIPT
-// ======================================================
-
-function printReceipt() {
-
-    const printWindow =
-
-    window.open("", "PRINT");
-
-    printWindow.document.write(`
-
-<html>
-
-<head>
-
-<title>
-
-Shipment Receipt
-
-</title>
-
-<style>
-
-body{
-
-font-family:Poppins,sans-serif;
-
-padding:40px;
-
-}
-
-table{
-
-width:100%;
-
-border-collapse:collapse;
-
-}
-
-td{
-
-border:1px solid #ddd;
-
-padding:10px;
-
-}
-
-h2{
-
-color:#0d6efd;
-
-}
-
-</style>
-
-</head>
-
-<body>
-
-${document.getElementById(
-
-"receiptPreview"
-
-).innerHTML}
-
-</body>
-
-</html>
-
-`);
-
-    printWindow.document.close();
-
-    printWindow.focus();
-
-    printWindow.print();
-
-    printWindow.close();
-
-}
 
 // ======================================================
 // OPEN RECEIPT PAGE
 // ======================================================
+// ======================================================
+// OPEN RECEIPT
+// Saves selected shipment to localStorage
+// ======================================================
 
-function openReceiptPage() {
+function openReceipt(trackingNumber){
 
-    if (!selectedShipment) {
-
-        return showError(
-
-            "Please select a shipment."
-
-        );
-
-    }
-
-    window.open(
-
-        `receipt.html?tracking=${selectedShipment.trackingNumber}`,
-
-        "_blank"
-
+    const shipment = shipments.find(
+        item => item.trackingNumber === trackingNumber
     );
 
+    if(!shipment){
+
+        Swal.fire({
+            icon: "error",
+            title: "Shipment Not Found",
+            text: "Unable to locate this shipment."
+        });
+
+        return;
+    }
+
+    // Save shipment for receipt page
+    localStorage.setItem(
+        "receiptShipment",
+        JSON.stringify(shipment)
+    );
+
+    // Open receipt page
+    window.location.href = "receipt.html";
+
 }
 
+
+
+
+
+
 // ======================================================
-// RECEIPT HISTORY
+// DELETE SHIPMENT
 // ======================================================
 
-function showReceiptHistory() {
 
-    Swal.fire({
+async function deleteShipment(id){
 
-        icon: "info",
 
-        title: "Receipt History",
 
-        text:
 
-        "Receipt history will be available in a future update."
 
-    });
+const confirmDelete =
+
+await Swal.fire({
+
+
+title:
+"Delete Shipment?",
+
+
+text:
+"This action cannot be reversed.",
+
+
+icon:
+"warning",
+
+
+showCancelButton:true,
+
+
+confirmButtonText:
+"Delete"
+
+
+
+});
+
+
+
+
+
+
+
+
+if(!confirmDelete.isConfirmed)
+
+return;
+
+
+
+
+
+
+
+
+try{
+
+
+
+
+
+
+const response =
+
+await fetch(
+
+
+`${API_URL}/shipments/${id}`,
+
+{
+
+
+method:"DELETE",
+
+
+headers:getHeaders()
+
 
 }
 
-// ======================================================
-// END PART 7
-// ======================================================
-// ======================================================
-// PART 8
-// FINAL UTILITIES
-// ======================================================
+
+);
+
+
+
+
+
+
+
+const data =
+
+await response.json();
+
+
+
+
+
+
+
+
+
+if(!data.success){
+
+
+throw new Error(
+
+data.message ||
+
+"Delete failed"
+
+);
+
+
+}
+
+
+
+
+
+
+
+
+
+Swal.fire({
+
+icon:"success",
+
+title:"Deleted",
+
+text:
+"Shipment removed successfully."
+
+});
+
+
+
+
+
+
+
+
+await loadShipments();
+
+
+
+updateStats();
+
+
+
+
+
+
+}
+
+catch(error){
+
+
+
+console.error(
+
+"DELETE ERROR:",
+
+error
+
+);
+
+
+
+
+
+
+Swal.fire({
+
+icon:"error",
+
+title:"Delete Failed",
+
+text:error.message
+
+
+});
+
+
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
 
 // ======================================================
-// CLOSE MODALS WHEN CLICKING OUTSIDE
+// END PART 3
+// ======================================================
+/* ======================================================
+LINKWORLD EXPRESS
+ADMIN DASHBOARD JS
+PART 4
+EDIT SHIPMENT + UPDATE + LOGOUT + FINAL SYSTEM
+MATCHES DASHBOARD.HTML IDS
+====================================================== */
+
+
+
+
+
+
+
+// ======================================================
+// OPEN EDIT SHIPMENT MODAL
 // ======================================================
 
-window.onclick = function (event) {
 
-    const modals = [
+function openEditShipment(id){
 
-        "shipmentModal",
 
-        "mapModal",
 
-        "receiptModal",
 
-        "deleteModal",
 
-        "locationModal"
+const shipment =
 
-    ];
+shipments.find(
 
-    modals.forEach(id => {
+item => item._id === id
 
-        const modal = document.getElementById(id);
+);
 
-        if (
 
-            modal &&
 
-            event.target === modal
 
-        ) {
 
-            modal.style.display = "none";
 
-        }
+if(!shipment)
 
-    });
+return;
+
+
+
+
+
+
+selectedShipment = shipment;
+
+
+
+
+
+
+
+
+
+const modal =
+
+document.getElementById(
+"editShipmentModal"
+);
+
+
+
+
+
+
+
+if(!modal)
+
+return;
+
+
+
+
+
+
+
+
+
+// hidden ID
+
+
+document.getElementById(
+"editShipmentId"
+).value =
+
+shipment._id;
+
+
+
+
+
+
+
+
+
+// current location
+
+
+document.getElementById(
+"editCurrentLocation"
+).value =
+
+shipment.currentLocation || "";
+
+
+
+
+
+
+
+document.getElementById(
+"editCurrentLatitude"
+).value =
+
+shipment.currentLatitude || 0;
+
+
+
+
+
+
+
+
+document.getElementById(
+"editCurrentLongitude"
+).value =
+
+shipment.currentLongitude || 0;
+
+
+
+
+
+
+
+
+document.getElementById(
+"editStatus"
+).value =
+
+shipment.status || "Created";
+
+
+
+
+
+
+
+
+document.getElementById(
+"editProgress"
+).value =
+
+shipment.progress || 0;
+
+
+
+
+
+
+
+
+document.getElementById(
+"editPaymentStatus"
+).value =
+
+shipment.paymentStatus || "Pending";
+
+
+
+
+
+
+
+
+
+modal.classList.add(
+"active"
+);
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+// ======================================================
+// CLOSE EDIT MODAL
+// ======================================================
+
+
+const closeEdit =
+
+document.getElementById(
+"closeEditModal"
+);
+
+
+
+
+
+if(closeEdit){
+
+
+
+closeEdit.onclick = ()=>{
+
+
+document.getElementById(
+"editShipmentModal"
+)
+
+.classList.remove(
+"active"
+);
+
+
 
 };
 
+
+}
+
+
+
+
+
+
+
+
+
+
+
 // ======================================================
-// ESC KEY CLOSE
+// UPDATE SHIPMENT
+// PUT /api/shipments/:id
 // ======================================================
 
-document.addEventListener(
 
-    "keydown",
+async function updateShipment(){
 
-    function (e) {
 
-        if (e.key !== "Escape") return;
 
-        closeShipmentModal();
 
-        closeMapModal();
 
-        closeReceiptModal();
 
-        closeDeleteModal();
+const id =
 
-        closeLocationModal();
+document.getElementById(
+"editShipmentId"
+).value;
 
-    }
+
+
+
+
+
+
+if(!id)
+
+return;
+
+
+
+
+
+
+
+
+const updateData = {
+
+
+
+
+
+currentLocation:
+
+document.getElementById(
+"editCurrentLocation"
+).value.trim(),
+
+
+
+
+
+
+currentLatitude:
+
+Number(
+
+document.getElementById(
+"editCurrentLatitude"
+).value
+
+)||0,
+
+
+
+
+
+
+
+currentLongitude:
+
+Number(
+
+document.getElementById(
+"editCurrentLongitude"
+).value
+
+)||0,
+
+
+
+
+
+
+
+status:
+
+document.getElementById(
+"editStatus"
+).value,
+
+
+
+
+
+
+
+
+progress:
+
+Number(
+
+document.getElementById(
+"editProgress"
+).value
+
+)||0,
+
+
+
+
+
+
+
+
+paymentStatus:
+
+document.getElementById(
+"editPaymentStatus"
+).value
+
+
+
+
+
+};
+
+
+
+
+
+
+
+
+
+try{
+
+
+
+
+
+const response =
+
+await fetch(
+
+
+`${API_URL}/shipments/${id}`,
+
+{
+
+
+method:"PUT",
+
+
+headers:getHeaders(),
+
+
+body:
+
+JSON.stringify(
+updateData
+)
+
+
+
+}
+
 
 );
 
-// ======================================================
-// AUTO SCROLL TO TOP
-// ======================================================
 
-function scrollTopSmooth() {
 
-    window.scrollTo({
 
-        top: 0,
 
-        behavior: "smooth"
 
-    });
+
+
+
+const data =
+
+await response.json();
+
+
+
+
+
+
+
+
+if(!data.success){
+
+
+throw new Error(
+
+data.message ||
+
+"Update failed"
+
+);
+
 
 }
 
-// ======================================================
-// RESET SELECTIONS
-// ======================================================
 
-function resetSelections() {
 
-    selectedShipment = null;
 
-    selectedShipmentId = null;
 
-    deleteShipmentId = null;
+
+
+
+
+
+Swal.fire({
+
+icon:"success",
+
+title:"Updated",
+
+text:
+"Shipment updated successfully."
+
+});
+
+
+
+
+
+
+
+
+
+document.getElementById(
+"editShipmentModal"
+)
+
+.classList.remove(
+"active"
+);
+
+
+
+
+
+
+
+
+await loadShipments();
+
+
+
+updateStats();
+
+
+
+
+
+
+
 
 }
 
+catch(error){
+
+
+
+console.error(
+
+"UPDATE ERROR:",
+
+error
+
+);
+
+
+
+
+
+
+Swal.fire({
+
+icon:"error",
+
+title:"Update Failed",
+
+text:error.message
+
+
+});
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
 // ======================================================
-// PAGE EXIT
+// UPDATE BUTTON CONNECTION
 // ======================================================
+
+
+const updateButton =
+
+document.getElementById(
+"updateShipmentBtn"
+);
+
+
+
+
+
+if(updateButton){
+
+
+updateButton.addEventListener(
+
+"click",
+
+updateShipment
+
+);
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+// ======================================================
+// LOGOUT BUTTON
+// ======================================================
+
+
+const logoutButton =
+
+document.getElementById(
+"logoutBtn"
+);
+
+
+
+
+
+if(logoutButton){
+
+
+logoutButton.addEventListener(
+
+"click",
+
+logoutAdmin
+
+);
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+// ======================================================
+// CHECK ADMIN SESSION
+// VERIFY TOKEN
+// GET /api/admin/check
+// ======================================================
+
+
+async function verifyAdminSession(){
+
+
+
+
+
+try{
+
+
+
+const response =
+
+await fetch(
+
+
+`${API_URL}/admin/check`,
+
+{
+
+
+method:"GET",
+
+
+headers:getHeaders()
+
+
+
+}
+
+
+);
+
+
+
+
+
+
+
+const data =
+
+await response.json();
+
+
+
+
+
+
+
+
+if(!data.success){
+
+
+throw new Error(
+"Session expired"
+);
+
+
+}
+
+
+
+
+
+
+}
+
+catch(error){
+
+
+
+
+
+localStorage.removeItem(
+"adminToken"
+);
+
+
+
+
+
+
+window.location.href =
+
+"admin-login.html";
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+// ======================================================
+// AUTO REFRESH SHIPMENTS
+// EVERY 60 SECONDS
+// ======================================================
+
+
+setInterval(
+
+async()=>{
+
+
+try{
+
+
+await loadShipments();
+
+
+
+updateStats();
+
+
+
+}
+
+catch(error){
+
+
+console.log(
+"Auto refresh failed"
+);
+
+
+
+}
+
+
+
+},
+
+60000
+
+);
+
+
+
+
+
+
+
+
+
+
+
+// ======================================================
+// START FINAL CHECK
+// ======================================================
+
+
+verifyAdminSession();
+
+
+
+
+
+
+
+
+
+
+
+// ======================================================
+// END PART 4
+// ======================================================
+/* ======================================================
+LINKWORLD EXPRESS
+ADMIN DASHBOARD JS
+PART 5
+FINAL HELPERS + STARTUP CONNECTION
+MATCHES ALL PREVIOUS PARTS
+====================================================== */
+
+
+
+
+
+
+
+// ======================================================
+// COMMON AUTH HEADER FUNCTION
+// USED BY ALL API REQUESTS
+// ======================================================
+
+
+function getHeaders(){
+
+
+
+const token =
+
+localStorage.getItem(
+"adminToken"
+);
+
+
+
+
+
+
+return {
+
+
+
+"Content-Type":
+
+"application/json",
+
+
+
+"Authorization":
+
+`Bearer ${token}`
+
+
+
+};
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+// ======================================================
+// STATUS BADGE COLORS
+// ======================================================
+
+
+function statusClass(status){
+
+
+
+if(!status)
+
+return "status-created";
+
+
+
+
+
+const value =
+
+status.toLowerCase();
+
+
+
+
+
+
+
+
+if(
+
+value.includes("deliver")
+
+)
+
+return "status-delivered";
+
+
+
+
+
+
+
+
+if(
+
+value.includes("transit")
+
+||
+
+value.includes("picked")
+
+||
+
+value.includes("pickup")
+
+)
+
+return "status-transit";
+
+
+
+
+
+
+
+
+if(
+
+value.includes("arriv")
+
+)
+
+return "status-arrived";
+
+
+
+
+
+
+
+
+return "status-created";
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+// ======================================================
+// UPDATE DASHBOARD STATISTICS
+// ======================================================
+
+
+function updateStats(){
+
+
+
+
+
+const total =
+
+document.getElementById(
+"totalShipments"
+);
+
+
+
+
+
+
+const transit =
+
+document.getElementById(
+"transitShipments"
+);
+
+
+
+
+
+
+const delivered =
+
+document.getElementById(
+"deliveredShipments"
+);
+
+
+
+
+
+
+const pending =
+
+document.getElementById(
+"pendingShipments"
+);
+
+
+
+
+
+
+
+
+
+if(total)
+
+total.textContent =
+
+shipments.length;
+
+
+
+
+
+
+
+
+
+if(transit)
+
+
+transit.textContent =
+
+
+shipments.filter(
+
+item =>
+
+item.status === "In Transit"
+
+||
+
+item.status === "Picked Up"
+
+).length;
+
+
+
+
+
+
+
+
+
+if(delivered)
+
+
+delivered.textContent =
+
+
+shipments.filter(
+
+item =>
+
+item.status === "Delivered"
+
+).length;
+
+
+
+
+
+
+
+
+
+if(pending)
+
+
+pending.textContent =
+
+
+shipments.filter(
+
+item =>
+
+item.status === "Created"
+
+).length;
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+// ======================================================
+// SAVE BUTTON CONNECTION
+// DASHBOARD HTML:
+// <button type="submit">
+// ======================================================
+
+
+const shipmentFormSubmit =
+
+document.getElementById(
+"shipmentForm"
+);
+
+
+
+
+
+
+
+if(shipmentFormSubmit){
+
+
+
+shipmentFormSubmit.addEventListener(
+
+"submit",
+
+createShipment
+
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+// ======================================================
+// LOGOUT FUNCTION
+// ======================================================
+
+
+function logoutAdmin(){
+
+
+
+localStorage.removeItem(
+"adminToken"
+);
+
+
+
+
+
+
+localStorage.removeItem(
+"receiptShipment"
+);
+
+
+
+
+
+
+window.location.href =
+
+"admin-login.html";
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+// ======================================================
+// CLOSE MODALS WHEN CLICK OUTSIDE
+// ======================================================
+
 
 window.addEventListener(
 
-    "beforeunload",
+"click",
 
-    function () {
+(event)=>{
 
-        if (adminMap) {
 
-            adminMap.remove();
 
-            adminMap = null;
 
-        }
 
-    }
+
+const viewModal =
+
+document.getElementById(
+"viewShipmentModal"
+);
+
+
+
+
+
+
+
+const editModal =
+
+document.getElementById(
+"editShipmentModal"
+);
+
+
+
+
+
+
+
+
+if(
+
+event.target === viewModal
+
+)
+
+{
+
+
+viewModal.classList.remove(
+"active"
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+if(
+
+event.target === editModal
+
+)
+
+{
+
+
+editModal.classList.remove(
+"active"
+);
+
+
+
+}
+
+
+
+
+
+}
 
 );
 
+
+
+
+
+
+
+
+
+
+
 // ======================================================
-// DASHBOARD READY
+// INITIAL DASHBOARD BOOT
+// RUNS AFTER LOGIN TOKEN CHECK
 // ======================================================
 
-console.log(
 
-    "✅ LinkWorld Express Dashboard Ready"
+async function startDashboard(){
+
+
+
+
+
+
+const token =
+
+localStorage.getItem(
+"adminToken"
+);
+
+
+
+
+
+
+
+if(!token){
+
+
+
+window.location.href =
+
+"admin-login.html";
+
+
+
+return;
+
+
+
+}
+
+
+
+
+
+
+
+
+try{
+
+
+
+
+
+await verifyAdminSession();
+
+
+
+
+
+await loadShipments();
+
+
+
+
+
+renderShipments();
+
+
+
+
+
+updateStats();
+
+
+
+
+
+
+}
+
+catch(error){
+
+
+
+console.error(
+
+"Dashboard start error:",
+
+error
 
 );
 
+
+
+
+
+
+localStorage.removeItem(
+"adminToken"
+);
+
+
+
+
+
+window.location.href =
+
+"admin-login.html";
+
+
+
+}
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
 // ======================================================
-// END OF DASHBOARD.JS
+// PAGE READY
+// ======================================================
+
+
+document.addEventListener(
+
+"DOMContentLoaded",
+
+()=>{
+
+
+startDashboard();
+
+
+
+}
+
+);
+
+
+
+
+
+
+
+
+
+// ======================================================
+// END PART 5
 // ======================================================

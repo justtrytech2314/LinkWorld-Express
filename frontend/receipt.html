@@ -686,7 +686,7 @@ ACTION BUTTONS
 <div class="receipt-actions">
 
 
-<button onclick="window.print()">
+<button onclick="printReceipt()">
 
 
 <i class="fa-solid fa-print"></i>
@@ -699,7 +699,7 @@ Print Receipt
 
 
 
-<button onclick="downloadReceipt()">
+<button onclick="downloadReceipt()"></button>
 
 
 
@@ -795,8 +795,8 @@ This receipt is electronically generated.
 
 
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script src="js/receipt.js"></script>
-
 
 </body>
 

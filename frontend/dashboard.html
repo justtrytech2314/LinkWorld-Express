@@ -1,1163 +1,2020 @@
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
 
+
 <meta charset="UTF-8">
 
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
 
-<title>LinkWorld Express | Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<link rel="preconnect"
-href="https://fonts.googleapis.com">
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-rel="stylesheet">
+<title>
+LinkWorld Express | Admin Dashboard
+</title>
+
+
+
+<meta name="description"
+content="LinkWorld Express premium shipment management dashboard">
+
+
+
+<!-- FAVICON -->
+
+<link rel="icon" href="images/image.png">
+
+
+
+
+
+<!-- GOOGLE FONT -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+
+
+
+
+<!-- FONT AWESOME -->
 
 <link rel="stylesheet"
 href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 
+
+
+
+
+<!-- SWEET ALERT -->
+
 <link rel="stylesheet"
-href="css/dashboard.css">
+href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+
+
+
+
+<!-- DASHBOARD CSS -->
+
+<link rel="stylesheet" href="css/dashboard.css">
+
 
 </head>
 
+
+
+
+
 <body>
 
-<!-- ========================================= -->
-<!-- SIDEBAR -->
-<!-- ========================================= -->
 
-<aside class="sidebar">
 
-<div class="logo">
 
-<img src="images/plane.web.png"
-alt="Logo">
 
-<h2>LinkWorld</h2>
+<!-- =================================================
+ADMIN SIDEBAR
+================================================= -->
 
-<p>Express Admin</p>
+
+<aside class="admin-sidebar">
+
+
+
+<div class="sidebar-logo">
+
+
+<img src="images/image.png" alt="LinkWorld Express">
+
+
+<div>
+
+<h2>
+LinkWorld
+</h2>
+
+<span>
+Admin Panel
+</span>
+
 
 </div>
 
-<ul>
 
-<li class="active"
-onclick="showDashboard()">
+</div>
+
+
+
+
+
+
+
+<nav class="sidebar-menu">
+
+
+<a href="dashboard.html" class="active">
+
 
 <i class="fa-solid fa-chart-line"></i>
 
-<span>Dashboard</span>
 
-</li>
+Dashboard
 
-<li onclick="showCreateShipment()">
+
+</a>
+
+
+
+
+
+<a href="#shipments">
+
 
 <i class="fa-solid fa-box"></i>
 
-<span>Create Shipment</span>
 
-</li>
+Shipments
 
-<li onclick="loadShipments()">
 
-<i class="fa-solid fa-truck-fast"></i>
+</a>
 
-<span>Shipments</span>
 
-</li>
 
-<li onclick="showReceiptHistory()">
 
-<i class="fa-solid fa-file-invoice"></i>
 
-<span>Receipts</span>
 
-</li>
+<a href="#createShipment">
 
-<li onclick="logout()">
-
-<i class="fa-solid fa-right-from-bracket"></i>
-
-<span>Logout</span>
-
-</li>
-
-</ul>
-
-</aside>
-
-<!-- ========================================= -->
-<!-- MAIN CONTENT -->
-<!-- ========================================= -->
-
-<main class="main">
-
-<header class="topbar">
-
-<div>
-
-<h1>
-
-Welcome,
-
-<span id="adminName">
-
-Administrator
-
-</span>
-
-</h1>
-
-<p>
-
-LinkWorld Express Logistics Management System
-
-</p>
-
-</div>
-
-<div class="top-actions">
-
-<button
-onclick="showCreateShipment()">
 
 <i class="fa-solid fa-plus"></i>
 
-New Shipment
+
+Create Shipment
+
+
+</a>
+
+
+
+
+
+
+<a href="receipt.html">
+
+
+<i class="fa-solid fa-file-invoice"></i>
+
+
+Receipts
+
+
+</a>
+
+
+
+
+
+
+
+<a href="#">
+
+
+<i class="fa-solid fa-gear"></i>
+
+
+Settings
+
+
+</a>
+
+
+
+
+
+
+
+<button id="logoutBtn">
+
+
+<i class="fa-solid fa-right-from-bracket"></i>
+
+
+Logout
+
 
 </button>
 
+
+
+
+</nav>
+
+
+
+</aside>
+
+
+
+
+
+
+
+
+
+
+<!-- =================================================
+MAIN CONTENT
+================================================= -->
+
+
+<div class="dashboard-main">
+
+
+
+
+
+
+
+<!-- =================================================
+TOP HEADER
+================================================= -->
+
+
+<header class="dashboard-header">
+
+
+<div>
+
+
+<h1>
+Welcome Back, Admin
+</h1>
+
+
+<p>
+Manage LinkWorld Express shipments and deliveries
+</p>
+
+
 </div>
+
+
+
+
+
+<div class="admin-profile">
+
+
+<i class="fa-solid fa-user-shield"></i>
+
+
+<span>
+Administrator
+</span>
+
+
+</div>
+
+
 
 </header>
 
-<!-- ========================================= -->
-<!-- DASHBOARD CARDS -->
-<!-- ========================================= -->
 
-<section class="cards">
 
-<div class="card">
 
-<i class="fa-solid fa-box"></i>
+
+
+
+<!-- =================================================
+STATISTICS
+================================================= -->
+
+
+<section class="dashboard-stats">
+
+
+
+<div class="stat-card">
+
+
+<div class="stat-icon">
+
+<i class="fa-solid fa-boxes-stacked"></i>
+
+</div>
+
+
 
 <div>
 
-<h4>Total Shipments</h4>
+<h4>
+Total Shipments
+</h4>
 
-<h2 id="shipmentCount">
 
+<h2 id="totalShipments">
 0
-
 </h2>
 
-</div>
 
 </div>
 
-<div class="card">
+
+</div>
+
+
+
+
+
+
+
+<div class="stat-card">
+
+
+<div class="stat-icon">
 
 <i class="fa-solid fa-truck-fast"></i>
 
+</div>
+
+
+
 <div>
 
-<h4>In Transit</h4>
+<h4>
+In Transit
+</h4>
 
-<h2 id="transitCount">
 
+<h2 id="transitShipments">
 0
-
 </h2>
 
-</div>
 
 </div>
 
-<div class="card">
+
+</div>
+
+
+
+
+
+
+
+
+<div class="stat-card">
+
+
+<div class="stat-icon">
 
 <i class="fa-solid fa-circle-check"></i>
 
+</div>
+
+
+
 <div>
 
-<h4>Delivered</h4>
+<h4>
+Delivered
+</h4>
 
-<h2 id="deliveredCount">
 
+<h2 id="deliveredShipments">
 0
-
 </h2>
 
-</div>
 
 </div>
 
-<div class="card">
+
+</div>
+
+
+
+
+
+
+
+
+<div class="stat-card">
+
+
+<div class="stat-icon">
 
 <i class="fa-solid fa-clock"></i>
 
+</div>
+
+
+
 <div>
 
-<h4>Pending</h4>
+<h4>
+Pending
+</h4>
 
-<h2 id="pendingCount">
 
+<h2 id="pendingShipments">
 0
-
 </h2>
 
-</div>
 
 </div>
+
+
+</div>
+
+
+
+
+
 
 </section>
+<!-- =================================================
+CREATE SHIPMENT SECTION
+================================================= -->
 
-<!-- ========================================= -->
-<!-- CREATE SHIPMENT PANEL -->
-<!-- ========================================= -->
+<section class="create-shipment-section" id="createShipment">
 
-<section
-id="createShipment"
-class="panel">
+
+<div class="section-title">
 
 <h2>
-
-<i class="fa-solid fa-plus-circle"></i>
-
 Create New Shipment
-
 </h2>
 
-<div class="form-grid">
-    <!-- ========================================= -->
-<!-- SENDER INFORMATION -->
-<!-- ========================================= -->
+<p>
+Register a new shipment into LinkWorld Express network
+</p>
 
-<div class="form-section">
+</div>
 
-<h3>
+
+
+
+
+<form id="shipmentForm">
+
+
+
+
+
+<!-- =================================================
+SENDER INFORMATION
+================================================= -->
+
+
+<div class="form-card">
+
+
+<div class="form-header">
 
 <i class="fa-solid fa-user"></i>
 
+<h3>
 Sender Information
-
 </h3>
-
-<input
-type="text"
-id="senderName"
-placeholder="Sender Name">
-
-<input
-type="tel"
-id="senderPhone"
-placeholder="Sender Phone Number">
-
-<input
-type="email"
-id="senderEmail"
-placeholder="Sender Email">
 
 </div>
 
-<!-- ========================================= -->
-<!-- RECEIVER INFORMATION -->
-<!-- ========================================= -->
 
-<div class="form-section">
 
-<h3>
+
+<div class="form-grid">
+
+
+
+<div class="input-group">
+
+<label>
+Sender Name
+</label>
+
+<input
+
+type="text"
+
+id="senderName"
+
+placeholder="Enter sender name"
+
+required>
+
+</div>
+
+
+
+
+
+<div class="input-group">
+
+<label>
+Sender Phone
+</label>
+
+<input
+
+type="text"
+
+id="senderPhone"
+
+placeholder="Phone number"
+
+required>
+
+</div>
+
+
+
+
+
+
+<div class="input-group">
+
+<label>
+Sender Email
+</label>
+
+<input
+
+type="email"
+
+id="senderEmail"
+
+placeholder="Email address">
+
+</div>
+
+
+
+
+
+
+<div class="input-group full">
+
+<label>
+Sender Address
+</label>
+
+<input
+
+type="text"
+
+id="senderAddress"
+
+placeholder="Full sender address">
+
+</div>
+
+
+
+
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+
+
+
+<!-- =================================================
+RECEIVER INFORMATION
+================================================= -->
+
+
+<div class="form-card">
+
+
+<div class="form-header">
 
 <i class="fa-solid fa-user-check"></i>
 
+<h3>
 Receiver Information
-
 </h3>
 
+</div>
+
+
+
+
+
+<div class="form-grid">
+
+
+
+<div class="input-group">
+
+<label>
+Receiver Name
+</label>
+
+
 <input
+
 type="text"
+
 id="receiverName"
-placeholder="Receiver Name">
+
+placeholder="Receiver name"
+
+required>
+
+
+</div>
+
+
+
+
+
+<div class="input-group">
+
+<label>
+Receiver Phone
+</label>
+
 
 <input
-type="tel"
+
+type="text"
+
 id="receiverPhone"
-placeholder="Receiver Phone Number">
+
+placeholder="Phone number"
+
+required>
+
+
+</div>
+
+
+
+
+
+
+<div class="input-group">
+
+<label>
+Receiver Email
+</label>
+
 
 <input
+
 type="email"
+
 id="receiverEmail"
-placeholder="Receiver Email">
 
-<textarea
+placeholder="Email address">
+
+
+</div>
+
+
+
+
+
+
+<div class="input-group full">
+
+<label>
+Receiver Address
+</label>
+
+
+<input
+
+type="text"
+
 id="receiverAddress"
-rows="3"
-placeholder="Receiver Home Address"></textarea>
+
+placeholder="Delivery address"
+
+required>
+
 
 </div>
 
-<!-- ========================================= -->
-<!-- SHIPMENT INFORMATION -->
-<!-- ========================================= -->
 
-<div class="form-section">
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<!-- =================================================
+SHIPMENT INFORMATION
+================================================= -->
+
+
+<div class="form-card">
+
+
+<div class="form-header">
+
+<i class="fa-solid fa-box-open"></i>
 
 <h3>
-
-<i class="fa-solid fa-box"></i>
-
-Shipment Information
-
+Shipment Details
 </h3>
 
+
+</div>
+
+
+
+
+
+
+
+<div class="form-grid">
+
+
+
+
+
+<div class="input-group">
+
+
+<label>
+Shipment Description
+</label>
+
+
 <input
+
 type="text"
-id="shipment"
-placeholder="Shipment Description">
 
-<input
-type="text"
-id="origin"
-placeholder="Origin">
+id="shipmentDescription"
 
-<input
-type="text"
-id="currentLocation"
-placeholder="Current Location">
+placeholder="Example: Electronics Package">
 
-<input
-type="text"
-id="destination"
-placeholder="Destination">
 
 </div>
 
-<!-- ========================================= -->
-<!-- CURRENT COORDINATES -->
-<!-- ========================================= -->
 
-<div class="form-section">
 
-<h3>
 
-<i class="fa-solid fa-location-dot"></i>
 
-Current Coordinates
 
-</h3>
 
-<input
-type="number"
-step="any"
-id="currentLatitude"
-placeholder="Current Latitude">
+<div class="input-group">
 
-<input
-type="number"
-step="any"
-id="currentLongitude"
-placeholder="Current Longitude">
 
-<div class="button-row">
+<label>
+Shipment Type
+</label>
 
-<button
-type="button"
-class="secondary-btn"
-onclick="pickCurrentLocation()">
 
-<i class="fa-solid fa-map-location-dot"></i>
 
-Pick On Map
+<select id="shipmentType">
 
-</button>
 
-<button
-type="button"
-class="secondary-btn"
-onclick="useCurrentLocation()">
-
-<i class="fa-solid fa-location-crosshairs"></i>
-
-Use Browser Location
-
-</button>
-
-</div>
-
-</div>
-
-<!-- ========================================= -->
-<!-- DESTINATION COORDINATES -->
-<!-- ========================================= -->
-
-<div class="form-section">
-
-<h3>
-
-<i class="fa-solid fa-map-pin"></i>
-
-Destination Coordinates
-
-</h3>
-
-<input
-type="number"
-step="any"
-id="destinationLatitude"
-placeholder="Destination Latitude">
-
-<input
-type="number"
-step="any"
-id="destinationLongitude"
-placeholder="Destination Longitude">
-
-<div class="button-row">
-
-<button
-type="button"
-class="secondary-btn"
-onclick="pickDestination()">
-
-<i class="fa-solid fa-map-location-dot"></i>
-
-Pick On Map
-
-</button>
-
-</div>
-
-</div>
-
-<!-- ========================================= -->
-<!-- STATUS -->
-<!-- ========================================= -->
-
-<div class="form-section">
-
-<h3>
-
-<i class="fa-solid fa-truck-fast"></i>
-
-Shipment Status
-
-</h3>
-
-<select id="status">
-
-<option value="Shipment Created">
-Shipment Created
+<option value="Package">
+Package
 </option>
 
-<option value="Picked Up">
-Picked Up
+
+<option value="Document">
+Document
 </option>
 
-<option value="Processing">
-Processing
+
+<option value="Express">
+Express
 </option>
 
-<option value="In Transit">
-In Transit
+
+<option value="Cargo">
+Cargo
 </option>
 
-<option value="Customs Clearance">
-Customs Clearance
-</option>
-
-<option value="Arrived at Destination">
-Arrived at Destination
-</option>
-
-<option value="Out for Delivery">
-Out for Delivery
-</option>
-
-<option value="Delivered">
-Delivered
-</option>
-
-<option value="On Hold">
-On Hold
-</option>
-
-<option value="Cancelled">
-Cancelled
-</option>
 
 </select>
 
+
 </div>
 
-<!-- ========================================= -->
-<!-- DELIVERY DATE -->
-<!-- ========================================= -->
 
-<div class="form-section">
 
-<h3>
 
-<i class="fa-solid fa-calendar-days"></i>
 
-Expected Delivery
 
-</h3>
+
+
+
+<div class="input-group">
+
+
+<label>
+Package Weight (KG)
+</label>
+
+
 
 <input
+
+type="number"
+
+id="packageWeight"
+
+placeholder="0">
+
+
+</div>
+
+
+
+
+
+
+
+<div class="input-group">
+
+
+<label>
+Package Value
+</label>
+
+
+
+<input
+
+type="number"
+
+id="packageValue"
+
+placeholder="0">
+
+
+</div>
+
+
+
+
+
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<!-- =================================================
+ROUTE INFORMATION
+================================================= -->
+
+
+<div class="form-card">
+
+
+<div class="form-header">
+
+
+<i class="fa-solid fa-route"></i>
+
+
+<h3>
+Shipment Route
+</h3>
+
+
+</div>
+
+
+
+
+
+
+
+<div class="form-grid">
+
+
+
+
+
+<div class="input-group">
+
+<label>
+Origin
+</label>
+
+
+<input
+
+type="text"
+
+id="origin"
+
+placeholder="Germany">
+
+
+</div>
+
+
+
+
+
+
+
+<div class="input-group">
+
+
+<label>
+Current Location
+</label>
+
+
+<input
+
+type="text"
+
+id="currentLocation"
+
+placeholder="Brazil">
+
+
+</div>
+
+
+
+
+
+
+
+<div class="input-group">
+
+
+<label>
+Destination
+</label>
+
+
+<input
+
+type="text"
+
+id="destination"
+
+placeholder="Mali">
+
+
+</div>
+
+
+
+
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<!-- =================================================
+GPS COORDINATES
+================================================= -->
+
+
+<div class="form-card">
+
+
+<div class="form-header">
+
+
+<i class="fa-solid fa-location-dot"></i>
+
+
+<h3>
+GPS Coordinates
+</h3>
+
+
+</div>
+
+
+
+
+
+
+
+<div class="form-grid">
+
+
+
+
+
+
+<div class="input-group">
+
+<label>
+Current Latitude
+</label>
+
+
+<input
+
+type="number"
+
+step="any"
+
+id="currentLatitude"
+
+placeholder="0.0000">
+
+
+</div>
+
+
+
+
+
+
+
+<div class="input-group">
+
+<label>
+Current Longitude
+</label>
+
+
+<input
+
+type="number"
+
+step="any"
+
+id="currentLongitude"
+
+placeholder="0.0000">
+
+
+</div>
+
+
+
+
+
+
+
+
+<div class="input-group">
+
+<label>
+Destination Latitude
+</label>
+
+
+<input
+
+type="number"
+
+step="any"
+
+id="destinationLatitude"
+
+placeholder="0.0000">
+
+
+</div>
+
+
+
+
+
+
+
+<div class="input-group">
+
+<label>
+Destination Longitude
+</label>
+
+
+<input
+
+type="number"
+
+step="any"
+
+id="destinationLongitude"
+
+placeholder="0.0000">
+
+
+</div>
+
+
+
+
+
+
+</div>
+
+
+
+
+
+</div>
+<!-- =================================================
+SHIPMENT CONTROL
+================================================= -->
+
+
+<div class="form-card">
+
+
+<div class="form-header">
+
+
+<i class="fa-solid fa-sliders"></i>
+
+
+<h3>
+Shipment Control
+</h3>
+
+
+</div>
+
+
+
+
+
+
+
+<div class="form-grid">
+
+
+
+
+
+<div class="input-group">
+
+
+<label>
+Shipment Status
+</label>
+
+
+
+<select id="shipmentStatus">
+
+<option value="Shipment Created">Shipment Created</option>
+
+<option value="Processing">Processing</option>
+
+<option value="Picked Up">Picked Up</option>
+
+<option value="In Transit">In Transit</option>
+
+<option value="At Facility">At Facility</option>
+
+<option value="Out For Delivery">Out For Delivery</option>
+
+<option value="Delivered">Delivered</option>
+
+<option value="Cancelled">Cancelled</option>
+
+</select>
+
+
+
+</div>
+
+
+
+
+
+
+
+<div class="input-group">
+
+
+<label>
+Payment Status
+</label>
+
+
+
+<select id="paymentStatus">
+
+
+<option value="Pending">
+Pending
+</option>
+
+
+<option value="Paid">
+Paid
+</option>
+
+
+<option value="Failed">
+Failed
+</option>
+
+
+</select>
+
+
+</div>
+
+
+
+
+
+
+
+
+<div class="input-group">
+
+
+<label>
+Expected Delivery
+</label>
+
+
+
+<input
+
 type="date"
+
 id="expectedDelivery">
 
-</div>
 
 </div>
 
-<!-- ========================================= -->
-<!-- FORM BUTTONS -->
-<!-- ========================================= -->
 
-<div class="form-buttons">
+
+
+
+
+<div class="input-group">
+
+
+<label>
+Shipment Progress (%)
+</label>
+
+
+
+<input
+
+type="number"
+
+id="shipmentProgress"
+
+min="0"
+
+max="100"
+
+value="0">
+
+
+</div>
+
+
+
+
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<!-- =================================================
+TRACKING NUMBER
+================================================= -->
+
+
+<div class="tracking-generator-card">
+
+
+<div>
+
+
+<h3>
+Tracking Number
+</h3>
+
+
+<p>
+Automatically generated after creating shipment
+</p>
+
+
+</div>
+
+
+
+
+<strong id="generatedTrackingNumber">
+
+Will generate automatically
+
+</strong>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<!-- =================================================
+SUBMIT BUTTON
+================================================= -->
+
+
+<div class="form-actions">
+
 
 <button
-class="save-btn"
-onclick="createShipment()">
 
-<i class="fa-solid fa-floppy-disk"></i>
+type="submit"
+
+class="save-shipment-btn">
+
+
+<i class="fa-solid fa-cloud-arrow-up"></i>
+
 
 Save Shipment
 
+
 </button>
+
+
 
 <button
-class="receipt-btn"
-onclick="previewReceipt()">
 
-<i class="fa-solid fa-file-invoice"></i>
+type="reset"
 
-Generate Receipt
+class="reset-btn">
 
-</button>
 
-<button
-class="clear-btn"
-onclick="clearShipmentForm()">
+<i class="fa-solid fa-rotate-left"></i>
 
-<i class="fa-solid fa-trash"></i>
 
-Clear Form
+Clear
+
 
 </button>
+
+
 
 </div>
+
+
+
+
+
+</form>
+
 
 </section>
-<!-- ========================================= -->
-<!-- SHIPMENT MANAGEMENT -->
-<!-- ========================================= -->
 
-<section
-id="shipmentPanel"
-class="panel">
 
-<div class="panel-header">
+
+
+
+
+
+
+
+<!-- =================================================
+SHIPMENTS MANAGEMENT
+================================================= -->
+
+
+<section class="shipment-management" id="shipments">
+
+
+
+<div class="section-title">
+
 
 <h2>
-
-<i class="fa-solid fa-truck-fast"></i>
-
 Shipment Management
-
 </h2>
 
-<div class="panel-actions">
 
-<button
-class="refresh-btn"
-onclick="loadShipments()">
+<p>
+View and control all shipments
+</p>
 
-<i class="fa-solid fa-rotate"></i>
-
-Refresh
-
-</button>
 
 </div>
 
-</div>
 
-<div class="table-responsive">
+
+
+
+
+
+
+
+<div class="table-container">
+
+
 
 <table class="shipment-table">
 
+
+
 <thead>
+
 
 <tr>
 
-<th>Tracking</th>
 
-<th>Sender</th>
+<th>
+Tracking Number
+</th>
 
-<th>Receiver</th>
 
-<th>Origin</th>
+<th>
+Sender
+</th>
 
-<th>Current Location</th>
 
-<th>Destination</th>
+<th>
+Receiver
+</th>
 
-<th>Status</th>
 
-<th>Delivery Date</th>
+<th>
+Current Location
+</th>
 
-<th>Actions</th>
+
+<th>
+Status
+</th>
+
+
+<th>
+Progress
+</th>
+
+
+<th>
+Actions
+</th>
+
 
 </tr>
+
 
 </thead>
 
-<tbody id="shipmentTable">
 
-<tr>
 
-<td colspan="9"
-style="text-align:center; padding:40px;">
 
-<i class="fa-solid fa-box-open"
-style="font-size:40px; color:#999;"></i>
 
-<br><br>
 
-No Shipments Available
+<tbody id="shipmentTableBody">
 
-</td>
 
-</tr>
+<!-- JS LOADS DATA HERE -->
+
+
 
 </tbody>
 
+
+
+
+
 </table>
 
+
+
 </div>
+
+
 
 </section>
+<!-- =================================================
+SHIPMENT VIEW MODAL
+================================================= -->
 
-<!-- ========================================= -->
-<!-- SHIPMENT DETAILS MODAL -->
-<!-- ========================================= -->
 
-<div
-id="shipmentModal"
-class="modal">
+<div class="modal" id="viewShipmentModal">
+
 
 <div class="modal-content">
 
-<div class="modal-header">
+
+<button class="close-modal" id="closeViewModal">
+
+<i class="fa-solid fa-xmark"></i>
+
+</button>
+
+
+
+
 
 <h2>
-
-<i class="fa-solid fa-box"></i>
-
 Shipment Details
-
 </h2>
 
-<button
-class="close-btn"
-onclick="closeShipmentModal()">
 
-<i class="fa-solid fa-xmark"></i>
 
-</button>
 
-</div>
 
-<div
-id="shipmentDetails">
+<div class="view-details">
 
-<!-- Loaded by dashboard.js -->
 
-</div>
+<div>
+<strong>
+Tracking Number
+</strong>
 
-</div>
-
-</div>
-
-<!-- ========================================= -->
-<!-- LOCATION PICKER MODAL -->
-<!-- ========================================= -->
-
-<div
-id="mapModal"
-class="modal">
-
-<div class="modal-content map-modal">
-
-<div class="modal-header">
-
-<h2>
-
-<i class="fa-solid fa-map-location-dot"></i>
-
-Select Location
-
-</h2>
-
-<button
-class="close-btn"
-onclick="closeMapModal()">
-
-<i class="fa-solid fa-xmark"></i>
-
-</button>
-
-</div>
-
-<div
-id="adminMap"
-style="height:500px; width:100%; border-radius:10px;">
-
-</div>
-
-<div
-class="map-buttons">
-
-<button
-class="save-btn"
-onclick="savePickedLocation()">
-
-<i class="fa-solid fa-check"></i>
-
-Use Selected Location
-
-</button>
-
-<button
-class="clear-btn"
-onclick="closeMapModal()">
-
-Cancel
-
-</button>
-
-</div>
-
-</div>
-
-</div>
-
-<!-- ========================================= -->
-<!-- LOADING OVERLAY -->
-<!-- ========================================= -->
-
-<div
-id="loadingOverlay"
-class="loading-overlay"
-style="display:none;">
-
-<div class="loader-box">
-
-<div class="spinner"></div>
-
-<h3>
-
-Processing Shipment...
-
-</h3>
-
-<p id="loadingText">
-
-Please wait...
-
+<p id="viewTracking">
+-
 </p>
 
 </div>
 
+
+
+
+
+<div>
+<strong>
+Sender
+</strong>
+
+<p id="viewSender">
+-
+</p>
+
 </div>
-<!-- ===================================================== -->
-<!-- RECEIPT PREVIEW MODAL -->
-<!-- ===================================================== -->
 
-<div
-id="receiptModal"
-class="modal">
 
-<div class="modal-content receipt-modal">
 
-<div class="modal-header">
 
-<h2>
 
-<i class="fa-solid fa-file-invoice"></i>
+<div>
+<strong>
+Receiver
+</strong>
 
-Shipment Receipt
+<p id="viewReceiver">
+-
+</p>
 
-</h2>
+</div>
 
-<button
-class="close-btn"
-onclick="closeReceiptModal()">
+
+
+
+
+<div>
+<strong>
+Route
+</strong>
+
+<p id="viewRoute">
+-
+</p>
+
+</div>
+
+
+
+
+
+<div>
+<strong>
+Status
+</strong>
+
+<p id="viewStatus">
+-
+</p>
+
+</div>
+
+
+
+
+
+<div>
+<strong>
+Progress
+</strong>
+
+<p id="viewProgress">
+-
+</p>
+
+</div>
+
+
+
+
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<!-- =================================================
+EDIT SHIPMENT MODAL
+================================================= -->
+
+
+<div class="modal" id="editShipmentModal">
+
+
+<div class="modal-content edit-box">
+
+
+
+<button class="close-modal" id="closeEditModal">
+
 
 <i class="fa-solid fa-xmark"></i>
 
+
 </button>
 
-</div>
 
-<div id="receiptPreview">
 
-<div class="receipt-logo">
 
-<img
-src="images/plane.web.png"
-alt="LinkWorld Express">
 
 <h2>
-
-LINKWORLD EXPRESS
-
+Update Shipment
 </h2>
 
-<p>
 
-Worldwide Logistics Services
 
-</p>
 
-</div>
 
-<hr>
 
-<div id="receiptContent">
 
-<!-- Receipt generated dynamically -->
 
-</div>
+<input 
+type="hidden"
+id="editShipmentId">
 
-</div>
 
-<div class="receipt-buttons">
 
-<button
-class="save-btn"
-onclick="openReceiptPage()">
 
-<i class="fa-solid fa-file-lines"></i>
 
-Open Receipt
 
-</button>
 
-<button
-class="receipt-btn"
-onclick="printReceipt()">
+<div class="form-grid">
 
-<i class="fa-solid fa-print"></i>
 
-Print Receipt
 
-</button>
 
-<button
-class="clear-btn"
-onclick="closeReceiptModal()">
 
-Close
 
-</button>
+<div class="input-group">
 
-</div>
 
-</div>
+<label>
+Current Location
+</label>
 
-</div>
-
-<!-- ===================================================== -->
-<!-- SUCCESS NOTIFICATION -->
-<!-- ===================================================== -->
-
-<div
-id="successToast"
-class="toast success-toast">
-
-<i class="fa-solid fa-circle-check"></i>
-
-<span id="successMessage">
-
-Operation completed successfully.
-
-</span>
-
-</div>
-
-<!-- ===================================================== -->
-<!-- ERROR NOTIFICATION -->
-<!-- ===================================================== -->
-
-<div
-id="errorToast"
-class="toast error-toast">
-
-<i class="fa-solid fa-circle-xmark"></i>
-
-<span id="errorMessage">
-
-Something went wrong.
-
-</span>
-
-</div>
-
-<!-- ===================================================== -->
-<!-- DELETE CONFIRMATION -->
-<!-- ===================================================== -->
-
-<div
-id="deleteModal"
-class="modal">
-
-<div class="modal-content small-modal">
-
-<h2>
-
-<i class="fa-solid fa-trash"></i>
-
-Delete Shipment
-
-</h2>
-
-<p>
-
-Are you sure you want to delete this shipment?
-
-This action cannot be undone.
-
-</p>
-
-<div class="modal-buttons">
-
-<button
-class="clear-btn"
-id="confirmDelete">
-
-Delete
-
-</button>
-
-<button
-class="save-btn"
-onclick="closeDeleteModal()">
-
-Cancel
-
-</button>
-
-</div>
-
-</div>
-
-</div>
-
-<!-- ===================================================== -->
-<!-- LIVE LOCATION UPDATE -->
-<!-- ===================================================== -->
-
-<div
-id="locationModal"
-class="modal">
-
-<div class="modal-content">
-
-<h2>
-
-<i class="fa-solid fa-location-dot"></i>
-
-Update Shipment Location
-
-</h2>
 
 <input
+
 type="text"
-id="newLocation"
-placeholder="Current Location">
 
-<input
-type="number"
-step="any"
-id="newLatitude"
-placeholder="Latitude">
+id="editCurrentLocation">
 
-<input
-type="number"
-step="any"
-id="newLongitude"
-placeholder="Longitude">
-
-<div class="button-row">
-
-<button
-class="secondary-btn"
-onclick="pickUpdateLocation()">
-
-<i class="fa-solid fa-map-location-dot"></i>
-
-Pick On Map
-
-</button>
-
-<button
-class="secondary-btn"
-onclick="useCurrentLocationUpdate()">
-
-<i class="fa-solid fa-location-crosshairs"></i>
-
-Use Browser Location
-
-</button>
 
 </div>
 
-<select id="newStatus">
 
-<option>Shipment Created</option>
 
-<option>Picked Up</option>
 
-<option>Processing</option>
 
-<option>In Transit</option>
 
-<option>Customs Clearance</option>
 
-<option>Arrived at Destination</option>
 
-<option>Out for Delivery</option>
+<div class="input-group">
 
-<option>Delivered</option>
 
-<option>On Hold</option>
+<label>
+Current Latitude
+</label>
 
-<option>Cancelled</option>
+
+<input
+
+type="number"
+
+step="any"
+
+id="editCurrentLatitude">
+
+
+</div>
+
+
+
+
+
+
+
+
+<div class="input-group">
+
+
+<label>
+Current Longitude
+</label>
+
+
+<input
+
+type="number"
+
+step="any"
+
+id="editCurrentLongitude">
+
+
+</div>
+
+
+
+
+
+
+
+
+<div class="input-group">
+
+    <label>
+        Status
+    </label>
+
+    <select id="editStatus">
+
+        <option value="Shipment Created">
+            Shipment Created
+        </option>
+
+        <option value="Processing">
+            Processing
+        </option>
+
+        <option value="Picked Up">
+            Picked Up
+        </option>
+
+        <option value="In Transit">
+            In Transit
+        </option>
+
+        <option value="At Facility">
+            At Facility
+        </option>
+
+        <option value="Out For Delivery">
+            Out For Delivery
+        </option>
+
+        <option value="Delivered">
+            Delivered
+        </option>
+
+        <option value="Cancelled">
+            Cancelled
+        </option>
+
+    </select>
+
+</div>
+
+
+
+
+
+
+
+
+
+<div class="input-group">
+
+
+<label>
+Progress %
+</label>
+
+
+
+<input
+
+type="number"
+
+id="editProgress"
+
+min="0"
+
+max="100">
+
+
+</div>
+
+
+
+
+
+
+
+<div class="input-group">
+
+
+<label>
+Payment Status
+</label>
+
+
+
+<select id="editPaymentStatus">
+
+
+<option>
+Pending
+</option>
+
+
+<option>
+Paid
+</option>
+
+
+<option>
+Failed
+</option>
+
 
 </select>
 
-<div class="modal-buttons">
+
+</div>
+
+
+
+
+
+
+
+</div>
+
+
+
+
+
+
 
 <button
-class="save-btn"
-onclick="saveLocationUpdate()">
+
+class="update-shipment-btn"
+
+id="updateShipmentBtn">
+
 
 <i class="fa-solid fa-floppy-disk"></i>
 
+
 Update Shipment
 
-</button>
-
-<button
-class="clear-btn"
-onclick="closeLocationModal()">
-
-Cancel
 
 </button>
 
+
+
+
+
+
+
 </div>
 
-</div>
 
 </div>
 
-<!-- ===================================================== -->
-<!-- DASHBOARD FOOTER -->
-<!-- ===================================================== -->
-
-<footer class="dashboard-footer">
-
-<p>
-
-© 2026 LinkWorld Express.
-
-All Rights Reserved.
-
-</p>
-
-<p>
-
-Logistics Management Dashboard
-
-</p>
-
-</footer>
-<!-- ===================================================== -->
-<!-- LEAFLET MAP -->
-<!-- ===================================================== -->
-
-<link
-rel="stylesheet"
-href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-
-<script
-src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
-</script>
-
-<!-- ===================================================== -->
-<!-- QR CODE -->
-<!-- ===================================================== -->
-
-<script
-src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js">
-</script>
-
-<!-- ===================================================== -->
-<!-- BARCODE -->
-<!-- ===================================================== -->
-
-<script
-src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js">
-</script>
-
-<!-- ===================================================== -->
-<!-- SWEET ALERT -->
-<!-- ===================================================== -->
-
-<script
-src="https://cdn.jsdelivr.net/npm/sweetalert2@11">
-</script>
-
-<!-- ===================================================== -->
-<!-- AXIOS -->
-<!-- ===================================================== -->
-
-<script
-src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js">
-</script>
 
 
-<script>
 
-// ======================================================
-// LINKWORLD EXPRESS
-// DASHBOARD SECURITY
-// ======================================================
 
-const token = localStorage.getItem("adminToken");
 
-if (!token) {
 
-    window.location.replace("login.html");
 
-}
 
-</script>
+<!-- =================================================
+LEAFLET
+================================================= -->
 
-<!-- ===================================================== -->
-<!-- DASHBOARD SCRIPT -->
-<!-- ===================================================== -->
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+
+
+
+
+<!-- =================================================
+SWEET ALERT
+================================================= -->
+
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+
+
+
+
+<!-- =================================================
+DASHBOARD JS
+================================================= -->
+
 
 <script src="js/dashboard.js"></script>
 
+
+
+
+
+
 </body>
 
-</html>
 
+</html>

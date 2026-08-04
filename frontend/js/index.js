@@ -2,222 +2,271 @@
 // LINKWORLD EXPRESS
 // index.js
 // PART 1
-// LOADER • AOS • HEADER • SCROLL TOP
+// CORE • INITIALIZATION • LOADER • HEADER • NAVIGATION
 // ======================================================
 
+// ======================================================
+// CONFIGURATION
+// ======================================================
+
+const API_BASE_URL =
+"https://linkworld-express2-1.onrender.com";
+
+const TRACKING_URL =
+"tracking.html?tracking=";
+
+const LOADER_TIME = 1800;
+
 
 // ======================================================
-// WAIT FOR PAGE
+// DOM ELEMENTS
 // ======================================================
 
-document.addEventListener(
+const pageLoader =
+document.getElementById("pageLoader");
 
-    "DOMContentLoaded",
+const navbar =
+document.getElementById("navbar");
 
-    function(){
+const menuToggle =
+document.getElementById("menuToggle");
 
-        initializeWebsite();
+const header =
+document.querySelector(".header");
+
+const homeTrackBtn =
+document.getElementById("homeTrackBtn");
+
+const homeTrackingInput =
+document.getElementById("homeTrackingNumber");
+
+const counters =
+document.querySelectorAll(".counter");
+
+
+// ======================================================
+// APPLICATION
+// ======================================================
+
+const App = {
+
+    init(){
+
+        this.initializeLoader();
+
+        this.initializeNavigation();
+
+        this.initializeHeader();
+
+        this.initializeTracking();
+
+        this.initializeCounters();
+
+        this.initializeLazyImages();
 
     }
 
-);
-
-
-// ======================================================
-// INITIALIZE WEBSITE
-// ======================================================
-
-function initializeWebsite(){
-
-    initializeLoader();
-
-    initializeAOS();
-
-    initializeStickyHeader();
-
-    initializeScrollTop();
-
-}
+};
 
 
 // ======================================================
 // PAGE LOADER
 // ======================================================
 
-function initializeLoader(){
+App.initializeLoader = function(){
 
-    const loader =
+    window.addEventListener("load",()=>{
 
-    document.querySelector(
+        setTimeout(()=>{
 
-        ".page-loader"
+            if(pageLoader){
 
-    );
+                pageLoader.style.opacity="0";
 
-    if(!loader) return;
+                pageLoader.style.visibility="hidden";
 
-    window.addEventListener(
+                pageLoader.style.pointerEvents="none";
 
-        "load",
+                setTimeout(()=>{
 
-        function(){
+                    pageLoader.remove();
 
-            setTimeout(()=>{
+                },700);
 
-                loader.style.opacity="0";
+            }
 
-                loader.style.visibility="hidden";
+        },LOADER_TIME);
 
-                loader.style.pointerEvents="none";
+    });
 
-            },800);
+};
+
+
+// ======================================================
+// MOBILE MENU
+// ======================================================
+
+App.initializeNavigation=function(){
+
+    if(!menuToggle || !navbar) return;
+
+    menuToggle.addEventListener("click",()=>{
+
+        navbar.classList.toggle("active");
+
+        menuToggle.classList.toggle("active");
+
+        const icon =
+        menuToggle.querySelector("i");
+
+        if(icon){
+
+            if(navbar.classList.contains("active")){
+
+                icon.className=
+                "fa-solid fa-xmark";
+
+            }else{
+
+                icon.className=
+                "fa-solid fa-bars";
+
+            }
 
         }
 
-    );
+    });
 
-}
+};
 
 
 // ======================================================
-// AOS
+// CLOSE MENU WHEN LINK CLICKED
 // ======================================================
 
-function initializeAOS(){
+document
+.querySelectorAll("#navbar a")
+.forEach(link=>{
 
-    if(typeof AOS!=="undefined"){
+    link.addEventListener("click",()=>{
 
-        AOS.init({
+        if(navbar){
 
-            duration:1000,
+            navbar.classList.remove("active");
 
-            once:true,
+        }
 
-            offset:120,
+        if(menuToggle){
 
-            easing:"ease-in-out"
+            menuToggle.classList.remove("active");
 
-        });
+            const icon =
+            menuToggle.querySelector("i");
 
-    }
+            if(icon){
 
-}
+                icon.className=
+                "fa-solid fa-bars";
+
+            }
+
+        }
+
+    });
+
+});
 
 
 // ======================================================
 // STICKY HEADER
 // ======================================================
 
-function initializeStickyHeader(){
+App.initializeHeader=function(){
 
-    const header =
+    window.addEventListener("scroll",()=>{
 
-    document.querySelector(
+        if(window.scrollY>80){
 
-        ".header"
+            header.classList.add("sticky");
 
-    );
+        }else{
 
-    if(!header) return;
-
-    window.addEventListener(
-
-        "scroll",
-
-        function(){
-
-            if(window.scrollY>60){
-
-                header.classList.add(
-
-                    "sticky"
-
-                );
-
-            }
-
-            else{
-
-                header.classList.remove(
-
-                    "sticky"
-
-                );
-
-            }
+            header.classList.remove("sticky");
 
         }
 
-    );
+    });
 
-}
+};
 
 
 // ======================================================
-// SCROLL TO TOP BUTTON
+// SMOOTH SCROLL
 // ======================================================
 
-function initializeScrollTop(){
+document
+.querySelectorAll('a[href^="#"]')
+.forEach(anchor=>{
 
-    const button =
+    anchor.addEventListener("click",function(e){
 
-    document.querySelector(
+        const target=
+        document.querySelector(
+        this.getAttribute("href")
+        );
 
-        ".scroll-top"
+        if(target){
 
-    );
+            e.preventDefault();
 
-    if(!button) return;
+            target.scrollIntoView({
 
-    window.addEventListener(
+                behavior:"smooth",
 
-        "scroll",
-
-        function(){
-
-            if(window.scrollY>500){
-
-                button.classList.add(
-
-                    "active"
-
-                );
-
-            }
-
-            else{
-
-                button.classList.remove(
-
-                    "active"
-
-                );
-
-            }
-
-        }
-
-    );
-
-    button.addEventListener(
-
-        "click",
-
-        function(){
-
-            window.scrollTo({
-
-                top:0,
-
-                behavior:"smooth"
+                block:"start"
 
             });
 
         }
 
-    );
+    });
 
-}
+});
+
+
+// ======================================================
+// IMAGE LAZY LOADING
+// ======================================================
+
+App.initializeLazyImages=function(){
+
+    const images =
+    document.querySelectorAll("img");
+
+    images.forEach(image=>{
+
+        image.loading="lazy";
+
+    });
+
+};
+
+
+// ======================================================
+// START APPLICATION
+// ======================================================
+
+document.addEventListener(
+
+    "DOMContentLoaded",
+
+    ()=>{
+
+        App.init();
+
+    }
+
+);
 
 
 // ======================================================
@@ -227,442 +276,149 @@ function initializeScrollTop(){
 // LINKWORLD EXPRESS
 // index.js
 // PART 2
-// MOBILE MENU • ACTIVE NAVIGATION • SMOOTH SCROLL
+// QUICK TRACKING • COUNTERS
 // ======================================================
 
 
 // ======================================================
-// MOBILE MENU
+// ANIMATED COUNTERS
 // ======================================================
 
-function initializeMobileMenu(){
+App.initializeCounters = function () {
 
-    const menuButton = document.getElementById("menuToggle");
+    if (!counters.length) return;
 
-    const navbar = document.getElementById("navbar");
+    const observer = new IntersectionObserver((entries) => {
 
-    if(!menuButton || !navbar) return;
+        entries.forEach(entry => {
 
-    menuButton.addEventListener("click",function(){
+            if (!entry.isIntersecting) return;
 
-        navbar.classList.toggle("active");
+            const counter = entry.target;
 
-        const icon = menuButton.querySelector("i");
+            const target = Number(counter.dataset.target);
 
-        if(icon){
+            const duration = 2000;
 
-            if(navbar.classList.contains("active")){
+            const increment = target / (duration / 16);
 
-                icon.classList.remove("fa-bars");
+            let current = 0;
 
-                icon.classList.add("fa-xmark");
+            const timer = setInterval(() => {
 
-            }
+                current += increment;
 
-            else{
+                if (current >= target) {
 
-                icon.classList.remove("fa-xmark");
+                    counter.textContent =
+                        target.toLocaleString();
 
-                icon.classList.add("fa-bars");
+                    clearInterval(timer);
 
-            }
+                } else {
 
-        }
+                    counter.textContent =
+                        Math.floor(current).toLocaleString();
 
-    });
+                }
 
-}
+            }, 16);
 
-
-// ======================================================
-// ACTIVE NAVIGATION
-// ======================================================
-
-function initializeActiveNavigation(){
-
-    const links = document.querySelectorAll(".navbar a");
-
-    const current = window.location.pathname.split("/").pop();
-
-    links.forEach(link=>{
-
-        const href = link.getAttribute("href");
-
-        if(href===current || (current==="" && href==="index.html")){
-
-            link.classList.add("active");
-
-        }
-
-        else{
-
-            link.classList.remove("active");
-
-        }
-
-    });
-
-}
-
-
-// ======================================================
-// SMOOTH SCROLL
-// ======================================================
-
-function initializeSmoothScroll(){
-
-    document.querySelectorAll('a[href^="#"]').forEach(anchor=>{
-
-        anchor.addEventListener("click",function(e){
-
-            const target=document.querySelector(
-
-                this.getAttribute("href")
-
-            );
-
-            if(target){
-
-                e.preventDefault();
-
-                target.scrollIntoView({
-
-                    behavior:"smooth",
-
-                    block:"start"
-
-                });
-
-            }
+            observer.unobserve(counter);
 
         });
 
-    });
+    }, {
 
-}
-
-
-// ======================================================
-// UPDATE INITIALIZER
-// ======================================================
-
-function initializeWebsite(){
-
-    initializeLoader();
-
-    initializeAOS();
-
-    initializeStickyHeader();
-
-    initializeScrollTop();
-
-    initializeMobileMenu();
-
-    initializeActiveNavigation();
-
-    initializeSmoothScroll();
-
-}
-// ======================================================
-// LINKWORLD EXPRESS
-// index.js
-// PART 3
-// TRACKING FORM • COUNTERS • HERO ANIMATIONS
-// ======================================================
-
-
-// ======================================================
-// TRACK SHIPMENT
-// ======================================================
-
-function initializeTrackingForm(){
-
-    const form = document.getElementById("trackingForm");
-
-    if(!form) return;
-
-    form.addEventListener("submit",function(e){
-
-        e.preventDefault();
-
-        const input = document.getElementById("trackingNumber");
-
-        if(!input) return;
-
-        const trackingNumber = input.value.trim();
-
-        if(trackingNumber===""){
-
-            alert("Please enter a tracking number.");
-
-            input.focus();
-
-            return;
-
-        }
-
-        window.location.href=
-
-        "tracking.html?tracking=" +
-
-        encodeURIComponent(trackingNumber);
+        threshold: 0.5
 
     });
 
-}
-
-
-// ======================================================
-// COUNTER ANIMATION
-// ======================================================
-
-function initializeCounters(){
-
-    const counters =
-
-    document.querySelectorAll(".counter");
-
-    if(counters.length===0) return;
-
-    const observer = new IntersectionObserver(
-
-        function(entries){
-
-            entries.forEach(entry=>{
-
-                if(!entry.isIntersecting) return;
-
-                const counter = entry.target;
-
-                const target =
-
-                Number(counter.dataset.target);
-
-                let current = 0;
-
-                const increment =
-
-                Math.max(
-
-                    1,
-
-                    Math.ceil(target/100)
-
-                );
-
-                const timer = setInterval(()=>{
-
-                    current += increment;
-
-                    if(current>=target){
-
-                        current=target;
-
-                        clearInterval(timer);
-
-                    }
-
-                    counter.textContent=
-
-                    current.toLocaleString();
-
-                },20);
-
-                observer.unobserve(counter);
-
-            });
-
-        },
-
-        {
-
-            threshold:0.5
-
-        }
-
-    );
-
-    counters.forEach(counter=>{
+    counters.forEach(counter => {
 
         observer.observe(counter);
 
     });
 
-}
+};
 
 
 // ======================================================
-// HERO IMAGE EFFECT
+// QUICK TRACKING
 // ======================================================
 
-function initializeHeroAnimation(){
+App.initializeTracking = function () {
 
-    const image =
+    if (homeTrackBtn) {
 
-    document.querySelector(
+        homeTrackBtn.addEventListener(
 
-        ".hero-right img"
+            "click",
 
-    );
+            startTracking
 
-    if(!image) return;
-
-    window.addEventListener(
-
-        "mousemove",
-
-        function(e){
-
-            const x =
-
-            (window.innerWidth/2-e.clientX)
-
-            /40;
-
-            const y =
-
-            (window.innerHeight/2-e.clientY)
-
-            /40;
-
-            image.style.transform=
-
-            `translate(${x}px,${y}px)`;
-
-        }
-
-    );
-
-}
-
-
-// ======================================================
-// UPDATE INITIALIZER
-// ======================================================
-
-function initializeWebsite(){
-
-    initializeLoader();
-
-    initializeAOS();
-
-    initializeStickyHeader();
-
-    initializeScrollTop();
-
-    initializeMobileMenu();
-
-    initializeActiveNavigation();
-
-    initializeSmoothScroll();
-
-    initializeTrackingForm();
-
-    initializeCounters();
-
-    initializeHeroAnimation();
-
-}
-// ======================================================
-// LINKWORLD EXPRESS
-// index.js
-// PART 3
-// TRACK SHIPMENT
-// ======================================================
-
-
-// ======================================================
-// 3.1 INITIALIZE TRACKING
-// ======================================================
-
-function initializeTrackingForm(){
-
-    const button = document.getElementById(
-
-        "homeTrackBtn"
-
-    );
-
-    const input = document.getElementById(
-
-        "homeTrackingNumber"
-
-    );
-
-    if(!button || !input){
-
-        return;
+        );
 
     }
 
-    button.addEventListener(
+    if (homeTrackingInput) {
 
-        "click",
+        homeTrackingInput.addEventListener(
 
-        function(){
+            "keypress",
 
-            submitTrackingNumber();
+            function (e) {
 
-        }
+                if (e.key === "Enter") {
 
-    );
+                    startTracking();
 
-    input.addEventListener(
-
-        "keypress",
-
-        function(e){
-
-            if(e.key==="Enter"){
-
-                e.preventDefault();
-
-                submitTrackingNumber();
+                }
 
             }
 
-        }
+        );
 
-    );
+    }
 
-}
+};
 
 
 // ======================================================
-// 3.2 SUBMIT TRACKING NUMBER
+// TRACK BUTTON FUNCTION
 // ======================================================
 
-function submitTrackingNumber(){
+function startTracking() {
 
-    const input = document.getElementById(
+    if (!homeTrackingInput) return;
 
-        "homeTrackingNumber"
+    const trackingNumber =
 
-    );
+        homeTrackingInput.value.trim();
 
-    if(!input){
+    if (trackingNumber === "") {
+
+        showMessage(
+
+            "Please enter your tracking number.",
+
+            "warning"
+
+        );
+
+        homeTrackingInput.focus();
 
         return;
 
     }
 
-    const trackingNumber =
+    if (trackingNumber.length < 6) {
 
-    input.value.trim();
+        showMessage(
 
-    if(
+            "Invalid tracking number.",
 
-        trackingNumber===""
-
-    ){
-
-        input.focus();
-
-        input.style.borderColor="#dc3545";
-
-        alert(
-
-            "Please enter your tracking number."
+            "error"
 
         );
 
@@ -670,57 +426,52 @@ function submitTrackingNumber(){
 
     }
 
-    input.style.borderColor="#28a745";
+    loadingButton(true);
 
-    redirectToTracking(
+    setTimeout(() => {
 
-        trackingNumber
+        window.location.href =
 
-    );
+            TRACKING_URL +
 
-}
+            encodeURIComponent(trackingNumber);
 
-
-// ======================================================
-// 3.3 REDIRECT
-// ======================================================
-
-function redirectToTracking(
-
-    trackingNumber
-
-){
-
-    window.location.href=
-
-    "tracking.html?tracking=" +
-
-    encodeURIComponent(
-
-        trackingNumber
-
-    );
+    }, 700);
 
 }
 
 
 // ======================================================
-// 3.4 CLEAR TRACK BOX
+// BUTTON LOADING
 // ======================================================
 
-function clearTrackingInput(){
+function loadingButton(status) {
 
-    const input = document.getElementById(
+    if (!homeTrackBtn) return;
 
-        "homeTrackingNumber"
+    if (status) {
 
-    );
+        homeTrackBtn.disabled = true;
 
-    if(input){
+        homeTrackBtn.innerHTML = `
 
-        input.value="";
+            <i class="fa-solid fa-spinner fa-spin"></i>
 
-        input.style.borderColor="";
+            Searching...
+
+        `;
+
+    } else {
+
+        homeTrackBtn.disabled = false;
+
+        homeTrackBtn.innerHTML = `
+
+            <i class="fa-solid fa-magnifying-glass"></i>
+
+            Track Now
+
+        `;
 
     }
 
@@ -728,30 +479,260 @@ function clearTrackingInput(){
 
 
 // ======================================================
-// 3.5 UPDATE INITIALIZER
-// Replace your initializeWebsite()
-// with this version
+// ALERTS
 // ======================================================
 
-function initializeWebsite(){
+function showMessage(message, icon = "info") {
 
-    initializeLoader();
+    Swal.fire({
 
-    initializeAOS();
+        icon,
 
-    initializeStickyHeader();
+        text: message,
 
-    initializeScrollTop();
+        confirmButtonColor: "#0b6b43",
 
-    initializeMobileMenu();
+        timer: 2500,
 
-    initializeActiveNavigation();
+        timerProgressBar: true,
 
-    initializeSmoothScroll();
+        showConfirmButton: false
 
-    initializeTrackingForm();
+    });
 
 }
+
+
+// ======================================================
+// RESET TRACK BUTTON WHEN RETURNING
+// ======================================================
+
+window.addEventListener("pageshow", () => {
+
+    loadingButton(false);
+
+});
+
+
+// ======================================================
+// END PART 2
+// ======================================================
+// ======================================================
+// LINKWORLD EXPRESS
+// index.js
+// PART 3
+// PREMIUM HOMEPAGE EFFECTS
+// ======================================================
+
+
+// ======================================================
+// HERO FLOATING IMAGE
+// ======================================================
+
+App.initializeHeroAnimation = function(){
+
+    const heroImage =
+    document.querySelector(".hero-right img");
+
+    if(!heroImage) return;
+
+    let direction = 1;
+    let position = 0;
+
+    setInterval(()=>{
+
+        position += 0.4 * direction;
+
+        if(position >= 15){
+
+            direction = -1;
+
+        }
+
+        if(position <= -15){
+
+            direction = 1;
+
+        }
+
+        heroImage.style.transform =
+        `translateY(${position}px)`;
+
+    },30);
+
+};
+
+
+// ======================================================
+// PARALLAX HERO
+// ======================================================
+
+App.initializeParallax = function(){
+
+    const hero =
+    document.querySelector(".hero");
+
+    if(!hero) return;
+
+    window.addEventListener("scroll",()=>{
+
+        const scroll =
+        window.pageYOffset;
+
+        hero.style.backgroundPositionY =
+        `${scroll * 0.35}px`;
+
+    });
+
+};
+
+
+// ======================================================
+// SERVICE CARD EFFECT
+// ======================================================
+
+App.initializeServiceCards = function(){
+
+    const cards =
+    document.querySelectorAll(".service-card");
+
+    cards.forEach(card=>{
+
+        card.addEventListener("mouseenter",()=>{
+
+            card.style.transform =
+            "translateY(-12px) scale(1.03)";
+
+            card.style.transition =
+            ".35s ease";
+
+        });
+
+        card.addEventListener("mouseleave",()=>{
+
+            card.style.transform =
+            "translateY(0) scale(1)";
+
+        });
+
+    });
+
+};
+
+
+// ======================================================
+// TESTIMONIAL AUTO SLIDER
+// ======================================================
+
+App.initializeTestimonials = function(){
+
+    const cards =
+    document.querySelectorAll(".testimonial-card");
+
+    if(cards.length <= 1) return;
+
+    let current = 0;
+
+    setInterval(()=>{
+
+        cards.forEach(card=>{
+
+            card.classList.remove("active");
+
+        });
+
+        cards[current].classList.add("active");
+
+        current++;
+
+        if(current >= cards.length){
+
+            current = 0;
+
+        }
+
+    },5000);
+
+};
+
+
+// ======================================================
+// SECTION REVEAL
+// ======================================================
+
+App.initializeReveal = function(){
+
+    const sections =
+    document.querySelectorAll("section");
+
+    const observer =
+    new IntersectionObserver(entries=>{
+
+        entries.forEach(entry=>{
+
+            if(entry.isIntersecting){
+
+                entry.target.classList.add("show-section");
+
+            }
+
+        });
+
+    },{
+
+        threshold:0.15
+
+    });
+
+    sections.forEach(section=>{
+
+        observer.observe(section);
+
+    });
+
+};
+
+
+// ======================================================
+// SCROLL OPTIMIZATION
+// ======================================================
+
+let ticking = false;
+
+window.addEventListener("scroll",()=>{
+
+    if(!ticking){
+
+        window.requestAnimationFrame(()=>{
+
+            ticking = false;
+
+        });
+
+        ticking = true;
+
+    }
+
+});
+
+
+// ======================================================
+// START PREMIUM EFFECTS
+// ======================================================
+
+document.addEventListener("DOMContentLoaded",()=>{
+
+    App.initializeHeroAnimation();
+
+    App.initializeParallax();
+
+    App.initializeServiceCards();
+
+    App.initializeTestimonials();
+
+    App.initializeReveal();
+
+});
 
 
 // ======================================================
@@ -761,237 +742,277 @@ function initializeWebsite(){
 // LINKWORLD EXPRESS
 // index.js
 // PART 4
-// COUNTERS • HERO EFFECT • SCROLL ANIMATIONS
+// PREMIUM UI INTERACTIONS
 // ======================================================
 
 
 // ======================================================
-// 4.1 ANIMATED COUNTERS
+// SCROLL PROGRESS BAR
 // ======================================================
 
-function initializeCounters(){
+App.initializeScrollProgress = function(){
 
-    const counters =
+    let progress =
+    document.getElementById("scrollProgress");
 
-    document.querySelectorAll(
+    if(!progress){
 
-        ".counter"
+        progress =
+        document.createElement("div");
 
-    );
+        progress.id = "scrollProgress";
 
-    if(counters.length===0){
+        progress.style.position = "fixed";
+        progress.style.top = "0";
+        progress.style.left = "0";
+        progress.style.width = "0%";
+        progress.style.height = "4px";
+        progress.style.zIndex = "99999";
+        progress.style.background =
+        "linear-gradient(90deg,#2E7D32,#66BB6A)";
+        progress.style.transition =
+        "width .15s linear";
 
-        return;
+        document.body.appendChild(progress);
 
     }
 
-    const observer =
+    window.addEventListener("scroll",()=>{
 
-    new IntersectionObserver(
+        const totalHeight =
 
-        function(entries){
+            document.documentElement.scrollHeight -
 
-            entries.forEach(entry=>{
+            window.innerHeight;
 
-                if(!entry.isIntersecting){
+        const percent =
 
-                    return;
+            (window.pageYOffset / totalHeight) * 100;
 
-                }
-
-                const counter =
-
-                entry.target;
-
-                const target = Number(
-
-                    counter.dataset.target
-
-                );
-
-                let current = 0;
-
-                const speed =
-
-                Math.ceil(target/100);
-
-                const timer =
-
-                setInterval(()=>{
-
-                    current += speed;
-
-                    if(current>=target){
-
-                        current=target;
-
-                        clearInterval(timer);
-
-                    }
-
-                    counter.textContent=
-
-                    current.toLocaleString();
-
-                },20);
-
-                observer.unobserve(counter);
-
-            });
-
-        },
-
-        {
-
-            threshold:0.5
-
-        }
-
-    );
-
-    counters.forEach(counter=>{
-
-        observer.observe(counter);
+        progress.style.width = percent + "%";
 
     });
 
-}
+};
 
 
 // ======================================================
-// 4.2 HERO PARALLAX EFFECT
+// ACTIVE NAVIGATION
 // ======================================================
 
-function initializeHeroEffect(){
+App.initializeActiveNav = function(){
 
-    const heroImage =
+    const sections =
+    document.querySelectorAll("section");
 
-    document.querySelector(
+    const navLinks =
+    document.querySelectorAll("#navbar a");
 
-        ".hero-right img"
+    window.addEventListener("scroll",()=>{
 
-    );
+        let current = "";
 
-    if(!heroImage){
+        sections.forEach(section=>{
 
-        return;
+            const top =
+            section.offsetTop - 150;
 
-    }
+            if(window.pageYOffset >= top){
 
-    window.addEventListener(
+                current = section.getAttribute("id");
 
-        "mousemove",
+            }
 
-        function(e){
+        });
 
-            const x =
+        navLinks.forEach(link=>{
 
-            (window.innerWidth/2-e.clientX)/50;
+            link.classList.remove("active");
 
-            const y =
+            const href =
 
-            (window.innerHeight/2-e.clientY)/50;
+            link.getAttribute("href");
 
-            heroImage.style.transform=
+            if(
 
-            `translate(${x}px,${y}px)`;
+                href === "#" + current ||
 
-        }
+                (href==="index.html" && current==="")
 
-    );
+            ){
 
-}
+                link.classList.add("active");
 
+            }
 
-// ======================================================
-// 4.3 FADE ELEMENTS ON SCROLL
-// ======================================================
-
-function initializeFadeIn(){
-
-    const elements =
-
-    document.querySelectorAll(
-
-        ".fade-up"
-
-    );
-
-    if(elements.length===0){
-
-        return;
-
-    }
-
-    const observer =
-
-    new IntersectionObserver(
-
-        function(entries){
-
-            entries.forEach(entry=>{
-
-                if(entry.isIntersecting){
-
-                    entry.target.classList.add(
-
-                        "show"
-
-                    );
-
-                }
-
-            });
-
-        },
-
-        {
-
-            threshold:0.15
-
-        }
-
-    );
-
-    elements.forEach(element=>{
-
-        observer.observe(element);
+        });
 
     });
 
-}
+};
 
 
 // ======================================================
-// 4.4 UPDATE INITIALIZER
-// Replace initializeWebsite()
+// RIPPLE BUTTON EFFECT
 // ======================================================
 
-function initializeWebsite(){
+App.initializeButtons = function(){
 
-    initializeLoader();
+    const buttons =
+    document.querySelectorAll(
 
-    initializeAOS();
+        ".primary-btn,.secondary-btn,.track-btn"
 
-    initializeStickyHeader();
+    );
 
-    initializeScrollTop();
+    buttons.forEach(button=>{
 
-    initializeMobileMenu();
+        button.addEventListener("click",function(e){
 
-    initializeActiveNavigation();
+            const ripple =
+            document.createElement("span");
 
-    initializeSmoothScroll();
+            ripple.className = "ripple";
 
-    initializeTrackingForm();
+            const rect =
+            button.getBoundingClientRect();
 
-    initializeCounters();
+            ripple.style.left =
+            (e.clientX-rect.left)+"px";
 
-    initializeHeroEffect();
+            ripple.style.top =
+            (e.clientY-rect.top)+"px";
 
-    initializeFadeIn();
+            button.appendChild(ripple);
 
-}
+            setTimeout(()=>{
+
+                ripple.remove();
+
+            },600);
+
+        });
+
+    });
+
+};
+
+
+// ======================================================
+// BACK TO TOP
+// ======================================================
+
+App.initializeBackToTop = function(){
+
+    const topButton =
+    document.getElementById("backToTop");
+
+    if(!topButton) return;
+
+    window.addEventListener("scroll",()=>{
+
+        if(window.scrollY>500){
+
+            topButton.classList.add("show");
+
+        }
+
+        else{
+
+            topButton.classList.remove("show");
+
+        }
+
+    });
+
+    topButton.addEventListener("click",()=>{
+
+        window.scrollTo({
+
+            top:0,
+
+            behavior:"smooth"
+
+        });
+
+    });
+
+};
+
+
+// ======================================================
+// CONNECTION STATUS
+// ======================================================
+
+App.initializeConnection = function(){
+
+    window.addEventListener("offline",()=>{
+
+        showMessage(
+
+            "Internet connection lost.",
+
+            "warning"
+
+        );
+
+    });
+
+    window.addEventListener("online",()=>{
+
+        showMessage(
+
+            "Connection restored.",
+
+            "success"
+
+        );
+
+    });
+
+};
+
+
+// ======================================================
+// PERFORMANCE
+// ======================================================
+
+App.initializePerformance = function(){
+
+    window.addEventListener("pageshow",()=>{
+
+        document.body.classList.add("page-ready");
+
+    });
+
+};
+
+
+// ======================================================
+// START PREMIUM FEATURES
+// ======================================================
+
+document.addEventListener(
+
+    "DOMContentLoaded",
+
+    ()=>{
+
+        App.initializeScrollProgress();
+
+        App.initializeActiveNav();
+
+        App.initializeButtons();
+
+        App.initializeBackToTop();
+
+        App.initializeConnection();
+
+        App.initializePerformance();
+
+    }
+
+);
 
 
 // ======================================================
@@ -1001,227 +1022,215 @@ function initializeWebsite(){
 // LINKWORLD EXPRESS
 // index.js
 // PART 5
-// NEWSLETTER • CONTACT • UTILITIES • FINAL SETUP
+// FINAL PREMIUM FEATURES
 // ======================================================
 
 
 // ======================================================
-// 5.1 NEWSLETTER SUBSCRIPTION
+// PREMIUM MOUSE GLOW
 // ======================================================
 
-function initializeNewsletter(){
+App.initializeMouseGlow = function(){
 
-    const form = document.getElementById(
+    const glow =
+    document.createElement("div");
 
-        "newsletterForm"
+    glow.id = "mouseGlow";
 
-    );
+    glow.style.position = "fixed";
+    glow.style.width = "18px";
+    glow.style.height = "18px";
+    glow.style.borderRadius = "50%";
+    glow.style.pointerEvents = "none";
+    glow.style.background =
+    "rgba(76,175,80,.25)";
+    glow.style.backdropFilter = "blur(3px)";
+    glow.style.transform =
+    "translate(-50%,-50%)";
+    glow.style.transition =
+    "transform .08s linear";
+    glow.style.zIndex = "999999";
 
-    if(!form){
+    document.body.appendChild(glow);
 
-        return;
+    document.addEventListener("mousemove",(e)=>{
 
-    }
+        glow.style.left =
+        e.clientX + "px";
 
-    form.addEventListener(
+        glow.style.top =
+        e.clientY + "px";
 
-        "submit",
+    });
 
-        function(e){
+};
 
-            e.preventDefault();
 
-            const email = document.getElementById(
+// ======================================================
+// IMAGE REVEAL EFFECT
+// ======================================================
 
-                "newsletterEmail"
+App.initializeImageReveal = function(){
 
-            );
+    const images =
+    document.querySelectorAll("img");
 
-            if(!email){
+    const observer =
+    new IntersectionObserver(entries=>{
 
-                return;
+        entries.forEach(entry=>{
+
+            if(entry.isIntersecting){
+
+                entry.target.style.opacity = "1";
+
+                entry.target.style.transform =
+                "translateY(0)";
 
             }
 
-            if(email.value.trim()===""){
+        });
 
-                alert(
+    },{
 
-                    "Please enter your email address."
+        threshold:0.2
 
-                );
+    });
 
-                email.focus();
+    images.forEach(image=>{
 
-                return;
+        image.style.opacity = "0";
 
-            }
+        image.style.transform =
+        "translateY(40px)";
 
-            alert(
+        image.style.transition =
+        "all .8s ease";
 
-                "Thank you for subscribing to LinkWorld Express."
+        observer.observe(image);
 
-            );
+    });
 
-            form.reset();
-
-        }
-
-    );
-
-}
+};
 
 
 // ======================================================
-// 5.2 CONTACT FORM
+// RENDER SERVER CHECK
 // ======================================================
 
-function initializeContactForm(){
+App.checkServer = async function(){
 
-    const form = document.getElementById(
+    try{
 
-        "contactForm"
+        await axios.get(API_BASE_URL);
 
-    );
+        console.log(
 
-    if(!form){
+            "✅ Render Server Connected"
 
-        return;
+        );
 
     }
 
-    form.addEventListener(
+    catch(error){
 
-        "submit",
+        console.warn(
 
-        function(e){
+            "⚠ Backend Offline"
 
-            e.preventDefault();
+        );
 
-            alert(
+    }
 
-                "Your message has been sent successfully."
-
-            );
-
-            form.reset();
-
-        }
-
-    );
-
-}
+};
 
 
 // ======================================================
-// 5.3 CURRENT YEAR
+// AUTO YEAR
 // ======================================================
 
-function updateFooterYear(){
+App.initializeYear = function(){
 
-    const year = document.getElementById(
-
-        "currentYear"
-
-    );
+    const year =
+    document.getElementById("currentYear");
 
     if(year){
 
         year.textContent =
-
         new Date().getFullYear();
 
     }
 
-}
+};
 
 
 // ======================================================
-// 5.4 PRELOAD IMAGES
+// DEVELOPER SHORTCUT
+// CTRL + SHIFT + L
 // ======================================================
 
-function preloadImages(){
+document.addEventListener(
 
-    const images = document.images;
+    "keydown",
 
-    for(let i=0;i<images.length;i++){
+    function(e){
 
-        const img = new Image();
+        if(
 
-        img.src = images[i].src;
+            e.ctrlKey &&
+
+            e.shiftKey &&
+
+            e.key.toLowerCase()==="l"
+
+        ){
+
+            console.clear();
+
+            console.log(
+
+                "%cLINKWORLD EXPRESS",
+
+                "color:#2E7D32;font-size:20px;font-weight:bold"
+
+            );
+
+        }
 
     }
 
-}
+);
 
 
 // ======================================================
-// 5.5 CONSOLE MESSAGE
+// FINAL INITIALIZATION
 // ======================================================
 
-function showDeveloperMessage(){
+document.addEventListener(
 
-    console.log(
+    "DOMContentLoaded",
 
-        "%cLinkWorld Express",
+    ()=>{
 
-        "color:#0d6efd;font-size:22px;font-weight:bold;"
+        App.initializeMouseGlow();
 
-    );
+        App.initializeImageReveal();
 
-    console.log(
+        App.initializeYear();
 
-        "%cWebsite Loaded Successfully.",
+        App.checkServer();
 
-        "color:#28a745;font-size:14px;"
+        console.log(
 
-    );
+            "🚚 LinkWorld Express Premium Homepage Ready"
 
-}
+        );
 
+    }
 
-// ======================================================
-// 5.6 UPDATE INITIALIZER
-// Replace initializeWebsite()
-// ======================================================
-
-function initializeWebsite(){
-
-    initializeLoader();
-
-    initializeAOS();
-
-    initializeStickyHeader();
-
-    initializeScrollTop();
-
-    initializeMobileMenu();
-
-    initializeActiveNavigation();
-
-    initializeSmoothScroll();
-
-    initializeTrackingForm();
-
-    initializeCounters();
-
-    initializeHeroEffect();
-
-    initializeFadeIn();
-
-    initializeNewsletter();
-
-    initializeContactForm();
-
-    updateFooterYear();
-
-    preloadImages();
-
-    showDeveloperMessage();
-
-}
+);
 
 
 // ======================================================
-// END PART 5
+// END OF FILE
 // ======================================================

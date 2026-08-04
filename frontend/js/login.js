@@ -1,187 +1,827 @@
-// ======================================================
-// LINKWORLD EXPRESS
-// ADMIN LOGIN
-// ======================================================
+/* ======================================================
+LINKWORLD EXPRESS
+ADMIN LOGIN JS
+PART 1
+AUTHENTICATION SYSTEM
+====================================================== */
 
-const loginForm = document.getElementById("loginForm");
-const emailInput = document.getElementById("email");
-const passwordInput = document.getElementById("password");
 
-const errorMessage = document.getElementById("errorMessage");
+"use strict";
 
-const loadingScreen = document.getElementById("loadingScreen");
-const loadingText = document.getElementById("loadingText");
-const progressBar = document.getElementById("progressBar");
-const progressPercent = document.getElementById("progressPercent");
 
-const togglePassword = document.getElementById("togglePassword");
 
 // ======================================================
-// API
+// API CONFIG
 // ======================================================
 
-const API_URL =
-"https://linkworld-express2-1.onrender.com";
+
+const API_URL = "http://localhost:5000/api";
+
+
+
+
 
 // ======================================================
-// SHOW / HIDE PASSWORD
+// DOM ELEMENTS
 // ======================================================
 
-togglePassword.addEventListener("click", () => {
 
-    if (passwordInput.type === "password") {
+const loginForm = document.getElementById(
+"loginForm"
+);
 
-        passwordInput.type = "text";
 
-        togglePassword.innerHTML =
-            '<i class="fa-solid fa-eye-slash"></i>';
+const emailInput = document.getElementById(
+"email"
+);
 
-    } else {
 
-        passwordInput.type = "password";
+const passwordInput = document.getElementById(
+"password"
+);
 
-        togglePassword.innerHTML =
-            '<i class="fa-solid fa-eye"></i>';
 
-    }
+const loginButton = document.getElementById(
+"loginButton"
+);
+
+
+const errorMessage = document.getElementById(
+"errorMessage"
+);
+
+
+
+const togglePassword = document.getElementById(
+"togglePassword"
+);
+
+
+
+
+
+// ======================================================
+// PASSWORD TOGGLE
+// ======================================================
+
+
+if(togglePassword){
+
+
+togglePassword.addEventListener(
+"click",
+()=>{
+
+
+if(passwordInput.type === "password"){
+
+
+passwordInput.type = "text";
+
+
+togglePassword.innerHTML =
+
+`
+<i class="fa-solid fa-eye-slash"></i>
+`;
+
+
+}
+
+
+else{
+
+
+passwordInput.type = "password";
+
+
+togglePassword.innerHTML =
+
+`
+<i class="fa-solid fa-eye"></i>
+`;
+
+
+}
+
+
 
 });
 
+
+}
+
+
+
+
+
+
+
+
 // ======================================================
-// LOGIN
+// LOGIN SUBMIT
 // ======================================================
 
-loginForm.addEventListener("submit", async (e) => {
 
-    e.preventDefault();
+loginForm.addEventListener(
 
-    errorMessage.style.display = "none";
+"submit",
 
-    const email = emailInput.value.trim();
-    const password = passwordInput.value.trim();
+async(e)=>{
 
-    try {
 
-        const response = await fetch(`${API_URL}/api/auth/login`, {
+e.preventDefault();
 
-            method: "POST",
 
-            headers: {
 
-                "Content-Type": "application/json"
+const email =
+emailInput.value.trim();
 
-            },
 
-            body: JSON.stringify({
 
-                email,
-                password
+const password =
+passwordInput.value.trim();
 
-            })
 
-        });
 
-        const data = await response.json();
 
-        if (!response.ok) {
 
-            errorMessage.style.display = "block";
+if(!email || !password){
 
-            errorMessage.innerHTML =
 
-                data.message || "Invalid Email or Password.";
+showError(
+"Please enter email and password."
+);
 
-            return;
 
-        }
+return;
 
-        localStorage.setItem("adminToken", data.token);
 
-        startLoading();
+}
 
-    }
 
-    catch (err) {
 
-        console.error(err);
 
-        errorMessage.style.display = "block";
 
-        errorMessage.innerHTML =
 
-            "Unable to connect to the server.";
+loginButton.disabled = true;
 
-    }
+
+loginButton.innerHTML =
+
+
+`
+<i class="fa-solid fa-spinner fa-spin"></i>
+
+Checking...
+
+`;
+
+
+
+
+
+
+
+try{
+
+
+
+const response = await fetch(
+
+`${API_URL}/admin/login`,
+
+{
+
+
+method:"POST",
+
+
+headers:{
+
+
+"Content-Type":
+"application/json"
+
+
+},
+
+
+body:JSON.stringify({
+
+
+email,
+
+password
+
+
+})
+
+
+}
+
+
+);
+
+
+
+
+
+
+const data = await response.json();
+
+
+
+
+
+
+
+
+if(!data.success){
+
+
+throw new Error(
+data.message
+);
+
+
+}
+
+
+
+
+
+
+
+// SAVE TOKEN
+
+
+localStorage.setItem(
+
+"adminToken",
+
+data.token
+
+);
+
+
+
+
+
+localStorage.setItem(
+
+"admin",
+
+JSON.stringify(
+data.admin
+)
+
+);
+
+
+
+
+
+showToast(
+"Login successful",
+"success"
+);
+
+
+
+
+
+
+startLoading();
+
+
+
+
+
+
+}
+
+catch(error){
+
+
+console.error(
+"LOGIN ERROR:",
+error
+);
+
+
+
+showError(
+error.message
+);
+
+
+
+loginButton.disabled=false;
+
+
+
+loginButton.innerHTML =
+
+
+`
+<i class="fa-solid fa-right-to-bracket"></i>
+
+Login
+
+`;
+
+
+
+}
+
+
+
+});
+/* ======================================================
+LINKWORLD EXPRESS
+ADMIN LOGIN JS
+PART 2
+LOADING + TOAST SYSTEM
+====================================================== */
+
+
+
+
+
+// ======================================================
+// START LAZY LOADING
+// ======================================================
+
+
+function startLoading(){
+
+
+
+const loadingScreen =
+
+document.getElementById(
+"loadingScreen"
+);
+
+
+
+const loadingText =
+
+document.getElementById(
+"loadingText"
+);
+
+
+
+const progressBar =
+
+document.getElementById(
+"progressBar"
+);
+
+
+
+const progressPercent =
+
+document.getElementById(
+"progressPercent"
+);
+
+
+
+
+
+
+if(!loadingScreen)
+
+return;
+
+
+
+
+
+
+loadingScreen.classList.add(
+"active"
+);
+
+
+
+
+
+
+let progress = 0;
+
+
+
+
+
+const messages = [
+
+
+"Connecting to secure server...",
+
+
+"Verifying administrator account...",
+
+
+"Loading shipment database...",
+
+
+"Preparing LinkWorld dashboard...",
+
+
+"Access granted..."
+
+
+
+];
+
+
+
+
+
+
+const loader = setInterval(()=>{
+
+
+
+progress += 10;
+
+
+
+
+
+
+if(progressBar){
+
+
+progressBar.style.width =
+progress + "%";
+
+
+}
+
+
+
+
+
+
+if(progressPercent){
+
+
+progressPercent.textContent =
+progress + "%";
+
+
+}
+
+
+
+
+
+
+
+
+if(loadingText){
+
+
+let index =
+
+Math.floor(progress / 20);
+
+
+
+if(index > 4)
+
+index = 4;
+
+
+
+loadingText.textContent =
+
+messages[index];
+
+
+
+}
+
+
+
+
+
+
+
+
+if(progress >= 100){
+
+
+
+clearInterval(loader);
+
+
+
+
+
+setTimeout(()=>{
+
+
+window.location.href =
+"dashboard.html";
+
+
+
+},700);
+
+
+
+
+
+}
+
+
+
+
+
+},300);
+
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// ======================================================
+// SHOW ERROR MESSAGE
+// ======================================================
+
+
+function showError(message){
+
+
+
+if(!errorMessage)
+
+return;
+
+
+
+
+errorMessage.style.display =
+"block";
+
+
+
+errorMessage.innerHTML =
+
+`
+
+<i class="fa-solid fa-circle-exclamation"></i>
+
+${message}
+
+`;
+
+
+
+
+
+
+setTimeout(()=>{
+
+
+errorMessage.style.display =
+"none";
+
+
+},4000);
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// ======================================================
+// TOAST SYSTEM
+// ======================================================
+
+
+function showToast(
+message,
+type="success"
+){
+
+
+
+const toast =
+
+document.getElementById(
+"toast"
+);
+
+
+
+const toastMessage =
+
+document.getElementById(
+"toastMessage"
+);
+
+
+
+const toastIcon =
+
+document.getElementById(
+"toastIcon"
+);
+
+
+
+
+
+
+if(!toast)
+
+return;
+
+
+
+
+
+
+
+if(toastMessage)
+
+toastMessage.textContent =
+message;
+
+
+
+
+
+
+if(toastIcon){
+
+
+
+if(type==="success"){
+
+
+
+toastIcon.className =
+
+"fa-solid fa-circle-check";
+
+
+}
+
+else{
+
+
+toastIcon.className =
+
+"fa-solid fa-circle-xmark";
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+toast.classList.add(
+"show"
+);
+
+
+
+
+
+
+setTimeout(()=>{
+
+
+toast.classList.remove(
+"show"
+);
+
+
+},3000);
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// ======================================================
+// CHECK EXISTING LOGIN
+// ======================================================
+
+
+// If admin already logged in,
+// do not force login again
+
+
+window.addEventListener(
+
+"DOMContentLoaded",
+
+()=>{
+
+
+
+const token =
+
+localStorage.getItem(
+"adminToken"
+);
+
+
+
+
+
+if(token){
+
+
+
+// optional:
+// remove this if you want
+// login page always visible
+
+
+
+// window.location.href="dashboard.html";
+
+
+
+}
+
+
+
+
 
 });
 
+
+
+
+
+
+
+
+
 // ======================================================
-// LOADING ANIMATION
+// YEAR UPDATE
 // ======================================================
 
-function startLoading() {
 
-    loadingScreen.style.display = "flex";
+const year =
 
-    const steps = [
+document.getElementById(
+"year"
+);
 
-        {
-            percent:20,
-            text:"Connecting to LinkWorld Server..."
-        },
 
-        {
-            percent:40,
-            text:"Verifying Administrator..."
-        },
 
-        {
-            percent:60,
-            text:"Loading Dashboard..."
-        },
+if(year){
 
-        {
-            percent:80,
-            text:"Preparing Workspace..."
-        },
 
-        {
-            percent:100,
-            text:"Login Successful..."
-        }
+year.textContent =
+new Date().getFullYear();
 
-    ];
-
-    let index = 0;
-
-    const timer = setInterval(() => {
-
-        progressBar.style.width =
-
-            steps[index].percent + "%";
-
-        progressPercent.innerHTML =
-
-            steps[index].percent + "%";
-
-        loadingText.innerHTML =
-
-            steps[index].text;
-
-        index++;
-
-        if(index===steps.length){
-
-            clearInterval(timer);
-
-            setTimeout(()=>{
-
-                window.location.href = "dashboard.html";
-
-            },800);
-
-        }
-
-    },700);
 
 }
