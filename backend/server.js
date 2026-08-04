@@ -71,7 +71,17 @@ connectDB();
 
 app.use(cors({
 
-    origin: "*",
+    origin: [
+
+        "https://linkworldexpress.com",
+
+        "https://www.linkworldexpress.com",
+
+        "http://localhost:5500",
+
+        "http://127.0.0.1:5500"
+
+    ],
 
     methods: [
 
@@ -91,9 +101,12 @@ app.use(cors({
 
         "Authorization"
 
-    ]
+    ],
+
+    credentials: true
 
 }));
+
 
 
 
