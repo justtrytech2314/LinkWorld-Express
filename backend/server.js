@@ -1,150 +1,394 @@
 // ======================================================
 // LINKWORLD EXPRESS
-// PRODUCTION SERVER
+// SERVER
+// PRODUCTION VERSION 10/10
+// ======================================================
+
+
+const dns = require("dns");
+
+
+// ======================================================
+// FORCE GOOGLE DNS
+// Fix MongoDB Atlas SRV DNS issues
+// ======================================================
+
+dns.setServers([
+    "8.8.8.8",
+    "8.8.4.4"
+]);
+
+
+
+
+// ======================================================
+// ENVIRONMENT
 // ======================================================
 
 require("dotenv").config();
 
-const express = require("express");
-const cors = require("cors");
+
+
 
 // ======================================================
 // IMPORTS
 // ======================================================
 
-// Database
+const express = require("express");
+
+const cors = require("cors");
+
 const connectDB = require("./config/database");
 
-// Create Default Admin
-const createDefaultAdmin = require("./utils/createAdmin");
 
-// Routes
-const shipmentRoutes = require("./routes/shipmentRoutes");
-const authRoutes = require("./routes/authRoutes");
+
+
 
 // ======================================================
-// INITIALIZE EXPRESS
+// APP INITIALIZATION
 // ======================================================
 
 const app = express();
 
-// ======================================================
-// MIDDLEWARE
-// ======================================================
 
-app.use(cors());
 
-app.use(express.json());
 
-app.use(express.urlencoded({ extended: true }));
 
 // ======================================================
-// HOME ROUTE
+// DATABASE CONNECTION
 // ======================================================
 
-app.get("/", (req, res) => {
+connectDB();
 
-    res.status(200).json({
 
-        success: true,
-        company: "LinkWorld Express",
-        version: "1.0.0",
-        status: "Online",
-        message: "Welcome to the LinkWorld Express API."
 
-    });
 
-});
+
+// ======================================================
+// SECURITY / MIDDLEWARE
+// ======================================================
+
+
+app.use(cors({
+
+    origin: "*",
+
+    methods: [
+
+        "GET",
+
+        "POST",
+
+        "PUT",
+
+        "DELETE"
+
+    ],
+
+    allowedHeaders: [
+
+        "Content-Type",
+
+        "Authorization"
+
+    ]
+
+}));
+
+
+
+
+app.use(express.json({
+
+    limit:"10mb"
+
+}));
+
+
+
+app.use(express.urlencoded({
+
+    extended:true,
+
+    limit:"10mb"
+
+}));
+
+
+
+
 
 // ======================================================
 // HEALTH CHECK
 // ======================================================
 
-app.get("/health", (req, res) => {
+
+app.get("/", (req,res)=>{
+
 
     res.status(200).json({
 
-        success: true,
-        status: "healthy",
-        uptime: process.uptime(),
-        timestamp: new Date()
+        success:true,
+
+        message:
+        "LinkWorld Express Backend Running",
+
+        environment:
+        process.env.NODE_ENV || "development",
+
+        time:
+        new Date()
 
     });
 
+
 });
+
+
+
+
 
 // ======================================================
 // API ROUTES
 // ======================================================
 
-// Authentication
-app.use("/api/auth", authRoutes);
 
-// Shipments
-app.use("/api/shipments", shipmentRoutes);
+app.use(
+
+    "/api/shipments",
+
+    require("./routes/shipmentRoutes")
+
+);
+
+
+
+app.use(
+
+    "/api/admin",
+
+    require("./routes/authRoutes")
+
+);
+
+
+
+
 
 // ======================================================
-// 404
+// 404 HANDLER
 // ======================================================
 
-app.use((req, res) => {
+
+app.use((req,res)=>{
+
 
     res.status(404).json({
 
-        success: false,
-        message: "Route not found."
+        success:false,
+
+        message:
+        "Route not found."
 
     });
 
+
 });
 
+
+
+
+
 // ======================================================
-// START APPLICATION
+// GLOBAL ERROR HANDLER
 // ======================================================
 
-const startServer = async () => {
 
-    try {
+app.use((err,req,res,next)=>{
 
-        // Connect MongoDB
 
-        await connectDB();
+    console.error(
 
-        // Create Default Administrator
+        "SERVER ERROR:",
 
-        await createDefaultAdmin();
+        err
 
-        // Start Express Server
+    );
 
-        const PORT = process.env.PORT || 5000;
 
-        app.listen(PORT, () => {
 
-            console.clear();
+    res.status(
 
-            console.log("======================================================");
-            console.log("🚚 LINKWORLD EXPRESS API");
-            console.log("======================================================");
-            console.log(`🌍 Environment : ${process.env.NODE_ENV || "development"}`);
-            console.log(`🚀 Status      : Running`);
-            console.log(`📡 Port        : ${PORT}`);
-            console.log(`👤 Admin       : udehuchekingsley80@gmail.com`);
-            console.log(`🕒 Started     : ${new Date().toLocaleString()}`);
-            console.log("======================================================");
+        err.status || 500
 
-        });
+    ).json({
 
-    } catch (error) {
 
-        console.error("======================================================");
-        console.error("❌ SERVER START FAILED");
-        console.error(error);
-        console.error("======================================================");
+        success:false,
 
-        process.exit(1);
 
-    }
+        message:
 
-};
+        err.message ||
 
-startServer();
+        "Internal server error."
+
+
+    });
+
+
+});
+
+
+
+
+
+// ======================================================
+// SERVER START
+// ======================================================
+
+
+const PORT = process.env.PORT || 5000;
+
+
+
+const server = app.listen(PORT,()=>{
+
+
+    console.log("========================================");
+
+    console.log(
+        `🚀 LinkWorld Express API running on port ${PORT}`
+    );
+
+    console.log("========================================");
+
+
+});
+
+
+
+
+
+// ======================================================
+// GRACEFUL SHUTDOWN
+// ======================================================
+
+
+process.on(
+
+"SIGINT",
+
+async()=>{
+
+
+    console.log(
+
+        "\nStopping server..."
+
+    );
+
+
+    server.close(()=>{
+
+
+        console.log(
+
+            "HTTP server closed."
+
+        );
+
+
+        process.exit(0);
+
+
+    });
+
+
+});
+
+
+process.on(
+
+"SIGTERM",
+
+async()=>{
+
+
+    console.log(
+
+        "\nSIGTERM received."
+
+    );
+
+
+    server.close(()=>{
+
+
+        console.log(
+
+            "Server shutdown complete."
+
+        );
+
+
+        process.exit(0);
+
+
+    });
+
+
+});
+
+
+
+
+// ======================================================
+// UNHANDLED ERRORS
+// ======================================================
+
+
+process.on(
+
+"unhandledRejection",
+
+(error)=>{
+
+
+    console.error(
+
+        "Unhandled Promise Rejection:",
+
+        error
+
+    );
+
+
+});
+
+
+
+process.on(
+
+"uncaughtException",
+
+(error)=>{
+
+
+    console.error(
+
+        "Uncaught Exception:",
+
+        error
+
+    );
+
+
+});
+
+
+
+
+// ======================================================
+// END OF LINKWORLD EXPRESS SERVER
+// ======================================================

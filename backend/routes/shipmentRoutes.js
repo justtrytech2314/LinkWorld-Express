@@ -1,23 +1,20 @@
 // ======================================================
 // LINKWORLD EXPRESS
-// Shipment Routes
+// SHIPMENT ROUTES
+// COMPLETE VERSION
 // ======================================================
+
 
 const express = require("express");
 
 const router = express.Router();
 
 
-// ======================================================
-// MIDDLEWARE
-// ======================================================
-
-const auth = require("../middleware/auth");
-
 
 // ======================================================
-// CONTROLLER IMPORTS
+// CONTROLLERS
 // ======================================================
+
 
 const {
 
@@ -25,11 +22,11 @@ const {
 
     getShipments,
 
+    getShipmentById,
+
     trackShipment,
 
     getShipmentByTracking,
-
-    getShipmentById,
 
     updateShipment,
 
@@ -43,82 +40,23 @@ const {
 
 
 
+
 // ======================================================
-// PUBLIC ROUTES
+// AUTH MIDDLEWARE
 // ======================================================
 
 
-// Customer Tracking
-
-// GET /api/shipments/track/:trackingNumber
-
-router.get(
-
-    "/track/:trackingNumber",
-
-    trackShipment
-
-);
-
-
-
-// Receipt / Tracking lookup
-
-// GET /api/shipments/receipt/:trackingNumber
-
-router.get(
-
-    "/receipt/:trackingNumber",
-
-    getShipmentByTracking
-
-);
+const auth = require("../middleware/auth");
 
 
 
 
 // ======================================================
-// ADMIN ROUTES
-// ======================================================
-
-
-// Get all shipments
-
-// GET /api/shipments
-
-router.get(
-
-    "/",
-
-    auth,
-
-    getShipments
-
-);
-
-
-
-
-// Get shipment by ID
-
-// GET /api/shipments/:id
-
-router.get(
-
-    "/:id",
-
-    auth,
-
-    getShipmentById
-
-);
-
-
-
-
-// Create shipment
-
+// CREATE SHIPMENT
+// ADMIN
 // POST /api/shipments
+// ======================================================
+
 
 router.post(
 
@@ -133,9 +71,101 @@ router.post(
 
 
 
-// Update shipment
 
+
+// ======================================================
+// GET ALL SHIPMENTS
+// ADMIN DASHBOARD TABLE
+// GET /api/shipments
+// ======================================================
+
+
+router.get(
+
+    "/",
+
+    auth,
+
+    getShipments
+
+);
+
+
+
+
+
+
+// ======================================================
+// PUBLIC TRACKING
+// CUSTOMER TRACK PAGE
+// IMPORTANT:
+// THIS MUST COME BEFORE /:id
+// ======================================================
+
+
+router.get(
+
+    "/track/:trackingNumber",
+
+    trackShipment
+
+);
+
+
+
+
+
+
+// ======================================================
+// RECEIPT LOOKUP
+// receipt.html
+// ======================================================
+
+
+router.get(
+
+    "/receipt/:trackingNumber",
+
+    getShipmentByTracking
+
+);
+
+
+
+
+
+
+
+// ======================================================
+// GET SINGLE SHIPMENT
+// ADMIN VIEW BUTTON
+// dashboard.js viewShipment()
+// GET /api/shipments/:id
+// ======================================================
+
+
+router.get(
+
+    "/:id",
+
+    auth,
+
+    getShipmentById
+
+);
+
+
+
+
+
+
+
+// ======================================================
+// UPDATE FULL SHIPMENT
+// EDIT BUTTON
 // PUT /api/shipments/:id
+// ======================================================
+
 
 router.put(
 
@@ -150,9 +180,15 @@ router.put(
 
 
 
-// Update shipment location
 
+
+
+// ======================================================
+// UPDATE LIVE LOCATION
+// MAP LOCATION UPDATE
 // PUT /api/shipments/location/:id
+// ======================================================
+
 
 router.put(
 
@@ -167,9 +203,15 @@ router.put(
 
 
 
-// Delete shipment
 
+
+
+// ======================================================
+// DELETE SHIPMENT
+// DELETE BUTTON
 // DELETE /api/shipments/:id
+// ======================================================
+
 
 router.delete(
 
@@ -184,8 +226,11 @@ router.delete(
 
 
 
+
+
 // ======================================================
 // EXPORT
 // ======================================================
+
 
 module.exports = router;

@@ -1,65 +1,86 @@
 // ======================================================
 // LINKWORLD EXPRESS
-// Shipment Controller
+// PREMIUM SHIPMENT CONTROLLER
+// PART 1/5
 // ======================================================
+
 
 const Shipment = require("../models/Shipment");
 
 const generateTrackingNumber = require("../utils/generateTrackingNumber");
 
 
+
+
+
+
 // ======================================================
 // CALCULATE PROGRESS
 // ======================================================
 
+
 function calculateProgress(status){
 
+
     switch(status){
+
 
         case "Shipment Created":
             return 5;
 
-        case "Picked Up":
-            return 15;
 
         case "Processing":
-            return 25;
+            return 30;
+
+
+        case "Picked Up":
+            return 45;
+
 
         case "In Transit":
-            return 50;
+            return 60;
 
-        case "Customs Clearance":
-            return 65;
 
-        case "Arrived at Destination":
-            return 80;
+        case "At Facility":
+            return 75;
 
-        case "Out for Delivery":
-            return 95;
+
+        case "Out For Delivery":
+            return 90;
+
 
         case "Delivered":
             return 100;
 
-        case "On Hold":
-            return 40;
 
         case "Cancelled":
             return 0;
 
+
         default:
-            return 0;
+            return 5;
+
 
     }
+
 
 }
 
 
 
+
+
+
+
+
 // ======================================================
 // CREATE SHIPMENT
+// POST /api/shipments
 // ======================================================
 
-exports.createShipment = async (req,res)=>{
+
+exports.createShipment = async(req,res)=>{
+
 
 try{
 
@@ -67,43 +88,50 @@ try{
 const {
 
 
+trackingNumber,
+
+
 sender,
-
-senderPhone,
-
-senderEmail,
 
 
 receiver,
 
-receiverPhone,
 
-receiverEmail,
-
-receiverAddress,
+shipmentDescription,
 
 
-shipment,
+packageType,
+
+
+packageWeight,
+
+
+packageValue,
 
 
 origin,
 
-currentLocation,
 
 destination,
 
 
+currentLocation,
+
+
 currentLatitude,
+
 
 currentLongitude,
 
 
 destinationLatitude,
 
+
 destinationLongitude,
 
 
 status,
+
 
 paymentStatus,
 
@@ -111,56 +139,114 @@ paymentStatus,
 expectedDelivery
 
 
+
 }=req.body;
 
 
 
+
+
+
+
+
+// ================================
+// VALIDATION
+// ================================
+
+
 if(
 
-!sender ||
 
-!receiver ||
+!sender?.name ||
+
+
+!sender?.phone ||
+
+
+!receiver?.name ||
+
+
+!receiver?.phone ||
+
+
+!receiver?.address ||
+
+
+!shipmentDescription ||
+
 
 !origin ||
 
+
 !destination
+
 
 ){
 
+
 return res.status(400).json({
+
 
 success:false,
 
-message:"Please fill all required fields."
+
+message:
+
+"Please complete all required shipment fields."
+
 
 });
+
 
 }
 
 
 
-// Generate tracking number
 
-let trackingNumber;
 
-let exists=true;
+
+
+
+
+// ================================
+// CREATE TRACKING NUMBER
+// ================================
+
+
+let finalTrackingNumber = trackingNumber;
+
+
+
+if(!finalTrackingNumber){
+
+
+let exists = true;
+
 
 
 while(exists){
 
 
-trackingNumber=
+
+finalTrackingNumber =
 
 generateTrackingNumber();
 
 
-exists=
 
-await Shipment.findOne({
+const check = await Shipment.findOne({
 
-trackingNumber
+trackingNumber:finalTrackingNumber
 
 });
+
+
+
+exists = Boolean(check);
+
+
+
+}
 
 
 }
@@ -168,172 +254,260 @@ trackingNumber
 
 
 
-const shipmentStatus=
-
-status ||
-
-"Shipment Created";
-
-
-
-const progress=
-
-calculateProgress(
-
-shipmentStatus
-
-);
 
 
 
 
-// Create shipment
+const finalStatus =
 
-const newShipment=
-
-await Shipment.create({
+status || "Shipment Created";
 
 
-trackingNumber,
 
 
-sender,
-
-senderPhone,
-
-senderEmail,
 
 
-receiver,
-
-receiverPhone,
-
-receiverEmail,
-
-receiverAddress,
 
 
-shipment,
+
+// ================================
+// SAVE SHIPMENT
+// ================================
+
+
+const shipment = await Shipment.create({
+
+
+
+
+trackingNumber:
+
+finalTrackingNumber,
+
+
+
+
+
+sender:{
+
+
+name:sender.name,
+
+
+phone:sender.phone,
+
+
+email:sender.email || "",
+
+
+address:sender.address || ""
+
+
+},
+
+
+
+
+
+
+receiver:{
+
+
+name:receiver.name,
+
+
+phone:receiver.phone,
+
+
+email:receiver.email || "",
+
+
+address:receiver.address
+
+
+},
+
+
+
+
+
+
+shipmentDescription,
+
+
+
+
+
+shipmentType:
+
+packageType || "Package",
+
+
+
+
+
+
+packageWeight:
+
+Number(packageWeight || 0),
+
+
+
+
+
+packageValue:
+
+Number(packageValue || 0),
+
+
+
+
+
 
 
 origin,
 
 
-currentLocation,
+
+currentLocation:
+
+currentLocation || origin,
+
+
 
 
 destination,
 
 
 
-currentLatitude,
-
-currentLongitude,
-
-
-destinationLatitude,
-
-destinationLongitude,
 
 
 
-status:shipmentStatus,
+
+
+
+currentLatitude:
+
+Number(currentLatitude || 0),
+
+
+
+
+currentLongitude:
+
+Number(currentLongitude || 0),
+
+
+
+
+destinationLatitude:
+
+Number(destinationLatitude || 0),
+
+
+
+
+destinationLongitude:
+
+Number(destinationLongitude || 0),
+
+
+
+
+
+
+
+status:finalStatus,
+
+
+
+
+progress:
+
+calculateProgress(finalStatus),
+
+
+
+
 
 
 paymentStatus:
 
-paymentStatus ||
-
-"Pending",
+paymentStatus || "Pending",
 
 
 
-expectedDelivery,
+
+
+expectedDelivery:
+
+expectedDelivery || null,
 
 
 
-progress,
 
 
 
-// Tracking history
 
-history:[
 
-{
+
+history:[{
+
 
 location:
 
 currentLocation || origin,
 
 
-status:
-
-shipmentStatus,
+status:finalStatus,
 
 
 latitude:
 
-currentLatitude || 0,
+Number(currentLatitude || 0),
+
 
 
 longitude:
 
-currentLongitude || 0
-
-}
-
-],
+Number(currentLongitude || 0),
 
 
 
-// Live route
-
-route:[
-
-{
-
-location:
-
-currentLocation || origin,
+timestamp:new Date()
 
 
-latitude:
-
-currentLatitude || 0,
+}]
 
 
-longitude:
-
-currentLongitude || 0,
-
-
-status:
-
-shipmentStatus
-
-}
-
-]
 
 
 });
 
 
 
-res.status(201).json({
+
+
+
+
+
+
+return res.status(201).json({
+
 
 success:true,
 
-message:"Shipment created successfully.",
 
-trackingNumber:
+message:
 
-newShipment.trackingNumber,
+"Shipment created successfully.",
 
-data:newShipment
+
+shipment
+
 
 });
+
 
 
 
@@ -342,25 +516,51 @@ data:newShipment
 catch(error){
 
 
-res.status(500).json({
+
+console.error(
+
+"CREATE SHIPMENT ERROR:",
+
+error
+
+);
+
+
+
+return res.status(500).json({
+
 
 success:false,
 
+
 message:error.message
 
+
 });
+
 
 
 }
 
 
+
 };
+
+
+
 // ======================================================
-// GET ALL SHIPMENTS
-// ADMIN
+// END PART 1/5
 // ======================================================
 
-exports.getShipments = async (req,res)=>{
+// ======================================================
+// GET ALL SHIPMENTS
+// ADMIN DASHBOARD
+// GET /api/shipments
+// ======================================================
+
+
+exports.getShipments = async(req,res)=>{
+
 
 try{
 
@@ -375,13 +575,18 @@ createdAt:-1
 
 
 
-res.status(200).json({
+
+return res.status(200).json({
+
 
 success:true,
 
+
 total:shipments.length,
 
-data:shipments
+
+shipments
+
 
 });
 
@@ -392,13 +597,28 @@ data:shipments
 catch(error){
 
 
-res.status(500).json({
+
+console.error(
+
+"GET SHIPMENTS ERROR:",
+
+error
+
+);
+
+
+
+return res.status(500).json({
+
 
 success:false,
 
+
 message:error.message
 
+
 });
+
 
 
 }
@@ -408,12 +628,124 @@ message:error.message
 
 
 
+
+
+
+
+
+
 // ======================================================
-// TRACK SHIPMENT
-// PUBLIC TRACKING
+// GET SHIPMENT BY ID
+// ADMIN VIEW BUTTON
+// GET /api/shipments/:id
 // ======================================================
 
-exports.trackShipment = async (req,res)=>{
+
+exports.getShipmentById = async(req,res)=>{
+
+
+try{
+
+
+const shipment = await Shipment.findById(
+
+req.params.id
+
+);
+
+
+
+
+
+
+if(!shipment){
+
+
+return res.status(404).json({
+
+
+success:false,
+
+
+message:"Shipment not found."
+
+
+});
+
+
+}
+
+
+
+
+
+
+
+return res.status(200).json({
+
+
+success:true,
+
+
+shipment
+
+
+});
+
+
+
+
+}
+
+catch(error){
+
+
+
+console.error(
+
+"GET SHIPMENT BY ID ERROR:",
+
+error
+
+);
+
+
+
+return res.status(500).json({
+
+
+success:false,
+
+
+message:error.message
+
+
+});
+
+
+
+}
+
+
+};
+
+
+
+
+
+
+
+
+
+// ======================================================
+// PUBLIC TRACK SHIPMENT
+// CUSTOMER TRACKING
+// GET /api/shipments/track/:trackingNumber
+// ======================================================
+
+
+exports.trackShipment = async(req,res)=>{
+
 
 try{
 
@@ -428,11 +760,19 @@ req.params.trackingNumber
 
 
 
+
+
+
+
 const shipment = await Shipment.findOne({
 
 trackingNumber
 
+
 });
+
+
+
 
 
 
@@ -441,9 +781,12 @@ if(!shipment){
 
 return res.status(404).json({
 
+
 success:false,
 
+
 message:"Tracking number not found."
+
 
 });
 
@@ -452,11 +795,18 @@ message:"Tracking number not found."
 
 
 
-res.status(200).json({
+
+
+
+
+return res.status(200).json({
+
 
 success:true,
 
-data:shipment
+
+shipment
+
 
 });
 
@@ -467,13 +817,28 @@ data:shipment
 catch(error){
 
 
-res.status(500).json({
+
+console.error(
+
+"TRACK SHIPMENT ERROR:",
+
+error
+
+);
+
+
+
+return res.status(500).json({
+
 
 success:false,
 
+
 message:error.message
 
+
 });
+
 
 
 }
@@ -483,27 +848,48 @@ message:error.message
 
 
 
+
+
+
+
+
+
 // ======================================================
-// GET SHIPMENT BY TRACKING NUMBER
-// RECEIPT / TRACKING PAGE
+// RECEIPT LOOKUP
+// CUSTOMER RECEIPT PAGE
+// GET /api/shipments/receipt/:trackingNumber
 // ======================================================
 
-exports.getShipmentByTracking = async (req,res)=>{
+
+exports.getShipmentByTracking = async(req,res)=>{
+
 
 try{
 
 
-const shipment = await Shipment.findOne({
-
-trackingNumber:
+const trackingNumber =
 
 req.params.trackingNumber
 
 .trim()
 
-.toUpperCase()
+.toUpperCase();
+
+
+
+
+
+
+const shipment = await Shipment.findOne({
+
+trackingNumber
+
 
 });
+
+
+
+
 
 
 
@@ -512,9 +898,12 @@ if(!shipment){
 
 return res.status(404).json({
 
+
 success:false,
 
+
 message:"Shipment not found."
+
 
 });
 
@@ -523,12 +912,19 @@ message:"Shipment not found."
 
 
 
-res.status(200).json({
+
+
+
+
+return res.status(200).json({
+
 
 success:true,
+
 
 shipment
 
+
 });
 
 
@@ -538,13 +934,28 @@ shipment
 catch(error){
 
 
-res.status(500).json({
+
+console.error(
+
+"RECEIPT LOOKUP ERROR:",
+
+error
+
+);
+
+
+
+return res.status(500).json({
+
 
 success:false,
 
+
 message:error.message
 
+
 });
+
 
 
 }
@@ -555,11 +966,17 @@ message:error.message
 
 
 // ======================================================
-// GET SHIPMENT BY ID
-// ADMIN
+// END PART 2/5
 // ======================================================
 
-exports.getShipmentById = async(req,res)=>{
+// ======================================================
+// UPDATE FULL SHIPMENT
+// PUT /api/shipments/:id
+// ======================================================
+
+
+exports.updateShipment = async(req,res)=>{
+
 
 try{
 
@@ -572,64 +989,6 @@ req.params.id
 
 
 
-if(!shipment){
-
-
-return res.status(404).json({
-
-success:false,
-
-message:"Shipment not found."
-
-});
-
-
-}
-
-
-
-res.status(200).json({
-
-success:true,
-
-data:shipment
-
-});
-
-
-}
-
-catch(error){
-
-
-res.status(500).json({
-
-success:false,
-
-message:error.message
-
-});
-
-
-}
-
-
-};
-// ======================================================
-// UPDATE SHIPMENT
-// ADMIN
-// ======================================================
-
-exports.updateShipment = async (req,res)=>{
-
-try{
-
-
-const shipment = await Shipment.findById(
-
-req.params.id
-
-);
 
 
 
@@ -638,131 +997,12 @@ if(!shipment){
 
 return res.status(404).json({
 
+
 success:false,
+
 
 message:"Shipment not found."
 
-});
-
-
-}
-
-
-
-// Save old values before update
-
-const oldLocation = shipment.currentLocation;
-
-const oldStatus = shipment.status;
-
-
-
-// Update fields
-
-Object.assign(
-
-shipment,
-
-req.body
-
-);
-
-
-
-// Recalculate progress
-
-shipment.progress =
-
-calculateProgress(
-
-shipment.status
-
-);
-
-
-
-// Check if location or status changed
-
-const locationChanged =
-
-req.body.currentLocation &&
-
-req.body.currentLocation !== oldLocation;
-
-
-
-const statusChanged =
-
-req.body.status &&
-
-req.body.status !== oldStatus;
-
-
-
-if(locationChanged || statusChanged){
-
-
-
-// Add tracking history
-
-shipment.history.push({
-
-location:
-
-shipment.currentLocation,
-
-
-status:
-
-shipment.status,
-
-
-latitude:
-
-shipment.currentLatitude || 0,
-
-
-longitude:
-
-shipment.currentLongitude || 0,
-
-
-date:
-
-new Date()
-
-});
-
-
-
-
-// Add live route point
-
-shipment.route.push({
-
-location:
-
-shipment.currentLocation,
-
-
-latitude:
-
-shipment.currentLatitude || 0,
-
-
-longitude:
-
-shipment.currentLongitude || 0,
-
-
-status:
-
-shipment.status,
-
-
-time:
-
-new Date()
 
 });
 
@@ -771,17 +1011,56 @@ new Date()
 
 
 
-await shipment.save();
 
 
 
-res.status(200).json({
+
+
+const updatedShipment = await Shipment.findByIdAndUpdate(
+
+
+req.params.id,
+
+
+req.body,
+
+
+{
+
+
+new:true,
+
+
+runValidators:true
+
+
+}
+
+
+);
+
+
+
+
+
+
+
+
+
+return res.status(200).json({
+
 
 success:true,
 
-message:"Shipment updated successfully.",
 
-data:shipment
+message:
+
+"Shipment updated successfully.",
+
+
+shipment:updatedShipment
+
+
 
 });
 
@@ -792,13 +1071,28 @@ data:shipment
 catch(error){
 
 
-res.status(500).json({
+
+console.error(
+
+"UPDATE SHIPMENT ERROR:",
+
+error
+
+);
+
+
+
+return res.status(500).json({
+
 
 success:false,
 
+
 message:error.message
 
+
 });
+
 
 
 }
@@ -809,12 +1103,20 @@ message:error.message
 
 
 
+
+
+
+
+
 // ======================================================
-// UPDATE LOCATION ONLY
+// UPDATE LIVE LOCATION
+// PUT /api/shipments/location/:id
 // ======================================================
+
 
 exports.updateLocation = async(req,res)=>{
 
+
 try{
 
 
@@ -826,131 +1128,216 @@ req.params.id
 
 
 
+
+
+
+
 if(!shipment){
 
 
 return res.status(404).json({
 
+
 success:false,
 
+
 message:"Shipment not found."
+
 
 });
 
 
 }
+
+
+
+
+
 
 
 
 const {
 
+
 currentLocation,
+
 
 currentLatitude,
 
+
 currentLongitude,
 
+
 status
+
+
 
 }=req.body;
 
 
 
-shipment.currentLocation =
-
-currentLocation ||
-
-shipment.currentLocation;
 
 
 
-shipment.currentLatitude =
-
-currentLatitude ||
-
-shipment.currentLatitude;
 
 
 
-shipment.currentLongitude =
-
-currentLongitude ||
-
-shipment.currentLongitude;
+let changed = false;
 
 
 
-if(status){
 
-shipment.status=status;
+
+
+
+
+// ================================
+// UPDATE LOCATION
+// ================================
+
+
+if(currentLocation !== undefined){
+
+
+shipment.currentLocation = currentLocation;
+
+
+changed = true;
+
 
 }
 
 
 
-shipment.progress =
-
-calculateProgress(
-
-shipment.status
-
-);
 
 
 
 
-// Add history
+if(currentLatitude !== undefined){
+
+
+shipment.currentLatitude =
+
+Number(currentLatitude);
+
+
+changed = true;
+
+
+}
+
+
+
+
+
+
+
+if(currentLongitude !== undefined){
+
+
+shipment.currentLongitude =
+
+Number(currentLongitude);
+
+
+changed = true;
+
+
+}
+
+
+
+
+
+
+
+
+
+// ================================
+// UPDATE STATUS
+// ================================
+
+
+if(status){
+
+
+shipment.status = status;
+
+
+shipment.progress = calculateProgress(status);
+
+
+changed = true;
+
+
+}
+
+
+
+
+
+
+
+
+
+// ================================
+// SAVE HISTORY
+// ================================
+
+
+if(changed){
+
 
 shipment.history.push({
 
+
+
 location:
 
-shipment.currentLocation,
+
+shipment.currentLocation || "Updated Location",
+
+
 
 
 status:
+
 
 shipment.status,
 
 
-latitude:
-
-shipment.currentLatitude,
-
-
-longitude:
-
-shipment.currentLongitude
-
-});
-
-
-
-
-// Add route
-
-shipment.route.push({
-
-location:
-
-shipment.currentLocation,
 
 
 latitude:
 
-shipment.currentLatitude,
+
+shipment.currentLatitude || 0,
+
+
 
 
 longitude:
 
-shipment.currentLongitude,
+
+shipment.currentLongitude || 0,
 
 
-status:
 
-shipment.status
+
+timestamp:new Date()
+
+
 
 });
+
+
+}
+
+
+
+
+
+
 
 
 
@@ -958,15 +1345,32 @@ await shipment.save();
 
 
 
-res.status(200).json({
+
+
+
+
+
+
+return res.status(200).json({
+
 
 success:true,
 
-message:"Location updated successfully.",
 
-data:shipment
+message:
+
+"Shipment location updated successfully.",
+
+
+
+shipment
+
+
 
 });
+
+
+
 
 
 }
@@ -974,13 +1378,28 @@ data:shipment
 catch(error){
 
 
-res.status(500).json({
+
+console.error(
+
+"UPDATE LOCATION ERROR:",
+
+error
+
+);
+
+
+
+return res.status(500).json({
+
 
 success:false,
 
+
 message:error.message
 
+
 });
+
 
 
 }
@@ -990,18 +1409,54 @@ message:error.message
 
 
 
-
-
+// ======================================================
+// END PART 3/5
+// ======================================================
 // ======================================================
 // DELETE SHIPMENT
+// DELETE /api/shipments/:id
 // ======================================================
 
+
 exports.deleteShipment = async(req,res)=>{
+
 
 try{
 
 
-const shipment =
+const shipment = await Shipment.findById(
+
+req.params.id
+
+);
+
+
+
+
+
+
+if(!shipment){
+
+
+return res.status(404).json({
+
+
+success:false,
+
+
+message:"Shipment not found."
+
+
+});
+
+
+}
+
+
+
+
+
+
 
 await Shipment.findByIdAndDelete(
 
@@ -1011,29 +1466,25 @@ req.params.id
 
 
 
-if(!shipment){
-
-
-return res.status(404).json({
-
-success:false,
-
-message:"Shipment not found."
-
-});
-
-
-}
 
 
 
-res.status(200).json({
+
+
+return res.status(200).json({
+
 
 success:true,
 
-message:"Shipment deleted successfully."
+
+message:
+
+"Shipment deleted successfully."
+
+
 
 });
+
 
 
 }
@@ -1041,16 +1492,158 @@ message:"Shipment deleted successfully."
 catch(error){
 
 
-res.status(500).json({
+
+console.error(
+
+"DELETE SHIPMENT ERROR:",
+
+error
+
+);
+
+
+
+return res.status(500).json({
+
 
 success:false,
 
+
 message:error.message
+
 
 });
 
 
+
 }
+
+
+};
+
+
+
+
+
+
+// ======================================================
+// END PART 4/5
+// ======================================================
+// ======================================================
+// LINKWORLD EXPRESS
+// PREMIUM SHIPMENT CONTROLLER
+// PART 5/5
+// FINAL PROTECTION
+// ======================================================
+
+
+
+// ======================================================
+// CLEAN STRING HELPER
+// ======================================================
+
+
+function clean(value){
+
+
+    if(typeof value !== "string"){
+
+        return value;
+
+    }
+
+
+    return value.trim();
+
+
+
+}
+
+
+
+
+
+
+
+// ======================================================
+// NORMALIZE TRACKING NUMBER
+// ======================================================
+
+
+function normalizeTrackingNumber(number){
+
+
+    if(!number){
+
+        return "";
+
+    }
+
+
+    return number
+
+    .toString()
+
+    .trim()
+
+    .toUpperCase();
+
+
+
+}
+
+
+
+
+
+
+
+// ======================================================
+// CONTROLLER READY CHECK
+// ======================================================
+
+
+console.log(
+"✅ Shipment Controller Loaded Successfully"
+);
+
+
+
+
+// ======================================================
+// END OF LINKWORLD EXPRESS
+// PREMIUM SHIPMENT CONTROLLER
+// ======================================================
+// ======================================================
+// EXPORT CHECK
+// ======================================================
+
+
+module.exports = {
+
+
+createShipment: exports.createShipment,
+
+
+getShipments: exports.getShipments,
+
+
+trackShipment: exports.trackShipment,
+
+
+getShipmentByTracking: exports.getShipmentByTracking,
+
+
+getShipmentById: exports.getShipmentById,
+
+
+updateShipment: exports.updateShipment,
+
+
+updateLocation: exports.updateLocation,
+
+
+deleteShipment: exports.deleteShipment
 
 
 };

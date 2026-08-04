@@ -1,13 +1,13 @@
 // ======================================================
 // LINKWORLD EXPRESS
-// MongoDB Database Connection
+// DATABASE CONFIGURATION
 // ======================================================
 
 const mongoose = require("mongoose");
 const dns = require("dns");
 
 // ======================================================
-// FIX DNS RESOLUTION FOR MONGODB SRV
+// FORCE GOOGLE DNS
 // ======================================================
 
 dns.setServers([
@@ -23,25 +23,55 @@ const connectDB = async () => {
 
     try {
 
-        const connection = await mongoose.connect(process.env.MONGO_URI);
+        if (!process.env.MONGO_URI) {
 
-        console.log("======================================================");
+            throw new Error("MONGO_URI is missing from .env");
+
+        }
+
+        await mongoose.connect(process.env.MONGO_URI);
+
+        console.log("========================================");
         console.log("✅ MongoDB Connected Successfully");
-        console.log(`🗄 Database : ${connection.connection.name}`);
-        console.log(`🌍 Host     : ${connection.connection.host}`);
-        console.log("======================================================");
+        console.log("========================================");
 
     } catch (error) {
 
-        console.error("======================================================");
-        console.error("❌ MongoDB Connection Failed");
-        console.error(error.message);
-        console.error("======================================================");
+        console.log("========================================");
+        console.log("❌ MongoDB Connection Failed");
+        console.log(error.message);
+        console.log("========================================");
 
         process.exit(1);
 
     }
 
 };
+
+// ======================================================
+// MONGOOSE EVENTS
+// ======================================================
+
+mongoose.connection.on("disconnected", () => {
+
+    console.log("⚠️ MongoDB Disconnected");
+
+});
+
+mongoose.connection.on("reconnected", () => {
+
+    console.log("🔄 MongoDB Reconnected");
+
+});
+
+mongoose.connection.on("error", (err) => {
+
+    console.log("❌ MongoDB Error:", err.message);
+
+});
+
+// ======================================================
+// EXPORT
+// ======================================================
 
 module.exports = connectDB;

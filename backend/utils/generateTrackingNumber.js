@@ -1,24 +1,36 @@
 // ======================================================
 // LINKWORLD EXPRESS
-// Tracking Number Generator
+// GENERATE TRACKING NUMBER
+// PRODUCTION VERSION 10/10
+// ======================================================
+
+const crypto = require("crypto");
+
+// ======================================================
+// GENERATE TRACKING NUMBER
+// FORMAT:
+// LWX2026A8F4C9D2
 // ======================================================
 
 const generateTrackingNumber = () => {
 
-    const prefix = "LWX";
+    const year = new Date().getFullYear();
 
-    const now = new Date();
+    const random = crypto
+        .randomBytes(4)
+        .toString("hex")
+        .toUpperCase();
 
-    const year = now.getFullYear().toString().slice(-2);
-
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-
-    const day = String(now.getDate()).padStart(2, "0");
-
-    const random = Math.random().toString(36).substring(2, 8).toUpperCase();
-
-    return `${prefix}${year}${month}${day}${random}`;
+    return `LWX${year}${random}`;
 
 };
 
+// ======================================================
+// EXPORT
+// ======================================================
+
 module.exports = generateTrackingNumber;
+
+// ======================================================
+// END OF FILE
+// ======================================================
