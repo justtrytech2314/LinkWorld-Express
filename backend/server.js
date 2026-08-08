@@ -22,6 +22,12 @@ const express = require("express");
 
 const cors = require("cors");
 
+const helmet = require("helmet");
+
+const compression = require("compression");
+
+const morgan = require("morgan");
+
 const connectDB = require("./config/database");
 
 
@@ -51,6 +57,17 @@ connectDB();
 // ======================================================
 // SECURITY / MIDDLEWARE
 // ======================================================
+
+
+app.use(helmet());
+
+app.use(compression());
+
+app.use(morgan(
+
+    process.env.NODE_ENV === "production" ? "combined" : "dev"
+
+));
 
 
 const PRODUCTION_ORIGINS = [

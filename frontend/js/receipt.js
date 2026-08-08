@@ -203,6 +203,65 @@ function populateReceipt(){
 
     buildHistory();
 
+    buildVerificationCodes();
+
+}
+
+
+// ======================================================
+// BARCODE + QR VERIFICATION CODES
+// Generated from the real tracking number, not static art.
+// ======================================================
+
+function buildVerificationCodes(){
+
+    const barcodeImg = document.getElementById("barcodeImage");
+
+    if(barcodeImg && typeof JsBarcode !== "undefined"){
+
+        try{
+
+            JsBarcode(barcodeImg, shipment.trackingNumber, {
+                format:"CODE128",
+                lineColor:"#000000",
+                width:2,
+                height:60,
+                displayValue:true,
+                margin:8
+            });
+
+        }
+        catch(error){
+
+            console.error("BARCODE ERROR:", error);
+
+        }
+
+    }
+
+    const qrImg = document.getElementById("qrCode");
+
+    if(qrImg && typeof QRCode !== "undefined"){
+
+        const verifyUrl =
+            `${window.location.origin}${window.location.pathname.replace("receipt.html","tracking-result.html")}?tracking=${encodeURIComponent(shipment.trackingNumber)}`;
+
+        QRCode.toDataURL(verifyUrl, { margin:1, width:160 }, (error, url) => {
+
+            if(error){
+
+                console.error("QR CODE ERROR:", error);
+
+                return;
+
+            }
+
+            qrImg.src = url;
+
+        });
+
+    }
+
 }
 
 
