@@ -1,503 +1,779 @@
-/* ======================================================
-LINKWORLD EXPRESS
-RECEIPT JS
-PART 1
-LOAD SHIPMENT FROM LOCAL STORAGE
-====================================================== */
+// ======================================================
+// LINKWORLD EXPRESS
+// PREMIUM SHIPMENT CONTROLLER
+// PART 1/5
+// ======================================================
 
-"use strict";
+const Shipment = require("../models/Shipment");
+const generateTrackingNumber = require("../utils/generateTrackingNumber");
+
 
 
 // ======================================================
-// GLOBAL
+// CALCULATE PROGRESS
 // ======================================================
 
-let shipment = null;
+function calculateProgress(status){
 
+    switch(status){
 
-// ======================================================
-// PAGE READY
-// ======================================================
+        case "Shipment Created":
+            return 5;
 
-document.addEventListener("DOMContentLoaded", () => {
+        case "Processing":
+            return 30;
 
-    loadReceipt();
+        case "Picked Up":
+            return 45;
 
-});
+        case "In Transit":
+            return 60;
 
+        case "At Facility":
+            return 75;
 
-// ======================================================
-// LOAD RECEIPT
-// ======================================================
+        case "Out For Delivery":
+            return 90;
 
-function loadReceipt(){
+        case "Delivered":
+            return 100;
 
-    // Read shipment saved by dashboard
-    const savedShipment =
-    localStorage.getItem("receiptShipment");
+        case "Cancelled":
+            return 0;
 
-
-    if(!savedShipment){
-
-        alert(
-            "No shipment found.\nPlease open the receipt from the Dashboard."
-        );
-
-        window.location.href = "dashboard.html";
-
-        return;
-
-    }
-
-
-    shipment = JSON.parse(savedShipment);
-
-
-    // Fill receipt
-    populateReceipt();
-
-
-    // Hide loading screen
-    const loading =
-    document.getElementById("loading");
-
-    if(loading){
-
-        setTimeout(()=>{
-
-            loading.style.display="none";
-
-        },600);
+        default:
+            return 5;
 
     }
 
 }
 
 
+
 // ======================================================
-// POPULATE RECEIPT
-// ======================================================
-
-function populateReceipt(){
-
-    if(!shipment) return;
-
-    // Receipt Date
-    document.getElementById("receiptDate").textContent =
-    new Date().toLocaleString();
-
-    // Tracking Number
-    document.getElementById("trackingNumber").textContent =
-    shipment.trackingNumber || "-";
-
-    // Status
-    document.getElementById("shipmentStatus").textContent =
-    shipment.status || "-";
-
-}
-// ======================================================
-// PART 2
-// FILL SENDER & RECEIVER INFORMATION
+// GENERATE RECEIPT NUMBER
 // ======================================================
 
-function populateReceipt(){
+function generateReceiptNumber(){
 
-    if(!shipment) return;
-
-    // =====================================
-    // HEADER
-    // =====================================
-
-    document.getElementById("receiptDate").textContent =
-    new Date().toLocaleString();
-
-    document.getElementById("trackingNumber").textContent =
-    shipment.trackingNumber || "-";
-
-    document.getElementById("shipmentStatus").textContent =
-    shipment.status || "-";
-
-
-    // =====================================
-    // SENDER
-    // =====================================
-
-    document.getElementById("senderName").textContent =
-    shipment.sender?.name || "-";
-
-    document.getElementById("senderPhone").textContent =
-    shipment.sender?.phone || "-";
-
-    document.getElementById("senderEmail").textContent =
-    shipment.sender?.email || "-";
-
-
-    // =====================================
-    // RECEIVER
-    // =====================================
-
-    document.getElementById("receiverName").textContent =
-    shipment.receiver?.name || "-";
-
-    document.getElementById("receiverPhone").textContent =
-    shipment.receiver?.phone || "-";
-
-    document.getElementById("receiverEmail").textContent =
-    shipment.receiver?.email || "-";
-
-    document.getElementById("receiverAddress").textContent =
-    shipment.receiver?.address || "-";
-
-}
-    // =====================================
-    // SHIPMENT INFORMATION
-    // =====================================
-
-    document.getElementById("shipmentType").textContent =
-    shipment.shipmentType || "-";
-
-    document.getElementById("origin").textContent =
-    shipment.origin || "-";
-
-    document.getElementById("currentLocation").textContent =
-    shipment.currentLocation || "-";
-
-    document.getElementById("destination").textContent =
-    shipment.destination || "-";
-
-    document.getElementById("deliveryDate").textContent =
-    shipment.expectedDelivery
-        ? new Date(shipment.expectedDelivery).toLocaleDateString()
-        : "-";
-
-    document.getElementById("paymentStatus").textContent =
-    shipment.paymentStatus || "Pending";
-
-
-    // =====================================
-    // GPS INFORMATION
-    // =====================================
-
-    document.getElementById("currentLatitude").textContent =
-    shipment.currentLatitude ?? "-";
-
-    document.getElementById("currentLongitude").textContent =
-    shipment.currentLongitude ?? "-";
-
-    document.getElementById("destinationLatitude").textContent =
-    shipment.destinationLatitude ?? "-";
-
-    document.getElementById("destinationLongitude").textContent =
-    shipment.destinationLongitude ?? "-";
-
-
-    // =====================================
-    // DELIVERY PROGRESS
-    // =====================================
-
-    const progress =
-    Number(shipment.progress || 0);
-
-    document.getElementById("progressFill").style.width =
-    progress + "%";
-
-    document.getElementById("progressText").textContent =
-    progress;
-
-
-    // =====================================
-    // BARCODE
-    // =====================================
-
-    document.getElementById("barcodeNumber").textContent =
-    shipment.trackingNumber || "-";
-        // =====================================
-    // ROUTE HISTORY
-    // =====================================
-
-    const routeBody =
-    document.getElementById("routeHistory");
-
-    routeBody.innerHTML = "";
-
-    const today =
-    new Date().toLocaleString();
-
-    const history = [
-
-        {
-            date: today,
-            location: shipment.origin || "-",
-            status: "Shipment Created",
-            coordinates:
-            `${shipment.currentLatitude ?? "-"}, ${shipment.currentLongitude ?? "-"}`
-        },
-
-        {
-            date: today,
-            location: shipment.currentLocation || "-",
-            status: shipment.status || "In Transit",
-            coordinates:
-            `${shipment.currentLatitude ?? "-"}, ${shipment.currentLongitude ?? "-"}`
-        },
-
-        {
-            date: shipment.expectedDelivery
-                ? new Date(shipment.expectedDelivery).toLocaleDateString()
-                : "-",
-            location: shipment.destination || "-",
-            status: "Expected Destination",
-            coordinates:
-            `${shipment.destinationLatitude ?? "-"}, ${shipment.destinationLongitude ?? "-"}`
-        }
-
-    ];
-
-
-
-    history.forEach(item=>{
-
-        routeBody.innerHTML += `
-
-        <tr>
-
-            <td>${item.date}</td>
-
-            <td>${item.location}</td>
-
-            <td>${item.status}</td>
-
-            <td>${item.coordinates}</td>
-
-        </tr>
-
-        `;
-
-    });
-
-
-    // ======================================================
-// PRINT RECEIPT
-// ======================================================
-
-function printReceipt(){
-
-    window.print();
+    return (
+        "RCPT-" +
+        Date.now() +
+        "-" +
+        Math.floor(Math.random() * 9000 + 1000)
+    );
 
 }
 
 
 
 // ======================================================
-// DOWNLOAD RECEIPT
+// CREATE SHIPMENT
+// POST /api/shipments
 // ======================================================
 
-function downloadReceipt(){
+exports.createShipment = async (req, res) => {
 
-    window.print();
+    try{
 
-}
-/* ======================================================
-LINKWORLD EXPRESS
-RECEIPT JS
-PART 5
-PREMIUM FINISHING
-====================================================== */
+        const{
+
+            trackingNumber,
+
+            sender,
+
+            receiver,
+
+            shipmentDescription,
+
+            packageType,
+
+            packageWeight,
+
+            packageValue,
+
+            origin,
+
+            destination,
+
+            currentLocation,
+
+            currentLatitude,
+
+            currentLongitude,
+
+            destinationLatitude,
+
+            destinationLongitude,
+
+            status,
+
+            paymentStatus,
+
+            expectedDelivery
+
+        } = req.body;
 
 
 
-// ======================================================
-// STATUS COLOR
-// ======================================================
+        // ==========================================
+        // VALIDATION
+        // ==========================================
 
-document.addEventListener("DOMContentLoaded",()=>{
+        if(
 
-    setTimeout(()=>{
+            !sender?.name ||
 
-        const status=document.getElementById("shipmentStatus");
+            !sender?.phone ||
 
-        if(!status) return;
+            !receiver?.name ||
 
-        const value=status.textContent.toLowerCase();
+            !receiver?.phone ||
 
-        status.style.padding="8px 18px";
-        status.style.borderRadius="30px";
-        status.style.fontWeight="700";
-        status.style.display="inline-block";
+            !receiver?.address ||
 
-        if(value.includes("deliver")){
+            !shipmentDescription ||
 
-            status.style.background="#dcfce7";
-            status.style.color="#15803d";
+            !origin ||
 
-        }
-
-        else if(
-
-            value.includes("transit") ||
-
-            value.includes("picked") ||
-
-            value.includes("pickup")
+            !destination
 
         ){
 
-            status.style.background="#dbeafe";
-            status.style.color="#2563eb";
+            return res.status(400).json({
+
+                success:false,
+
+                message:"Please complete all required shipment fields."
+
+            });
 
         }
 
-        else if(value.includes("hold")){
-
-            status.style.background="#fee2e2";
-            status.style.color="#dc2626";
-
-        }
-
-        else{
-
-            status.style.background="#fef3c7";
-            status.style.color="#b45309";
-
-        }
-
-    },500);
-
-});
 
 
+        // ==========================================
+        // TRACKING NUMBER
+        // ==========================================
 
+        let finalTrackingNumber = trackingNumber;
 
-// ======================================================
-// PROGRESS ANIMATION
-// ======================================================
+        if(!finalTrackingNumber){
 
-window.addEventListener("load",()=>{
+            let exists = true;
 
-    const fill=document.getElementById("progressFill");
+            while(exists){
 
-    const text=document.getElementById("progressText");
+                finalTrackingNumber = generateTrackingNumber();
 
-    if(!fill||!shipment) return;
+                const check = await Shipment.findOne({
 
-    let current=0;
+                    trackingNumber: finalTrackingNumber
 
-    const target=Number(shipment.progress||0);
+                });
 
-    fill.style.width="0%";
+                exists = Boolean(check);
 
-    const timer=setInterval(()=>{
-
-        current++;
-
-        fill.style.width=current+"%";
-
-        text.textContent=current;
-
-        if(current>=target){
-
-            clearInterval(timer);
+            }
 
         }
 
-    },20);
-
-});
 
 
+        const finalStatus = status || "Shipment Created";
 
 
-// ======================================================
-// BARCODE STYLE
-// ======================================================
 
-window.addEventListener("load",()=>{
+        // ==========================================
+        // CREATE SHIPMENT
+        // ==========================================
 
-    const barcode=document.querySelector(".barcode-lines");
+        const shipment = await Shipment.create({
 
-    if(!barcode) return;
+            receiptNumber: generateReceiptNumber(),
 
-    barcode.innerHTML="";
+            trackingNumber: finalTrackingNumber,
 
-    let code="";
+            sender:{
+                name: sender.name,
+                phone: sender.phone,
+                email: sender.email || "",
+                address: sender.address || ""
+            },
 
-    for(let i=0;i<120;i++){
+            receiver:{
+                name: receiver.name,
+                phone: receiver.phone,
+                email: receiver.email || "",
+                address: receiver.address
+            },
 
-        code+=Math.random()>0.5 ? "|" : "||";
+            shipmentDescription,
+
+            shipmentType: packageType || "Package",
+
+            packageWeight: Number(packageWeight || 0),
+
+            packageValue: Number(packageValue || 0),
+
+            origin,
+
+            currentLocation: currentLocation || origin,
+
+            destination,
+
+            currentLatitude: Number(currentLatitude || 0),
+
+            currentLongitude: Number(currentLongitude || 0),
+
+            destinationLatitude: Number(destinationLatitude || 0),
+
+            destinationLongitude: Number(destinationLongitude || 0),
+
+            status: finalStatus,
+
+            progress: calculateProgress(finalStatus),
+
+            paymentStatus: paymentStatus || "Pending",
+
+            expectedDelivery: expectedDelivery || null,
+
+            history:[
+                {
+                    location: currentLocation || origin,
+                    status: finalStatus,
+                    latitude: Number(currentLatitude || 0),
+                    longitude: Number(currentLongitude || 0),
+                    timestamp: new Date()
+                }
+            ]
+
+        });
+
+
+
+        return res.status(201).json({
+
+            success:true,
+
+            message:"Shipment created successfully.",
+
+            shipment
+
+        });
 
     }
 
-    barcode.textContent=code;
+    catch(error){
 
-});
+        console.error("CREATE SHIPMENT ERROR:", error);
 
+        return res.status(500).json({
 
+            success:false,
 
+            message:error.message
 
-// ======================================================
-// AUTO FOOTER YEAR
-// ======================================================
-
-window.addEventListener("load",()=>{
-
-    const footer=document.querySelector(".receipt-footer");
-
-    if(!footer) return;
-
-    const year=new Date().getFullYear();
-
-    footer.insertAdjacentHTML(
-
-        "beforeend",
-
-        `
-
-        <div style="margin-top:25px;font-size:13px;color:#666;text-align:center;width:100%;">
-
-        © ${year} LinkWorld Express. All Rights Reserved.
-
-        </div>
-
-        `
-
-    );
-
-});
-
-
-
-
-// ======================================================
-// AUTO PRINT TITLE
-// ======================================================
-
-window.addEventListener("load",()=>{
-
-    if(shipment){
-
-        document.title=
-
-        `Receipt - ${shipment.trackingNumber}`;
+        });
 
     }
 
-});
+};
+
+// ======================================================
+// END PART 1/5
+// ======================================================
+// ======================================================
+// GET ALL SHIPMENTS
+// ADMIN DASHBOARD
+// GET /api/shipments
+// ======================================================
+
+exports.getShipments = async (req, res) => {
+
+    try{
+
+        const shipments = await Shipment.find()
+            .sort({ createdAt: -1 });
+
+        return res.status(200).json({
+
+            success: true,
+
+            total: shipments.length,
+
+            shipments
+
+        });
+
+    }
+
+    catch(error){
+
+        console.error("GET SHIPMENTS ERROR:", error);
+
+        return res.status(500).json({
+
+            success:false,
+
+            message:error.message
+
+        });
+
+    }
+
+};
 
 
 
 
 // ======================================================
-// RECEIPT GENERATED TIME
+// GET SHIPMENT BY ID
+// ADMIN VIEW
+// GET /api/shipments/:id
 // ======================================================
 
-window.addEventListener("load",()=>{
+exports.getShipmentById = async (req, res) => {
 
-    console.log(
+    try{
 
-        "Receipt Generated:",
+        const shipment = await Shipment.findById(req.params.id);
 
-        new Date().toLocaleString()
+        if(!shipment){
 
-    );
+            return res.status(404).json({
 
-});
+                success:false,
+
+                message:"Shipment not found."
+
+            });
+
+        }
+
+        return res.status(200).json({
+
+            success:true,
+
+            shipment
+
+        });
+
+    }
+
+    catch(error){
+
+        console.error("GET SHIPMENT BY ID ERROR:", error);
+
+        return res.status(500).json({
+
+            success:false,
+
+            message:error.message
+
+        });
+
+    }
+
+};
+
+
+
+
+// ======================================================
+// PUBLIC TRACK SHIPMENT
+// GET /api/shipments/track/:trackingNumber
+// ======================================================
+
+exports.trackShipment = async (req, res) => {
+
+    try{
+
+        const trackingNumber = req.params.trackingNumber
+            .trim()
+            .toUpperCase();
+
+        const shipment = await Shipment.findOne({
+
+            trackingNumber
+
+        });
+
+        if(!shipment){
+
+            return res.status(404).json({
+
+                success:false,
+
+                message:"Tracking number not found."
+
+            });
+
+        }
+
+        return res.status(200).json({
+
+            success:true,
+
+            shipment
+
+        });
+
+    }
+
+    catch(error){
+
+        console.error("TRACK SHIPMENT ERROR:", error);
+
+        return res.status(500).json({
+
+            success:false,
+
+            message:error.message
+
+        });
+
+    }
+
+};
+
+
+
+
+// ======================================================
+// RECEIPT LOOKUP
+// GET /api/shipments/receipt/:trackingNumber
+// ======================================================
+
+exports.getShipmentByTracking = async (req, res) => {
+
+    try{
+
+        const trackingNumber = req.params.trackingNumber
+            .trim()
+            .toUpperCase();
+
+        const shipment = await Shipment.findOne({
+
+            trackingNumber
+
+        });
+
+        if(!shipment){
+
+            return res.status(404).json({
+
+                success:false,
+
+                message:"Shipment not found."
+
+            });
+
+        }
+
+        // Sort history from newest to oldest
+        shipment.history.sort(
+
+            (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
+
+        );
+
+        return res.status(200).json({
+
+            success:true,
+
+            shipment
+
+        });
+
+    }
+
+    catch(error){
+
+        console.error("RECEIPT LOOKUP ERROR:", error);
+
+        return res.status(500).json({
+
+            success:false,
+
+            message:error.message
+
+        });
+
+    }
+
+};
+
+// ======================================================
+// END PART 2/5
+// ======================================================
+// ======================================================
+// UPDATE FULL SHIPMENT
+// PUT /api/shipments/:id
+// ======================================================
+
+exports.updateShipment = async (req, res) => {
+
+    try{
+
+        const shipment = await Shipment.findById(req.params.id);
+
+        if(!shipment){
+
+            return res.status(404).json({
+
+                success:false,
+
+                message:"Shipment not found."
+
+            });
+
+        }
+
+
+
+        // ==========================================
+        // UPDATE FIELDS
+        // ==========================================
+
+        Object.assign(shipment, req.body);
+
+
+
+        // ==========================================
+        // UPDATE PROGRESS
+        // ==========================================
+
+        if(req.body.status){
+
+            shipment.progress = calculateProgress(req.body.status);
+
+        }
+
+
+
+        // ==========================================
+        // SAVE HISTORY WHEN STATUS OR LOCATION CHANGES
+        // ==========================================
+
+        if(
+
+            req.body.status ||
+
+            req.body.currentLocation ||
+
+            req.body.currentLatitude ||
+
+            req.body.currentLongitude
+
+        ){
+
+            shipment.history.push({
+
+                location:
+                    shipment.currentLocation,
+
+                status:
+                    shipment.status,
+
+                latitude:
+                    Number(shipment.currentLatitude || 0),
+
+                longitude:
+                    Number(shipment.currentLongitude || 0),
+
+                timestamp:new Date()
+
+            });
+
+        }
+
+
+
+        await shipment.save();
+
+
+
+        return res.status(200).json({
+
+            success:true,
+
+            message:"Shipment updated successfully.",
+
+            shipment
+
+        });
+
+    }
+
+    catch(error){
+
+        console.error("UPDATE SHIPMENT ERROR:", error);
+
+        return res.status(500).json({
+
+            success:false,
+
+            message:error.message
+
+        });
+
+    }
+
+};
+
+
+
+
+// ======================================================
+// UPDATE LIVE LOCATION
+// PUT /api/shipments/location/:id
+// ======================================================
+
+exports.updateLocation = async (req, res) => {
+
+    try{
+
+        const shipment = await Shipment.findById(req.params.id);
+
+        if(!shipment){
+
+            return res.status(404).json({
+
+                success:false,
+
+                message:"Shipment not found."
+
+            });
+
+        }
+
+
+
+        const{
+
+            currentLocation,
+
+            currentLatitude,
+
+            currentLongitude,
+
+            status
+
+        } = req.body;
+
+
+
+        let changed = false;
+
+
+
+        // ==========================================
+        // LOCATION
+        // ==========================================
+
+        if(currentLocation !== undefined){
+
+            shipment.currentLocation = currentLocation;
+
+            changed = true;
+
+        }
+
+
+
+        if(currentLatitude !== undefined){
+
+            shipment.currentLatitude = Number(currentLatitude);
+
+            changed = true;
+
+        }
+
+
+
+        if(currentLongitude !== undefined){
+
+            shipment.currentLongitude = Number(currentLongitude);
+
+            changed = true;
+
+        }
+
+
+
+        // ==========================================
+        // STATUS
+        // ==========================================
+
+        if(status){
+
+            shipment.status = status;
+
+            shipment.progress = calculateProgress(status);
+
+            changed = true;
+
+        }
+
+
+
+        // ==========================================
+        // SAVE HISTORY
+        // ==========================================
+
+        if(changed){
+
+            shipment.history.push({
+
+                location: shipment.currentLocation,
+
+                status: shipment.status,
+
+                latitude: shipment.currentLatitude,
+
+                longitude: shipment.currentLongitude,
+
+                timestamp:new Date()
+
+            });
+
+        }
+
+
+
+        await shipment.save();
+
+
+
+        return res.status(200).json({
+
+            success:true,
+
+            message:"Shipment location updated successfully.",
+
+            shipment
+
+        });
+
+    }
+
+    catch(error){
+
+        console.error("UPDATE LOCATION ERROR:", error);
+
+        return res.status(500).json({
+
+            success:false,
+
+            message:error.message
+
+        });
+
+    }
+
+};
+
+// ======================================================
+// END PART 3/5
+// ======================================================

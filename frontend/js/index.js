@@ -1234,3 +1234,67 @@ document.addEventListener(
 // ======================================================
 // END OF FILE
 // ======================================================
+/*====================================================
+SMOOTH NAVIGATION + ACTIVE SECTION
+====================================================*/
+
+const navLinks = document.querySelectorAll(".navbar a");
+
+navLinks.forEach(link => {
+
+    link.addEventListener("click", function(e){
+
+        const targetId = this.getAttribute("href");
+
+        if(targetId.startsWith("#")){
+
+            e.preventDefault();
+
+            document.querySelector(targetId).scrollIntoView({
+
+                behavior:"smooth"
+
+            });
+
+        }
+
+    });
+
+});
+
+
+const sections = document.querySelectorAll("section[id]");
+
+const observer = new IntersectionObserver((entries)=>{
+
+    entries.forEach(entry=>{
+
+        if(entry.isIntersecting){
+
+            navLinks.forEach(link=>{
+
+                link.classList.remove("active");
+
+                if(link.getAttribute("href")==="#" + entry.target.id){
+
+                    link.classList.add("active");
+
+                }
+
+            });
+
+        }
+
+    });
+
+},{
+
+    threshold:0.45
+
+});
+
+sections.forEach(section=>{
+
+    observer.observe(section);
+
+});
