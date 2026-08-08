@@ -10,7 +10,7 @@
 // API
 // =====================================================
 
-const API_URL = "http://localhost:5000/api";
+const API_URL = LWX_API;
 
 
 // =====================================================
@@ -177,13 +177,9 @@ function startLoading(trackingNumber){
 // TRACK SHIPMENT
 // =====================================================
 
-trackingForm.addEventListener("submit",async function(e){
-
-    e.preventDefault();
+async function trackShipment(trackingNumber){
 
     clearError();
-
-    const trackingNumber=trackingInput.value.trim().toUpperCase();
 
     if(!trackingNumber){
 
@@ -267,7 +263,42 @@ trackingForm.addEventListener("submit",async function(e){
 
     }
 
+}
+
+
+trackingForm.addEventListener("submit",function(e){
+
+    e.preventDefault();
+
+    trackShipment(trackingInput.value.trim().toUpperCase());
+
 });
+
+
+// =====================================================
+// AUTO-TRACK FROM URL
+// Supports links like tracking.html?tracking=LWX...
+// (used by the homepage quick-track box)
+// =====================================================
+
+(function autoTrackFromURL(){
+
+    const params = new URLSearchParams(window.location.search);
+
+    const trackingNumber =
+        (params.get("tracking") || params.get("trackingNumber") || "")
+        .trim()
+        .toUpperCase();
+
+    if(trackingNumber){
+
+        trackingInput.value = trackingNumber;
+
+        trackShipment(trackingNumber);
+
+    }
+
+})();
 
 
 // =====================================================

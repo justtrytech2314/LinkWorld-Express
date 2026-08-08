@@ -189,7 +189,7 @@ TRACKING HEADER
 
                     <p>
 
-                        Connected to Global GPS Network
+                        Tracking #: <span id="trackingNumberDisplay">-</span>
 
                     </p>
 
@@ -473,7 +473,32 @@ LIVE GLOBAL TRACKING MAP
 
         <!-- GPS INFORMATION -->
 
-    
+        <div class="gps-information-card">
+
+            <div class="gps-row">
+                <span>Current Location</span>
+                <strong id="mapCurrentLocation">-</strong>
+            </div>
+
+            <div class="gps-row">
+                <span>Latitude</span>
+                <strong id="mapLatitude">-</strong>
+            </div>
+
+            <div class="gps-row">
+                <span>Longitude</span>
+                <strong id="mapLongitude">-</strong>
+            </div>
+
+            <div class="gps-row">
+                <span>GPS Signal</span>
+                <strong id="gpsLastSignal">-</strong>
+            </div>
+
+        </div>
+
+    </div>
+
 </section>
 
 
@@ -1420,6 +1445,7 @@ JAVASCRIPT
 
 
 
+<script src="js/config.js"></script>
 <script src="js/index.js"></script>
 
 

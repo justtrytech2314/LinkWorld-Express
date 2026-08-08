@@ -16,7 +16,7 @@ MATCHES DASHBOARD.HTML IDS
 // ======================================================
 
 
-const API_URL = "https://api.linkworldexpress.com/api";
+const API_URL = LWX_API;
 
 
 
@@ -50,7 +50,7 @@ if(!adminToken){
 
 
 window.location.href =
-"admin-login.html";
+"admin.html";
 
 
 }
@@ -120,6 +120,9 @@ async function initializeDashboard(){
 
 
 try{
+
+
+await verifyAdminSession();
 
 
 await loadShipments();
@@ -365,7 +368,7 @@ shipments.filter(
 
 shipment =>
 
-shipment.status === "Created"
+shipment.status === "Shipment Created"
 
 
 ).length;
@@ -501,9 +504,14 @@ localStorage.removeItem(
 );
 
 
+localStorage.removeItem(
+"receiptShipment"
+);
+
+
 
 window.location.href =
-"admin-login.html";
+"admin.html";
 
 
 }
@@ -1567,7 +1575,7 @@ ${shipment.currentLocation || "-"}
 <span class="status-badge ${statusClass(shipment.status)}">
 
 
-${shipment.status || "Created"}
+${shipment.status || "Shipment Created"}
 
 
 </span>
@@ -2338,7 +2346,7 @@ document.getElementById(
 "editStatus"
 ).value =
 
-shipment.status || "Created";
+shipment.status || "Shipment Created";
 
 
 
@@ -2917,7 +2925,7 @@ localStorage.removeItem(
 
 window.location.href =
 
-"admin-login.html";
+"admin.html";
 
 
 
@@ -2991,16 +2999,6 @@ console.log(
 
 
 
-// ======================================================
-// START FINAL CHECK
-// ======================================================
-
-
-verifyAdminSession();
-
-
-
-
 
 
 
@@ -3011,414 +3009,6 @@ verifyAdminSession();
 // ======================================================
 // END PART 4
 // ======================================================
-/* ======================================================
-LINKWORLD EXPRESS
-ADMIN DASHBOARD JS
-PART 5
-FINAL HELPERS + STARTUP CONNECTION
-MATCHES ALL PREVIOUS PARTS
-====================================================== */
-
-
-
-
-
-
-
-// ======================================================
-// COMMON AUTH HEADER FUNCTION
-// USED BY ALL API REQUESTS
-// ======================================================
-
-
-function getHeaders(){
-
-
-
-const token =
-
-localStorage.getItem(
-"adminToken"
-);
-
-
-
-
-
-
-return {
-
-
-
-"Content-Type":
-
-"application/json",
-
-
-
-"Authorization":
-
-`Bearer ${token}`
-
-
-
-};
-
-
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-// ======================================================
-// STATUS BADGE COLORS
-// ======================================================
-
-
-function statusClass(status){
-
-
-
-if(!status)
-
-return "status-created";
-
-
-
-
-
-const value =
-
-status.toLowerCase();
-
-
-
-
-
-
-
-
-if(
-
-value.includes("deliver")
-
-)
-
-return "status-delivered";
-
-
-
-
-
-
-
-
-if(
-
-value.includes("transit")
-
-||
-
-value.includes("picked")
-
-||
-
-value.includes("pickup")
-
-)
-
-return "status-transit";
-
-
-
-
-
-
-
-
-if(
-
-value.includes("arriv")
-
-)
-
-return "status-arrived";
-
-
-
-
-
-
-
-
-return "status-created";
-
-
-
-}
-
-
-
-
-
-
-
-
-
-
-
-// ======================================================
-// UPDATE DASHBOARD STATISTICS
-// ======================================================
-
-
-function updateStats(){
-
-
-
-
-
-const total =
-
-document.getElementById(
-"totalShipments"
-);
-
-
-
-
-
-
-const transit =
-
-document.getElementById(
-"transitShipments"
-);
-
-
-
-
-
-
-const delivered =
-
-document.getElementById(
-"deliveredShipments"
-);
-
-
-
-
-
-
-const pending =
-
-document.getElementById(
-"pendingShipments"
-);
-
-
-
-
-
-
-
-
-
-if(total)
-
-total.textContent =
-
-shipments.length;
-
-
-
-
-
-
-
-
-
-if(transit)
-
-
-transit.textContent =
-
-
-shipments.filter(
-
-item =>
-
-item.status === "In Transit"
-
-||
-
-item.status === "Picked Up"
-
-).length;
-
-
-
-
-
-
-
-
-
-if(delivered)
-
-
-delivered.textContent =
-
-
-shipments.filter(
-
-item =>
-
-item.status === "Delivered"
-
-).length;
-
-
-
-
-
-
-
-
-
-if(pending)
-
-
-pending.textContent =
-
-
-shipments.filter(
-
-item =>
-
-item.status === "Created"
-
-).length;
-
-
-
-
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-// ======================================================
-// SAVE BUTTON CONNECTION
-// DASHBOARD HTML:
-// <button type="submit">
-// ======================================================
-
-
-const shipmentFormSubmit =
-
-document.getElementById(
-"shipmentForm"
-);
-
-
-
-
-
-
-
-if(shipmentFormSubmit){
-
-
-
-shipmentFormSubmit.addEventListener(
-
-"submit",
-
-createShipment
-
-);
-
-
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-// ======================================================
-// LOGOUT FUNCTION
-// ======================================================
-
-
-function logoutAdmin(){
-
-
-
-localStorage.removeItem(
-"adminToken"
-);
-
-
-
-
-
-
-localStorage.removeItem(
-"receiptShipment"
-);
-
-
-
-
-
-
-window.location.href =
-
-"admin-login.html";
-
-
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
 // ======================================================
 // CLOSE MODALS WHEN CLICK OUTSIDE
 // ======================================================
@@ -3519,163 +3109,3 @@ editModal.classList.remove(
 
 
 
-// ======================================================
-// INITIAL DASHBOARD BOOT
-// RUNS AFTER LOGIN TOKEN CHECK
-// ======================================================
-
-
-async function startDashboard(){
-
-
-
-
-
-
-const token =
-
-localStorage.getItem(
-"adminToken"
-);
-
-
-
-
-
-
-
-if(!token){
-
-
-
-window.location.href =
-
-"admin-login.html";
-
-
-
-return;
-
-
-
-}
-
-
-
-
-
-
-
-
-try{
-
-
-
-
-
-await verifyAdminSession();
-
-
-
-
-
-await loadShipments();
-
-
-
-
-
-renderShipments();
-
-
-
-
-
-updateStats();
-
-
-
-
-
-
-}
-
-catch(error){
-
-
-
-console.error(
-
-"Dashboard start error:",
-
-error
-
-);
-
-
-
-
-
-
-localStorage.removeItem(
-"adminToken"
-);
-
-
-
-
-
-window.location.href =
-
-"admin-login.html";
-
-
-
-}
-
-
-
-
-}
-
-
-
-
-
-
-
-
-
-
-
-// ======================================================
-// PAGE READY
-// ======================================================
-
-
-document.addEventListener(
-
-"DOMContentLoaded",
-
-()=>{
-
-
-startDashboard();
-
-
-
-}
-
-);
-
-
-
-
-
-
-
-
-
-// ======================================================
-// END PART 5
-// ======================================================

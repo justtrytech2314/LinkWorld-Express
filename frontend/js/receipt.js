@@ -1,779 +1,303 @@
-// ======================================================
-// LINKWORLD EXPRESS
-// PREMIUM SHIPMENT CONTROLLER
-// PART 1/5
-// ======================================================
+/* ======================================================
+LINKWORLD EXPRESS
+RECEIPT PAGE
+Loads a shipment (from the dashboard hand-off, or by
+?tracking= in the URL) and renders the printable receipt.
+====================================================== */
 
-const Shipment = require("../models/Shipment");
-const generateTrackingNumber = require("../utils/generateTrackingNumber");
-
-
-
-// ======================================================
-// CALCULATE PROGRESS
-// ======================================================
-
-function calculateProgress(status){
-
-    switch(status){
-
-        case "Shipment Created":
-            return 5;
-
-        case "Processing":
-            return 30;
-
-        case "Picked Up":
-            return 45;
-
-        case "In Transit":
-            return 60;
-
-        case "At Facility":
-            return 75;
-
-        case "Out For Delivery":
-            return 90;
-
-        case "Delivered":
-            return 100;
-
-        case "Cancelled":
-            return 0;
-
-        default:
-            return 5;
-
-    }
-
-}
-
+"use strict";
 
 
 // ======================================================
-// GENERATE RECEIPT NUMBER
+// LOAD SHIPMENT
 // ======================================================
 
-function generateReceiptNumber(){
+let shipment = null;
 
-    return (
-        "RCPT-" +
-        Date.now() +
-        "-" +
-        Math.floor(Math.random() * 9000 + 1000)
-    );
+document.addEventListener("DOMContentLoaded", () => {
 
-}
+    loadReceipt();
 
+});
 
-
-// ======================================================
-// CREATE SHIPMENT
-// POST /api/shipments
-// ======================================================
-
-exports.createShipment = async (req, res) => {
+async function loadReceipt(){
 
     try{
 
-        const{
+        // Shipment handed off from the admin dashboard.
+        const saved = localStorage.getItem("receiptShipment");
 
-            trackingNumber,
+        if(saved){
 
-            sender,
+            shipment = JSON.parse(saved);
 
-            receiver,
+            populateReceipt();
 
-            shipmentDescription,
+            hideLoading();
 
-            packageType,
+            return;
 
-            packageWeight,
+        }
 
-            packageValue,
+        // Fallback: a shareable link, e.g. receipt.html?tracking=LWX...
+        const params = new URLSearchParams(window.location.search);
 
-            origin,
+        const trackingNumber =
+            (params.get("tracking") || "").trim().toUpperCase();
 
-            destination,
+        if(!trackingNumber){
 
-            currentLocation,
+            Swal.fire({
+                icon:"error",
+                title:"No Shipment Found",
+                text:"Please open the receipt from the Dashboard, or provide a tracking number."
+            }).then(()=>{
 
-            currentLatitude,
-
-            currentLongitude,
-
-            destinationLatitude,
-
-            destinationLongitude,
-
-            status,
-
-            paymentStatus,
-
-            expectedDelivery
-
-        } = req.body;
-
-
-
-        // ==========================================
-        // VALIDATION
-        // ==========================================
-
-        if(
-
-            !sender?.name ||
-
-            !sender?.phone ||
-
-            !receiver?.name ||
-
-            !receiver?.phone ||
-
-            !receiver?.address ||
-
-            !shipmentDescription ||
-
-            !origin ||
-
-            !destination
-
-        ){
-
-            return res.status(400).json({
-
-                success:false,
-
-                message:"Please complete all required shipment fields."
+                window.location.href = "dashboard.html";
 
             });
 
-        }
-
-
-
-        // ==========================================
-        // TRACKING NUMBER
-        // ==========================================
-
-        let finalTrackingNumber = trackingNumber;
-
-        if(!finalTrackingNumber){
-
-            let exists = true;
-
-            while(exists){
-
-                finalTrackingNumber = generateTrackingNumber();
-
-                const check = await Shipment.findOne({
-
-                    trackingNumber: finalTrackingNumber
-
-                });
-
-                exists = Boolean(check);
-
-            }
+            return;
 
         }
 
-
-
-        const finalStatus = status || "Shipment Created";
-
-
-
-        // ==========================================
-        // CREATE SHIPMENT
-        // ==========================================
-
-        const shipment = await Shipment.create({
-
-            receiptNumber: generateReceiptNumber(),
-
-            trackingNumber: finalTrackingNumber,
-
-            sender:{
-                name: sender.name,
-                phone: sender.phone,
-                email: sender.email || "",
-                address: sender.address || ""
-            },
-
-            receiver:{
-                name: receiver.name,
-                phone: receiver.phone,
-                email: receiver.email || "",
-                address: receiver.address
-            },
-
-            shipmentDescription,
-
-            shipmentType: packageType || "Package",
-
-            packageWeight: Number(packageWeight || 0),
-
-            packageValue: Number(packageValue || 0),
-
-            origin,
-
-            currentLocation: currentLocation || origin,
-
-            destination,
-
-            currentLatitude: Number(currentLatitude || 0),
-
-            currentLongitude: Number(currentLongitude || 0),
-
-            destinationLatitude: Number(destinationLatitude || 0),
-
-            destinationLongitude: Number(destinationLongitude || 0),
-
-            status: finalStatus,
-
-            progress: calculateProgress(finalStatus),
-
-            paymentStatus: paymentStatus || "Pending",
-
-            expectedDelivery: expectedDelivery || null,
-
-            history:[
-                {
-                    location: currentLocation || origin,
-                    status: finalStatus,
-                    latitude: Number(currentLatitude || 0),
-                    longitude: Number(currentLongitude || 0),
-                    timestamp: new Date()
-                }
-            ]
-
-        });
-
-
-
-        return res.status(201).json({
-
-            success:true,
-
-            message:"Shipment created successfully.",
-
-            shipment
-
-        });
-
-    }
-
-    catch(error){
-
-        console.error("CREATE SHIPMENT ERROR:", error);
-
-        return res.status(500).json({
-
-            success:false,
-
-            message:error.message
-
-        });
-
-    }
-
-};
-
-// ======================================================
-// END PART 1/5
-// ======================================================
-// ======================================================
-// GET ALL SHIPMENTS
-// ADMIN DASHBOARD
-// GET /api/shipments
-// ======================================================
-
-exports.getShipments = async (req, res) => {
-
-    try{
-
-        const shipments = await Shipment.find()
-            .sort({ createdAt: -1 });
-
-        return res.status(200).json({
-
-            success: true,
-
-            total: shipments.length,
-
-            shipments
-
-        });
-
-    }
-
-    catch(error){
-
-        console.error("GET SHIPMENTS ERROR:", error);
-
-        return res.status(500).json({
-
-            success:false,
-
-            message:error.message
-
-        });
-
-    }
-
-};
-
-
-
-
-// ======================================================
-// GET SHIPMENT BY ID
-// ADMIN VIEW
-// GET /api/shipments/:id
-// ======================================================
-
-exports.getShipmentById = async (req, res) => {
-
-    try{
-
-        const shipment = await Shipment.findById(req.params.id);
-
-        if(!shipment){
-
-            return res.status(404).json({
-
-                success:false,
-
-                message:"Shipment not found."
-
-            });
-
-        }
-
-        return res.status(200).json({
-
-            success:true,
-
-            shipment
-
-        });
-
-    }
-
-    catch(error){
-
-        console.error("GET SHIPMENT BY ID ERROR:", error);
-
-        return res.status(500).json({
-
-            success:false,
-
-            message:error.message
-
-        });
-
-    }
-
-};
-
-
-
-
-// ======================================================
-// PUBLIC TRACK SHIPMENT
-// GET /api/shipments/track/:trackingNumber
-// ======================================================
-
-exports.trackShipment = async (req, res) => {
-
-    try{
-
-        const trackingNumber = req.params.trackingNumber
-            .trim()
-            .toUpperCase();
-
-        const shipment = await Shipment.findOne({
-
-            trackingNumber
-
-        });
-
-        if(!shipment){
-
-            return res.status(404).json({
-
-                success:false,
-
-                message:"Tracking number not found."
-
-            });
-
-        }
-
-        return res.status(200).json({
-
-            success:true,
-
-            shipment
-
-        });
-
-    }
-
-    catch(error){
-
-        console.error("TRACK SHIPMENT ERROR:", error);
-
-        return res.status(500).json({
-
-            success:false,
-
-            message:error.message
-
-        });
-
-    }
-
-};
-
-
-
-
-// ======================================================
-// RECEIPT LOOKUP
-// GET /api/shipments/receipt/:trackingNumber
-// ======================================================
-
-exports.getShipmentByTracking = async (req, res) => {
-
-    try{
-
-        const trackingNumber = req.params.trackingNumber
-            .trim()
-            .toUpperCase();
-
-        const shipment = await Shipment.findOne({
-
-            trackingNumber
-
-        });
-
-        if(!shipment){
-
-            return res.status(404).json({
-
-                success:false,
-
-                message:"Shipment not found."
-
-            });
-
-        }
-
-        // Sort history from newest to oldest
-        shipment.history.sort(
-
-            (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
-
+        const response = await fetch(
+            `${LWX_API}/shipments/receipt/${trackingNumber}`
         );
 
-        return res.status(200).json({
+        const data = await response.json();
 
-            success:true,
+        if(!data.success){
 
-            shipment
+            Swal.fire({
+                icon:"error",
+                title:"Shipment Not Found",
+                text:data.message || "Unable to locate this shipment."
+            }).then(()=>{
 
-        });
+                window.location.href = "tracking.html";
+
+            });
+
+            return;
+
+        }
+
+        shipment = data.shipment;
+
+        populateReceipt();
+
+        hideLoading();
 
     }
 
     catch(error){
 
-        console.error("RECEIPT LOOKUP ERROR:", error);
+        console.error("RECEIPT ERROR:", error);
 
-        return res.status(500).json({
+        Swal.fire({
+            icon:"error",
+            title:"Connection Error",
+            text:"Unable to load this receipt right now."
+        });
 
-            success:false,
+        hideLoading();
 
-            message:error.message
+    }
+
+}
+
+
+function hideLoading(){
+
+    const loading = document.getElementById("loading");
+
+    if(loading){
+
+        setTimeout(()=>{
+
+            loading.style.display = "none";
+
+        },400);
+
+    }
+
+}
+
+
+// ======================================================
+// SAFE TEXT UPDATE
+// ======================================================
+
+function setText(id,value){
+
+    const element = document.getElementById(id);
+
+    if(element){
+
+        element.textContent = (value === 0) ? "0" : (value || "-");
+
+    }
+
+}
+
+
+function formatDate(date){
+
+    if(!date) return "-";
+
+    return new Date(date).toLocaleDateString("en-US",{
+        year:"numeric",
+        month:"short",
+        day:"numeric"
+    });
+
+}
+
+
+function formatDateTime(date){
+
+    if(!date) return "-";
+
+    return new Date(date).toLocaleString("en-US",{
+        year:"numeric",
+        month:"short",
+        day:"numeric",
+        hour:"2-digit",
+        minute:"2-digit"
+    });
+
+}
+
+
+// ======================================================
+// POPULATE RECEIPT
+// ======================================================
+
+function populateReceipt(){
+
+    if(!shipment) return;
+
+    setText("trackingNumber", shipment.trackingNumber);
+    setText("shipmentStatus", shipment.status);
+    setText("shipmentType", shipment.shipmentType);
+    setText("paymentStatus", shipment.paymentStatus);
+    setText("shipmentDescription", shipment.shipmentDescription);
+    setText("packageWeight", shipment.packageWeight != null ? `${shipment.packageWeight} kg` : "-");
+    setText("packageValue", shipment.packageValue != null ? `$${shipment.packageValue}` : "-");
+    setText("expectedDelivery", formatDate(shipment.expectedDelivery));
+
+    setText("origin", shipment.origin);
+    setText("currentLocation", shipment.currentLocation);
+    setText("destination", shipment.destination);
+
+    setText("senderName", shipment.sender?.name);
+    setText("senderPhone", shipment.sender?.phone);
+    setText("senderEmail", shipment.sender?.email);
+    setText("senderAddress", shipment.sender?.address);
+
+    setText("receiverName", shipment.receiver?.name);
+    setText("receiverPhone", shipment.receiver?.phone);
+    setText("receiverEmail", shipment.receiver?.email);
+    setText("receiverAddress", shipment.receiver?.address);
+
+    buildHistory();
+
+}
+
+
+// ======================================================
+// SHIPMENT HISTORY
+// ======================================================
+
+function buildHistory(){
+
+    const container = document.getElementById("historyContainer");
+
+    if(!container) return;
+
+    container.innerHTML = "";
+
+    const history = shipment.history || [];
+
+    if(history.length === 0){
+
+        container.innerHTML =
+        `<div class="timeline-empty">No tracking history yet.</div>`;
+
+        return;
+
+    }
+
+    const sorted = [...history].sort(
+        (a,b) => new Date(b.timestamp) - new Date(a.timestamp)
+    );
+
+    sorted.forEach(item => {
+
+        const row = document.createElement("div");
+
+        row.className = "history-item";
+
+        row.innerHTML = `
+            <div class="history-icon">
+                <i class="fa-solid fa-check"></i>
+            </div>
+            <div class="history-content">
+                <h3>${item.status}</h3>
+                <p><i class="fa-solid fa-location-dot"></i> ${item.location || "-"}</p>
+                <span>${formatDateTime(item.timestamp)}</span>
+            </div>
+        `;
+
+        container.appendChild(row);
+
+    });
+
+}
+
+
+// ======================================================
+// PRINT / DOWNLOAD
+// ======================================================
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    const printBtn = document.getElementById("printReceipt");
+
+    if(printBtn){
+
+        printBtn.addEventListener("click", () => {
+
+            window.print();
 
         });
 
     }
 
-};
+    const downloadBtn = document.getElementById("downloadPDF");
 
-// ======================================================
-// END PART 2/5
-// ======================================================
-// ======================================================
-// UPDATE FULL SHIPMENT
-// PUT /api/shipments/:id
-// ======================================================
+    if(downloadBtn){
 
-exports.updateShipment = async (req, res) => {
+        downloadBtn.addEventListener("click", () => {
 
-    try{
+            const container = document.getElementById("receiptContainer");
 
-        const shipment = await Shipment.findById(req.params.id);
+            if(!container || typeof html2pdf === "undefined") return;
 
-        if(!shipment){
+            const fileName =
+                `LinkWorld-Express-Receipt-${shipment?.trackingNumber || "shipment"}.pdf`;
 
-            return res.status(404).json({
-
-                success:false,
-
-                message:"Shipment not found."
-
-            });
-
-        }
-
-
-
-        // ==========================================
-        // UPDATE FIELDS
-        // ==========================================
-
-        Object.assign(shipment, req.body);
-
-
-
-        // ==========================================
-        // UPDATE PROGRESS
-        // ==========================================
-
-        if(req.body.status){
-
-            shipment.progress = calculateProgress(req.body.status);
-
-        }
-
-
-
-        // ==========================================
-        // SAVE HISTORY WHEN STATUS OR LOCATION CHANGES
-        // ==========================================
-
-        if(
-
-            req.body.status ||
-
-            req.body.currentLocation ||
-
-            req.body.currentLatitude ||
-
-            req.body.currentLongitude
-
-        ){
-
-            shipment.history.push({
-
-                location:
-                    shipment.currentLocation,
-
-                status:
-                    shipment.status,
-
-                latitude:
-                    Number(shipment.currentLatitude || 0),
-
-                longitude:
-                    Number(shipment.currentLongitude || 0),
-
-                timestamp:new Date()
-
-            });
-
-        }
-
-
-
-        await shipment.save();
-
-
-
-        return res.status(200).json({
-
-            success:true,
-
-            message:"Shipment updated successfully.",
-
-            shipment
+            html2pdf().from(container).set({
+                filename:fileName,
+                margin:0.3,
+                image:{ type:"jpeg", quality:0.98 },
+                html2canvas:{ scale:2 },
+                jsPDF:{ unit:"in", format:"letter", orientation:"portrait" }
+            }).save();
 
         });
 
     }
 
-    catch(error){
-
-        console.error("UPDATE SHIPMENT ERROR:", error);
-
-        return res.status(500).json({
-
-            success:false,
-
-            message:error.message
-
-        });
-
-    }
-
-};
-
-
-
-
-// ======================================================
-// UPDATE LIVE LOCATION
-// PUT /api/shipments/location/:id
-// ======================================================
-
-exports.updateLocation = async (req, res) => {
-
-    try{
-
-        const shipment = await Shipment.findById(req.params.id);
-
-        if(!shipment){
-
-            return res.status(404).json({
-
-                success:false,
-
-                message:"Shipment not found."
-
-            });
-
-        }
-
-
-
-        const{
-
-            currentLocation,
-
-            currentLatitude,
-
-            currentLongitude,
-
-            status
-
-        } = req.body;
-
-
-
-        let changed = false;
-
-
-
-        // ==========================================
-        // LOCATION
-        // ==========================================
-
-        if(currentLocation !== undefined){
-
-            shipment.currentLocation = currentLocation;
-
-            changed = true;
-
-        }
-
-
-
-        if(currentLatitude !== undefined){
-
-            shipment.currentLatitude = Number(currentLatitude);
-
-            changed = true;
-
-        }
-
-
-
-        if(currentLongitude !== undefined){
-
-            shipment.currentLongitude = Number(currentLongitude);
-
-            changed = true;
-
-        }
-
-
-
-        // ==========================================
-        // STATUS
-        // ==========================================
-
-        if(status){
-
-            shipment.status = status;
-
-            shipment.progress = calculateProgress(status);
-
-            changed = true;
-
-        }
-
-
-
-        // ==========================================
-        // SAVE HISTORY
-        // ==========================================
-
-        if(changed){
-
-            shipment.history.push({
-
-                location: shipment.currentLocation,
-
-                status: shipment.status,
-
-                latitude: shipment.currentLatitude,
-
-                longitude: shipment.currentLongitude,
-
-                timestamp:new Date()
-
-            });
-
-        }
-
-
-
-        await shipment.save();
-
-
-
-        return res.status(200).json({
-
-            success:true,
-
-            message:"Shipment location updated successfully.",
-
-            shipment
-
-        });
-
-    }
-
-    catch(error){
-
-        console.error("UPDATE LOCATION ERROR:", error);
-
-        return res.status(500).json({
-
-            success:false,
-
-            message:error.message
-
-        });
-
-    }
-
-};
-
-// ======================================================
-// END PART 3/5
-// ======================================================
+});

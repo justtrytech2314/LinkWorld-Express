@@ -16,8 +16,7 @@ FETCH SHIPMENT + CONNECT API
 // ======================================================
 
 
-const TRACKING_API = 
-"https://api.linkworldexpress.com/api";
+const TRACKING_API = LWX_API;
 
 
 
@@ -362,6 +361,22 @@ shipment.updatedAt
 setText(
 "mapCurrentLocation",
 shipment.currentLocation
+);
+
+
+
+
+setText(
+"mapLatitude",
+shipment.currentLatitude
+);
+
+
+
+
+setText(
+"mapLongitude",
+shipment.currentLongitude
 );
 
 

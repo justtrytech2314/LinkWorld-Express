@@ -5,22 +5,6 @@
 // ======================================================
 
 
-const dns = require("dns");
-
-
-// ======================================================
-// FORCE GOOGLE DNS
-// Fix MongoDB Atlas SRV DNS issues
-// ======================================================
-
-dns.setServers([
-    "8.8.8.8",
-    "8.8.4.4"
-]);
-
-
-
-
 // ======================================================
 // ENVIRONMENT
 // ======================================================
@@ -69,19 +53,43 @@ connectDB();
 // ======================================================
 
 
+const PRODUCTION_ORIGINS = [
+
+    "https://linkworldexpress.com",
+
+    "https://www.linkworldexpress.com"
+
+];
+
+
 app.use(cors({
 
-    origin: [
+    origin: (origin, callback) => {
 
-        "https://linkworldexpress.com",
+        // No Origin header: curl, server-to-server, or a page
+        // opened directly from disk (file://) sends "null".
+        if (!origin || origin === "null") {
 
-        "https://www.linkworldexpress.com",
+            return callback(null, true);
 
-        "http://localhost:5500",
+        }
 
-        "http://127.0.0.1:5500"
+        if (PRODUCTION_ORIGINS.includes(origin)) {
 
-    ],
+            return callback(null, true);
+
+        }
+
+        // Any local dev server, on any port.
+        if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+
+            return callback(null, true);
+
+        }
+
+        return callback(new Error("Not allowed by CORS"));
+
+    },
 
     methods: [
 
@@ -181,6 +189,16 @@ app.use(
     "/api/admin",
 
     require("./routes/authRoutes")
+
+);
+
+
+
+app.use(
+
+    "/api/requests",
+
+    require("./routes/requestRoutes")
 
 );
 

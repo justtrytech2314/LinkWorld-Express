@@ -9,8 +9,7 @@
 // CONFIGURATION
 // ======================================================
 
-const API_BASE_URL =
-"https://linkworld-express2-1.onrender.com";
+const API_BASE_URL = LWX_API_ROOT;
 
 const TRACKING_URL =
 "tracking.html?tracking=";
