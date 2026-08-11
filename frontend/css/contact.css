@@ -199,4 +199,5 @@
 @media (max-width:600px){
   .contact-form .form-grid{ grid-template-columns:1fr; }
   .contact-form .form-card{ padding:26px 22px; }
+  .channel-card h3{ font-size:15px; word-break:break-word; }
 }

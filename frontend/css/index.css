@@ -7,58 +7,6 @@
 
 
 /* =========================================================
-   HERO PHOTO (right side of the hero band)
-========================================================= */
-.hero-photo-frame{
-  position:relative;
-  border:1px solid rgba(255,255,255,.16);
-  box-shadow:0 30px 60px rgba(0,0,0,.35);
-}
-
-.hero-photo-frame img{
-  width:100%;
-  display:block;
-}
-
-.hero-photo-tag{
-  position:absolute;
-  left:0; bottom:0; right:0;
-  display:flex;
-  align-items:center;
-  gap:10px;
-  background:var(--navy);
-  color:#fff;
-  font-family:var(--mono);
-  font-size:12px;
-  letter-spacing:.08em;
-  text-transform:uppercase;
-  padding:14px 20px;
-  border-top:1px solid rgba(255,255,255,.16);
-}
-
-.hero-photo-tag i{ color:var(--orange); }
-
-
-/* =========================================================
-   SECTION CTA (centered button under a grid)
-========================================================= */
-.section-cta{
-  text-align:center;
-  margin-top:44px;
-}
-
-.on-paper-btn{
-  color:var(--navy);
-  border-color:var(--line);
-}
-
-.on-paper-btn:hover{
-  border-color:var(--orange);
-  color:var(--orange-dk);
-}
-
-
-/* =========================================================
    QUICK TRACKING
 ========================================================= */
 .quick-track{
@@ -132,51 +80,6 @@
 }
 
 .track-form button:hover{ background:var(--orange-dk); }
-
-
-/* =========================================================
-   COMPANY STATISTICS
-========================================================= */
-.statistics{
-  background:var(--navy);
-  padding:64px 0;
-}
-
-.stats-grid{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:1px;
-  background:rgba(255,255,255,.14);
-}
-
-.stat-card{
-  background:var(--navy-2);
-  padding:38px 24px;
-  text-align:center;
-}
-
-.stat-card i{
-  font-size:22px;
-  color:var(--orange);
-  margin-bottom:14px;
-}
-
-.stat-card .counter{
-  display:block;
-  font-family:var(--display);
-  font-size:38px;
-  color:#fff;
-  font-weight:700;
-  margin-bottom:8px;
-}
-
-.stat-card p{
-  font-family:var(--mono);
-  font-size:11.5px;
-  letter-spacing:.06em;
-  text-transform:uppercase;
-  color:#9BA6B2;
-}
 
 
 /* =========================================================
@@ -566,7 +469,6 @@
   .testimonial-grid{ grid-template-columns:1fr; }
   .coverage-grid{ grid-template-columns:1fr; }
   .contact-preview-grid{ grid-template-columns:1fr 1fr; }
-  .stats-grid{ grid-template-columns:1fr 1fr; }
 
 }
 
@@ -595,11 +497,11 @@
     justify-content:center;
   }
 
-  .stats-grid{ grid-template-columns:1fr 1fr; }
   .features-grid{ grid-template-columns:1fr; }
   .services-grid{ grid-template-columns:1fr; }
   .process-grid{ grid-template-columns:1fr; }
   .coverage-content ul{ grid-template-columns:1fr; }
   .contact-preview-grid{ grid-template-columns:1fr; }
+  .contact-preview-card h3{ font-size:14.5px; }
 
 }

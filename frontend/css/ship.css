@@ -464,7 +464,7 @@ ul{ list-style:none; }
   .footer-grid{ grid-template-columns:1fr 1fr; }
 }
 @media (max-width: 600px){
-  .process-grid, .features-grid, .services-grid, .contact-grid, .options-grid, .coverage-card, .footer-grid{ grid-template-columns:1fr; }
+  .process-grid, .features-grid, .services-grid, .contact-grid, .options-grid, .coverage-card, .footer-grid, .shipping-summary, .faq-grid{ grid-template-columns:1fr; }
   .hero-stats{ flex-wrap:wrap; gap:22px; }
   .hero-card{ transform:none; }
   .header-wrapper{ flex-wrap:wrap; }

@@ -310,6 +310,13 @@
   border:1px solid var(--line);
   margin-bottom:2px;
   width:fit-content;
+  max-width:100%;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+}
+
+.details-tabs button{
+  flex-shrink:0;
 }
 
 .details-tabs button{
