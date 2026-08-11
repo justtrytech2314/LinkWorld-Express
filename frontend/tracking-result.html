@@ -13,7 +13,7 @@ LinkWorld Express | Live Shipment Tracking
 </title>
 
 
-<meta 
+<meta
 name="description"
 content="Track your shipment live with LinkWorld Express global tracking system">
 
@@ -28,15 +28,15 @@ content="Track your shipment live with LinkWorld Express global tracking system"
 
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-<link 
-href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+<link
+href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil+Text:wght@500;700;900&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
 rel="stylesheet">
 
 
 
 <!-- FONT AWESOME -->
 
-<link 
+<link
 rel="stylesheet"
 href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 
@@ -44,7 +44,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
 
 <!-- LEAFLET MAP -->
 
-<link 
+<link
 rel="stylesheet"
 href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
@@ -52,13 +52,13 @@ href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
 <!-- SWEET ALERT -->
 
-<link 
+<link
 rel="stylesheet"
 href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
 
 
-<!-- MAIN CSS -->
+<!-- SHARED DESIGN SYSTEM -->
 
 <link rel="stylesheet" href="css/style.css">
 
@@ -72,128 +72,108 @@ href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
 
 
-
 <body>
 
 
 
-<!-- ==============================
-HEADER
-============================== -->
-<!-- ==============================
-HEADER
-============================== -->
 <!-- ======================================================
-TRACKING HEADER
+HEADER
 ====================================================== -->
 
-<header class="tracking-header">
+<header class="site-header">
 
-    <div class="tracking-header-container">
+    <div class="container">
 
-        <!-- ==========================================
-        LEFT SIDE
-        =========================================== -->
+        <div class="header-wrapper">
 
-        <div class="header-left">
+            <div class="header-left">
 
-            <div class="brand-row">
+                <div class="brand-row">
 
-                <!-- COMPANY LOGO -->
+                    <div class="company-logo">
 
-                <div class="company-logo">
+                        <img
+                            src="images/image.png"
+                            alt="LinkWorld Express Logo">
 
-                    <img
-                        src="images/image.png"
-                        alt="LinkWorld Express Logo">
+                    </div>
 
-                </div>
+                    <div class="brand-details">
 
-                <!-- COMPANY DETAILS -->
+                        <h1>
 
-                <div class="brand-details">
+                            LINKWORLD EXPRESS
 
-                    <h1>
+                        </h1>
 
-                        LINKWORLD EXPRESS
+                        <p>
 
-                    </h1>
+                            Global Logistics & Freight Services
 
-                    <p>
+                        </p>
 
-                        Global Logistics & Freight Services
-
-                    </p>
+                    </div>
 
                 </div>
+
+                <nav class="navbar">
+
+                    <a href="index.html">
+                        Home
+                    </a>
+
+                    <a href="about.html">
+                        About
+                    </a>
+
+                    <a href="services.html">
+                        Services
+                    </a>
+
+                    <a href="tracking.html" class="active">
+                        Track Shipment
+                    </a>
+
+                    <a href="contact.html">
+                        Contact
+                    </a>
+
+                </nav>
 
             </div>
 
-            <!-- ==========================
-            NAVIGATION
-            =========================== -->
 
-            <nav class="navbar">
+            <div class="header-right" id="trackingIdentity">
 
-                <a href="index.html">
-                    Home
-                </a>
+                <div class="live-badge">
 
-                <a href="index.html#about">
-                    About
-                </a>
+                    <div class="live-dot-wrapper">
 
-                <a href="index.html#services">
-                    Services
-                </a>
+                        <span
+                            class="live-dot"
+                            id="liveIndicator"></span>
 
-                <a href="tracking.html" class="active">
-                    Track Shipment
-                </a>
+                    </div>
 
-                <a href="index.html#contact">
-                    Contact
-                </a>
+                    <div class="live-text">
 
-            </nav>
+                        <h3>
 
-        </div>
+                            LIVE TRACKING SYSTEM
 
+                        </h3>
 
+                        <p>
 
-        <!-- ==========================================
-        RIGHT SIDE
-        =========================================== -->
+                            Tracking #: <span id="trackingNumberDisplay">-</span>
 
-        <div
-            class="tracking-identity"
-            id="trackingIdentity">
+                        </p>
 
-            <div class="tracking-live-card">
-
-                <div class="live-dot-wrapper">
-
-                    <span
-                        class="live-dot"
-                        id="liveIndicator"></span>
+                    </div>
 
                 </div>
 
-                <div class="live-text">
-
-                    <h3>
-
-                        LIVE TRACKING SYSTEM
-
-                    </h3>
-
-                    <p>
-
-                        Tracking #: <span id="trackingNumberDisplay">-</span>
-
-                    </p>
-
-                </div>
+                <button id="menuToggle" class="menu-toggle"><i class="fa-solid fa-bars"></i></button>
 
             </div>
 
@@ -203,296 +183,164 @@ TRACKING HEADER
 
 </header>
 
-<!-- ==============================
-MAIN CONTENT
-============================== -->
+
+<!-- ======================================================
+SHIPMENT SUMMARY — HERO / WAYBILL STUB
+====================================================== -->
+
+<section class="hero-band shipment-summary">
+
+    <div class="container">
+
+        <div class="hero-grid">
+
+            <div class="hero-left">
+
+                <span class="hero-tag">
+                    SHIPMENT STATUS
+                </span>
+
+                <h1 id="shipmentStatusLarge">
+                    IN TRANSIT
+                </h1>
+
+                <p>
+                    Your package is currently moving through our global logistics network.
+                </p>
+
+                <div class="hero-stats route-line-stats">
+
+                    <div class="stat-box">
+                        <h2><i class="fa-solid fa-location-dot"></i></h2>
+                        <span id="originDisplay">Lagos, Nigeria</span>
+                    </div>
+
+                    <div class="route-line">
+                        <div class="moving-icon">
+                            <i class="fa-solid fa-truck-fast"></i>
+                        </div>
+                    </div>
+
+                    <div class="stat-box">
+                        <h2><i class="fa-solid fa-flag-checkered"></i></h2>
+                        <span id="destinationDisplay">New York, USA</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="hero-right">
+
+                <div class="hero-card">
+
+                    <div class="hero-card-top">
+                        <i class="fa-solid fa-route"></i>
+                        Live Shipment Waybill
+                    </div>
+
+                    <div class="shipment-preview">
+
+                        <div class="preview-row">
+                            <span>Estimated Arrival</span>
+                            <strong id="estimatedArrival">Calculating...</strong>
+                        </div>
+
+                        <div class="preview-row">
+                            <span>Last Updated</span>
+                            <strong id="shipmentLastUpdated">--</strong>
+                        </div>
+
+                        <div class="preview-row">
+                            <span>Network</span>
+                            <strong>Global</strong>
+                        </div>
+
+                        <div class="hero-stamp" id="heroStampText">
+                            In<br>Transit
+                        </div>
+
+                    </div>
+
+                    <div class="barcode"></div>
+
+                    <div class="barcode-label">
+                        <span id="barcodeTrackingNumber">-</span>
+                        <span>LIVE GPS TRACKED</span>
+                    </div>
+
+                    <div class="preview-footer">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        Every shipment is monitored across our secure logistics network.
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="perforation"></div>
+
+</section>
 
 
 <main class="tracking-result-page">
 
 
-<div class="container">
-
-
-
-
-
-<!-- ==============================
-SHIPMENT SUMMARY
-============================== -->
-
-
-<section class="shipment-summary">
-
-
-
-<div class="summary-header">
-
-
-<span>
-SHIPMENT STATUS
-</span>
-
-
-<h1 id="shipmentStatusLarge">
-
-IN TRANSIT
-
-</h1>
-
-
-
-<p>
-
-Your package is currently moving through our global logistics network.
-
-</p>
-
-
-</div>
-
-
-
-
-
-
-
-<div class="route-box">
-
-
-
-<div class="route-point">
-
-
-<i class="fa-solid fa-location-dot"></i>
-
-
-<div>
-
-
-<h4>
-Origin
-</h4>
-
-
-<strong id="originDisplay">
-Lagos, Nigeria
-</strong>
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-
-<div class="route-line">
-
-
-<div class="moving-icon">
-
-<i class="fa-solid fa-truck-fast"></i>
-
-</div>
-
-
-</div>
-
-
-
-
-
-
-<div class="route-point">
-
-
-<i class="fa-solid fa-flag-checkered"></i>
-
-
-<div>
-
-
-<h4>
-Destination
-</h4>
-
-
-<strong id="destinationDisplay">
-New York, USA
-</strong>
-
-
-</div>
-
-
-</div>
-
-
-
-
-</div>
-
-
-
-
-
-
-
-<div class="summary-cards">
-
-
-
-<div class="summary-card">
-
-
-<i class="fa-solid fa-clock"></i>
-
-
-<div>
-
-<h5>
-Estimated Arrival
-</h5>
-
-
-<h3 id="estimatedArrival">
-
-Calculating...
-
-</h3>
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-
-
-<div class="summary-card">
-
-
-<i class="fa-solid fa-arrows-rotate"></i>
-
-
-<div>
-
-
-<h5>
-Last Updated
-</h5>
-
-
-<h3 id="shipmentLastUpdated">
-
---
-
-</h3>
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-
-
-<div class="summary-card">
-
-
-<i class="fa-solid fa-globe"></i>
-
-
-<div>
-
-
-<h5>
-Network
-</h5>
-
-
-<h3>
-Global
-</h3>
-
-
-</div>
-
-
-</div>
-
-
-
-
-</div>
-
-
-
-
-
-</section>
-<!-- ==============================
+<!-- ======================================================
 LIVE GLOBAL TRACKING MAP
-============================== -->
+====================================================== -->
 
 <section class="global-map-section">
 
-    <div class="section-title">
+    <div class="container">
 
-        <span>LIVE GPS NETWORK</span>
-
-        <h2>Global Shipment Tracking</h2>
-
-        <p>
-            Real-time location monitoring through LinkWorld Express logistics network.
-        </p>
-
-    </div>
-
-    <div class="global-map-container">
-
-        <!-- MAP CARD -->
-
-        <div class="world-map-card">
-
-            <div id="trackingMap"></div>
-
+        <div class="section-title">
+            <span class="eyebrow">Live GPS Network</span>
+            <h2>Global Shipment Tracking</h2>
+            <p>
+                Real-time location monitoring through LinkWorld Express logistics network.
+            </p>
         </div>
 
-        <!-- GPS INFORMATION -->
+        <div class="global-map-container">
 
-        <div class="gps-information-card">
+            <!-- MAP CARD -->
 
-            <div class="gps-row">
-                <span>Current Location</span>
-                <strong id="mapCurrentLocation">-</strong>
+            <div class="world-map-card">
+
+                <div id="trackingMap"></div>
+
             </div>
 
-            <div class="gps-row">
-                <span>Latitude</span>
-                <strong id="mapLatitude">-</strong>
-            </div>
+            <!-- GPS INFORMATION -->
 
-            <div class="gps-row">
-                <span>Longitude</span>
-                <strong id="mapLongitude">-</strong>
-            </div>
+            <div class="gps-information-card">
 
-            <div class="gps-row">
-                <span>GPS Signal</span>
-                <strong id="gpsLastSignal">-</strong>
+                <div class="gps-row">
+                    <span>Current Location</span>
+                    <strong id="mapCurrentLocation">-</strong>
+                </div>
+
+                <div class="gps-row">
+                    <span>Latitude</span>
+                    <strong id="mapLatitude">-</strong>
+                </div>
+
+                <div class="gps-row">
+                    <span>Longitude</span>
+                    <strong id="mapLongitude">-</strong>
+                </div>
+
+                <div class="gps-row">
+                    <span>GPS Signal</span>
+                    <strong id="gpsLastSignal">-</strong>
+                </div>
+
             </div>
 
         </div>
@@ -502,961 +350,398 @@ LIVE GLOBAL TRACKING MAP
 </section>
 
 
-
-
-
-
-
-<!-- ==============================
+<!-- ======================================================
 SHIPMENT PROGRESS
-============================== -->
-
+====================================================== -->
 
 <section class="shipment-progress-section">
 
+    <div class="container">
 
+        <div class="section-title">
+            <span class="eyebrow">Delivery Status</span>
+            <h2>Shipment Progress</h2>
+        </div>
 
-<div class="section-title">
+        <div class="progress-container">
 
+            <div class="progress-header">
 
-<span>
-DELIVERY STATUS
-</span>
+                <h3>
+                    Delivery Progress
+                </h3>
 
+                <strong id="progressText">
+                    0%
+                </strong>
 
-<h2>
-Shipment Progress
-</h2>
+            </div>
 
+            <div class="progress-track">
 
-</div>
+                <div
+                    id="progressBar"
+                    class="progress-fill">
 
+                    <div class="truck-progress-icon">
 
+                        <i class="fa-solid fa-truck-fast"></i>
 
+                    </div>
 
+                </div>
 
+            </div>
 
+            <div class="progress-labels">
 
-<div class="progress-container">
+                <span>
+                    Created
+                </span>
 
+                <span>
+                    In Transit
+                </span>
 
+                <span>
+                    Delivered
+                </span>
 
+            </div>
 
+        </div>
 
-<div class="progress-header">
-
-
-<h3>
-Delivery Progress
-</h3>
-
-
-<strong id="progressText">
-
-0%
-
-</strong>
-
-
-
-</div>
-
-
-
-
-
-
-
-
-<div class="progress-track">
-
-
-<div 
-id="progressBar"
-class="progress-fill">
-
-
-
-<div class="truck-progress-icon">
-
-
-<i class="fa-solid fa-truck-fast"></i>
-
-
-</div>
-
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-
-
-<div class="progress-labels">
-
-
-<span>
-Created
-</span>
-
-
-<span>
-In Transit
-</span>
-
-
-<span>
-Delivered
-</span>
-
-
-</div>
-
-
-
-
-
-
-</div>
-
-
+    </div>
 
 </section>
-<!-- ==============================
-SHIPMENT JOURNEY
-============================== -->
 
+
+<!-- ======================================================
+SHIPMENT JOURNEY
+====================================================== -->
 
 <section class="shipment-journey-section">
 
+    <div class="container">
 
+        <div class="section-title on-dark">
+            <span class="eyebrow">Shipment Timeline</span>
+            <h2>Delivery Journey</h2>
+            <p>
+                Follow every stage of your package movement.
+            </p>
+        </div>
 
-<div class="section-title">
+        <!-- DYNAMIC TIMELINE CONTAINER -->
 
+        <div
+            id="shipmentTimeline"
+            class="shipment-timeline">
 
-<span>
-SHIPMENT TIMELINE
-</span>
+            <!-- JAVASCRIPT WILL BUILD STEPS HERE -->
 
+        </div>
 
-<h2>
-Delivery Journey
-</h2>
-
-
-<p>
-Follow every stage of your package movement.
-</p>
-
-
-</div>
-
-
-
-
-
-
-
-
-<!-- DYNAMIC TIMELINE CONTAINER -->
-
-<div 
-id="shipmentTimeline"
-class="shipment-timeline">
-
-
-
-
-
-<!-- JAVASCRIPT WILL BUILD STEPS HERE -->
-
-
-
-</div>
-
-
+    </div>
 
 </section>
 
 
-
-
-
-
-
-
-
-<!-- ==============================
+<!-- ======================================================
 SHIPMENT DETAILS
-============================== -->
-
+====================================================== -->
 
 <section class="shipment-details-section">
 
+    <div class="container">
 
+        <div class="section-title">
+            <span class="eyebrow">Shipment Information</span>
+            <h2>Package Details</h2>
+        </div>
 
+        <div class="details-tabs">
 
+            <button class="active">
+                Shipment
+            </button>
 
-<div class="section-title">
+            <button>
+                Sender
+            </button>
 
+            <button>
+                Receiver
+            </button>
 
-<span>
-SHIPMENT INFORMATION
-</span>
+            <button>
+                Location
+            </button>
 
+        </div>
 
-<h2>
-Package Details
-</h2>
+        <div class="details-grid">
 
+            <!-- SHIPMENT DETAILS -->
 
-</div>
+            <div class="detail-card">
 
+                <div class="detail-header">
 
+                    <i class="fa-solid fa-box-open"></i>
 
+                    <h3>
+                        Shipment
+                    </h3>
 
+                </div>
 
+                <div class="detail-row">
+                    <span>Tracking Number</span>
+                    <strong id="detailsTrackingNumber">-</strong>
+                </div>
 
+                <div class="detail-row">
+                    <span>Shipment Type</span>
+                    <strong id="detailsShipmentType">-</strong>
+                </div>
 
-<div class="details-tabs">
+                <div class="detail-row">
+                    <span>Status</span>
+                    <strong id="detailsStatus">-</strong>
+                </div>
 
+            </div>
 
 
-<button class="active">
-Shipment
-</button>
+            <!-- SENDER DETAILS -->
 
+            <div class="detail-card">
 
-<button>
-Sender
-</button>
+                <div class="detail-header">
 
+                    <i class="fa-solid fa-user"></i>
 
-<button>
-Receiver
-</button>
+                    <h3>
+                        Sender Information
+                    </h3>
 
+                </div>
 
-<button>
-Location
-</button>
+                <div class="detail-row">
+                    <span>Name</span>
+                    <strong id="detailsSender">-</strong>
+                </div>
 
+                <div class="detail-row">
+                    <span>Origin</span>
+                    <strong id="detailsOrigin">-</strong>
+                </div>
 
+                <div class="detail-row">
+                    <span>Created Date</span>
+                    <strong id="createdDate">-</strong>
+                </div>
 
-</div>
+            </div>
 
 
+            <!-- RECEIVER DETAILS -->
 
+            <div class="detail-card">
 
+                <div class="detail-header">
 
+                    <i class="fa-solid fa-user-check"></i>
 
+                    <h3>
+                        Receiver Information
+                    </h3>
 
+                </div>
 
+                <div class="detail-row">
+                    <span>Name</span>
+                    <strong id="detailsReceiver">-</strong>
+                </div>
 
-<div class="details-grid">
+                <div class="detail-row">
+                    <span>Destination</span>
+                    <strong id="detailsDestination">-</strong>
+                </div>
 
+                <div class="detail-row">
+                    <span>Expected Delivery</span>
+                    <strong id="expectedDelivery">-</strong>
+                </div>
 
+            </div>
 
 
+            <!-- LOCATION DETAILS -->
 
-<!-- SHIPMENT DETAILS -->
+            <div class="detail-card live-card">
 
+                <div class="detail-header">
 
-<div class="detail-card">
+                    <i class="fa-solid fa-location-dot"></i>
 
+                    <h3>
+                        Current Location
+                    </h3>
 
+                </div>
 
-<div class="detail-header">
+                <div class="detail-row">
+                    <span>Current Hub</span>
+                    <strong id="locationHub">-</strong>
+                </div>
 
+                <div class="detail-row">
+                    <span>Latitude</span>
+                    <strong id="locationLatitude">-</strong>
+                </div>
 
-<i class="fa-solid fa-box-open"></i>
+                <div class="detail-row">
+                    <span>Longitude</span>
+                    <strong id="locationLongitude">-</strong>
+                </div>
 
+                <div class="location-live">
+                    <span></span>
+                    LIVE TRACKING
+                </div>
 
-<h3>
-Shipment
-</h3>
+            </div>
 
+        </div>
 
-</div>
-
-
-
-
-
-
-<div class="detail-row">
-
-
-<span>
-Tracking Number
-</span>
-
-
-<strong id="detailsTrackingNumber">
-
--
-
-</strong>
-
-
-</div>
-
-
-
-
-
-
-
-<div class="detail-row">
-
-
-<span>
-Shipment Type
-</span>
-
-
-<strong id="detailsShipmentType">
-
--
-
-</strong>
-
-
-</div>
-
-
-
-
-
-
-
-<div class="detail-row">
-
-
-<span>
-Status
-</span>
-
-
-<strong id="detailsStatus">
-
--
-
-</strong>
-
-
-</div>
-
-
-
-
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<!-- SENDER DETAILS -->
-
-
-<div class="detail-card">
-
-
-
-<div class="detail-header">
-
-
-<i class="fa-solid fa-user"></i>
-
-
-<h3>
-Sender Information
-</h3>
-
-
-</div>
-
-
-
-
-
-
-
-<div class="detail-row">
-
-
-<span>
-Name
-</span>
-
-
-<strong id="detailsSender">
-
--
-
-</strong>
-
-
-</div>
-
-
-
-
-
-
-
-<div class="detail-row">
-
-
-<span>
-Origin
-</span>
-
-
-<strong id="detailsOrigin">
-
--
-
-</strong>
-
-
-</div>
-
-
-
-
-
-<div class="detail-row">
-
-
-<span>
-Created Date
-</span>
-
-
-<strong id="createdDate">
-
--
-
-</strong>
-
-
-</div>
-
-
-
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<!-- RECEIVER DETAILS -->
-
-
-<div class="detail-card">
-
-
-
-<div class="detail-header">
-
-
-<i class="fa-solid fa-user-check"></i>
-
-
-<h3>
-Receiver Information
-</h3>
-
-
-</div>
-
-
-
-
-
-
-
-<div class="detail-row">
-
-
-<span>
-Name
-</span>
-
-
-<strong id="detailsReceiver">
-
--
-
-</strong>
-
-
-</div>
-
-
-
-
-
-
-
-<div class="detail-row">
-
-
-<span>
-Destination
-</span>
-
-
-<strong id="detailsDestination">
-
--
-
-</strong>
-
-
-</div>
-
-
-
-
-
-
-
-<div class="detail-row">
-
-
-<span>
-Expected Delivery
-</span>
-
-
-<strong id="expectedDelivery">
-
--
-
-</strong>
-
-
-</div>
-
-
-
-
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<!-- LOCATION DETAILS -->
-
-
-<div class="detail-card live-card">
-
-
-
-<div class="detail-header">
-
-
-<i class="fa-solid fa-location-dot"></i>
-
-
-<h3>
-Current Location
-</h3>
-
-
-</div>
-
-
-
-
-
-
-
-<div class="detail-row">
-
-
-<span>
-Current Hub
-</span>
-
-
-<strong id="locationHub">
-
--
-
-</strong>
-
-
-</div>
-
-
-
-
-
-
-
-<div class="detail-row">
-
-
-<span>
-Latitude
-</span>
-
-
-<strong id="locationLatitude">
-
--
-
-</strong>
-
-
-</div>
-
-
-
-
-
-
-
-<div class="detail-row">
-
-
-<span>
-Longitude
-</span>
-
-
-<strong id="locationLongitude">
-
--
-
-</strong>
-
-
-</div>
-
-
-
-
-
-
-
-<div class="location-live">
-
-
-<span></span>
-
-
-LIVE TRACKING
-
-
-</div>
-
-
-
-
-
-</div>
-
-
-
-
-
-
-
-
-</div>
-
-
-
-
+    </div>
 
 </section>
-<!-- ==============================
-SECURITY VERIFICATION
-============================== -->
 
+
+<!-- ======================================================
+SECURITY VERIFICATION
+====================================================== -->
 
 <section class="security-section">
 
+    <div class="container">
 
+        <div class="security-card">
 
-<div class="security-card">
+            <div class="security-icon">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
 
+            <div class="security-content">
 
+                <h2>
+                    Shipment Verification
+                </h2>
 
-<div class="security-icon">
+                <p>
+                    Your shipment information is protected and verified through LinkWorld Express secure logistics network.
+                </p>
 
-<i class="fa-solid fa-shield-halved"></i>
+                <div class="security-items">
 
-</div>
+                    <div>
+                        <i class="fa-solid fa-circle-check"></i>
+                        Tracking Number Verified
+                    </div>
 
+                    <div>
+                        <i class="fa-solid fa-circle-check"></i>
+                        GPS Location Authenticated
+                    </div>
 
+                    <div>
+                        <i class="fa-solid fa-circle-check"></i>
+                        Logistics Network Connected
+                    </div>
 
+                    <div>
+                        <i class="fa-solid fa-circle-check"></i>
+                        Secure Shipment Record
+                    </div>
 
+                </div>
 
+            </div>
 
-<div class="security-content">
+        </div>
 
-
-<h2>
-Shipment Verification
-</h2>
-
-
-<p>
-Your shipment information is protected and verified through LinkWorld Express secure logistics network.
-</p>
-
-
-
-
-<div class="security-items">
-
-
-
-<div>
-
-<i class="fa-solid fa-circle-check"></i>
-
-Tracking Number Verified
-
-</div>
-
-
-
-
-
-<div>
-
-<i class="fa-solid fa-circle-check"></i>
-
-GPS Location Authenticated
-
-</div>
-
-
-
-
-
-<div>
-
-<i class="fa-solid fa-circle-check"></i>
-
-Logistics Network Connected
-
-</div>
-
-
-
-
-
-<div>
-
-<i class="fa-solid fa-circle-check"></i>
-
-Secure Shipment Record
-
-</div>
-
-
-
-
-
-</div>
-
-
-
-</div>
-
-
-
-
-
-</div>
-
-
+    </div>
 
 </section>
-
-
-
-
-
-
-
-
-
-<!-- ==============================
-FOOTER
-============================== -->
-
-
-<footer class="tracking-footer">
-
-
-
-
-
-<div class="footer-follow-row">
-
-
-<span>
-Follow
-</span>
-
-
-
-
-<div class="footer-social">
-
-
-
-<a href="#">
-
-<i class="fa-brands fa-facebook-f"></i>
-
-</a>
-
-
-
-
-
-<a href="#">
-
-<i class="fa-brands fa-instagram"></i>
-
-</a>
-
-
-
-
-
-<a href="#">
-
-<i class="fa-brands fa-tiktok"></i>
-
-</a>
-
-
-
-
-
-<a href="#">
-
-<i class="fa-brands fa-linkedin-in"></i>
-
-</a>
-
-
-
-
-
-</div>
-
-
-
-
-</div>
-
-
-
-
-
-
-
-<p>
-
-© 2026 LinkWorld Express. All Rights Reserved.
-
-</p>
-
-
-
-
-
-
-</footer>
-
-
-
-
-
-
-
-
-
-</div>
 
 
 </main>
 
 
+<!-- ======================================================
+FOOTER
+====================================================== -->
+
+<footer class="footer-simple">
+
+    <div class="container">
+
+        <div class="footer-follow-row">
+
+            <span>
+                Follow
+            </span>
+
+            <div class="social-icons">
+
+                <a href="#">
+                    <i class="fa-brands fa-facebook-f"></i>
+                </a>
+
+                <a href="#">
+                    <i class="fa-brands fa-instagram"></i>
+                </a>
+
+                <a href="#">
+                    <i class="fa-brands fa-tiktok"></i>
+                </a>
+
+                <a href="#">
+                    <i class="fa-brands fa-linkedin-in"></i>
+                </a>
+
+            </div>
+
+        </div>
+
+        <p>
+            © 2026 LinkWorld Express. All Rights Reserved.
+        </p>
+
+    </div>
+
+</footer>
 
 
-
-
-
-
-
-<!-- ==============================
+<!-- ======================================================
 JAVASCRIPT
-============================== -->
-
+====================================================== -->
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-
-
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-
-
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-
-
-
-
 
 <script src="js/config.js"></script>
 <script src="js/index.js"></script>
 
-
-
 <script src="js/tracking-result.js"></script>
-
-
-
-
+<script src="js/reveal.js"></script>
 
 </body>
-
 
 </html>

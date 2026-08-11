@@ -1,241 +1,105 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
+<title>Track Shipment | LinkWorld Express</title>
+<meta name="description" content="Track your LinkWorld Express shipment in real time.">
 
-<title>
+<link rel="icon" href="images/image.png">
 
-Track Shipment | LinkWorld Express
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil+Text:wght@500;700;900&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 
-</title>
-
-<meta
-name="description"
-content="Track your LinkWorld Express shipment in real time.">
-
-<link
-rel="icon"
-href="images/image.png">
-
-<link
-rel="preconnect"
-href="https://fonts.googleapis.com">
-
-<link
-rel="preconnect"
-href="https://fonts.gstatic.com"
-crossorigin>
-
-<link
-href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
-rel="stylesheet">
-
-<link
-rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
-
-<link
-rel="stylesheet"
-href="css/tracking.css">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/tracking.css">
 
 </head>
-
 <body>
 
-
-<!--=========================================
-BACKGROUND
-==========================================-->
-
-<div class="background-overlay"></div>
-
-
-
-<!--=========================================
-HEADER
-==========================================-->
-
-<header class="tracking-header">
-
-<div class="logo">
-
-<a href="index.html">
-
-<img
-src="images/image.png"
-alt="LinkWorld Express">
-
-<span>
-
-LinkWorld Express
-
-</span>
-
-</a>
-
+<!-- PAGE LOADER -->
+<div id="pageLoader" class="page-loader">
+  <div class="loader-mark">LX</div>
+  <div class="loader-bar"><span></span></div>
+  <p>Preparing Tracking Portal...</p>
 </div>
 
-
-
-<a
-href="index.html"
-class="back-btn">
-
-<i class="fa-solid fa-arrow-left"></i>
-
-Go Back
-
-</a>
-
+<!-- HEADER -->
+<header class="site-header">
+  <div class="container">
+    <div class="header-wrapper">
+      <div class="header-left">
+        <div class="brand-row">
+          <div class="company-logo">LX</div>
+          <div class="brand-details">
+            <h1>LINKWORLD EXPRESS</h1>
+            <p>Global Logistics &amp; Freight</p>
+          </div>
+        </div>
+      </div>
+      <div class="header-right">
+        <a href="index.html" class="track-btn"><i class="fa-solid fa-arrow-left"></i> Go Back</a>
+      </div>
+    </div>
+  </div>
 </header>
 
-
-
-<!--=========================================
-TRACKING SECTION
-==========================================-->
-
+<!-- TRACKING -->
 <section class="tracking-section">
+  <div class="container">
+    <div class="tracking-card">
 
-<div class="tracking-card">
+      <span class="eyebrow">Live Shipment Tracking</span>
+      <h1>Track Your Shipment</h1>
+      <p>Enter your shipment tracking number below to view your shipment's latest status and live tracking information.</p>
 
-<h1>
+      <form id="trackingForm" class="tracking-form">
+        <div class="input-group">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="trackingNumber" placeholder="e.g. LWX2026A1B2C3D4" autocomplete="off" required>
+        </div>
+        <button type="submit" id="trackButton"><i class="fa-solid fa-location-crosshairs"></i> Track Shipment</button>
+      </form>
 
-Track Your Shipment
+      <div id="trackingError" class="tracking-error"></div>
 
-</h1>
+      <div class="tracking-hint">
+        <i class="fa-solid fa-circle-info"></i>
+        Your tracking number was sent to you when your shipment was booked.
+      </div>
 
-<p>
-
-Enter your shipment tracking number below to view your shipment's latest status and live tracking information.
-
-</p>
-
-
-
-<form
-id="trackingForm"
-class="tracking-form">
-
-<div class="input-group">
-
-<i class="fa-solid fa-magnifying-glass"></i>
-
-<input
-
-type="text"
-
-id="trackingNumber"
-
-placeholder="Enter Tracking Number"
-
-autocomplete="off"
-
-required>
-
-</div>
-
-
-
-<button
-type="submit"
-id="trackButton">
-
-<i class="fa-solid fa-location-crosshairs"></i>
-
-Track Shipment
-
-</button>
-
-</form>
-
-
-
-<div
-id="trackingError"
-class="tracking-error">
-
-</div>
-
-</div>
-
+    </div>
+  </div>
 </section>
 
+<!-- LOADING SCREEN -->
+<div id="loadingScreen" class="loading-screen">
+  <div class="loading-content">
 
+    <div class="loading-mark">LX</div>
 
-<!--=========================================
-LOADING SCREEN
-==========================================-->
+    <h2 id="loadingTitle">Connecting To LinkWorld Express...</h2>
+    <p id="loadingMessage">Please wait while we locate your shipment.</p>
 
-<div
-id="loadingScreen"
-class="loading-screen">
+    <div class="progress-container">
+      <div id="progressBar" class="progress-bar">
+        <div id="truck" class="truck">🚚</div>
+      </div>
+    </div>
 
-<div class="loading-content">
+    <h3 id="progressPercent">0%</h3>
 
-<img
-src="images/image.png"
-alt="Logo">
-
-<h2
-id="loadingTitle">
-
-Connecting To LinkWorld Express...
-
-</h2>
-
-<p
-id="loadingMessage">
-
-Please wait while we locate your shipment.
-
-</p>
-
-
-
-<div class="progress-container">
-
-<div
-id="progressBar"
-class="progress-bar">
-
-<div
-id="truck"
-class="truck">
-
-🚚
-
+  </div>
 </div>
-
-</div>
-
-</div>
-
-
-
-<h3
-id="progressPercent">
-
-0%
-
-</h3>
-
-</div>
-
-</div>
-
-
 
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-
 <script src="js/config.js"></script>
 <script src="js/tracking.js"></script>
+<script src="js/reveal.js"></script>
 
 </body>
-
 </html>

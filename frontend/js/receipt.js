@@ -116,7 +116,7 @@ function hideLoading(){
 
         setTimeout(()=>{
 
-            loading.style.display = "none";
+            loading.classList.add("hide");
 
         },400);
 
@@ -180,6 +180,9 @@ function populateReceipt(){
 
     setText("trackingNumber", shipment.trackingNumber);
     setText("shipmentStatus", shipment.status);
+    setText("issuedDate", formatDateTime(new Date()));
+    applyStatusBadge();
+    updateProgress();
     setText("shipmentType", shipment.shipmentType);
     setText("paymentStatus", shipment.paymentStatus);
     setText("shipmentDescription", shipment.shipmentDescription);
@@ -204,6 +207,74 @@ function populateReceipt(){
     buildHistory();
 
     buildVerificationCodes();
+
+}
+
+
+// ======================================================
+// STATUS BADGE COLOR
+// ======================================================
+
+function applyStatusBadge(){
+
+    const el = document.getElementById("shipmentStatus");
+
+    if(!el) return;
+
+    el.classList.remove(
+        "status-delivered",
+        "status-transit",
+        "status-pending",
+        "status-cancelled"
+    );
+
+    const value = (shipment.status || "").toLowerCase();
+
+    if(value.includes("deliver")){
+
+        el.classList.add("status-delivered");
+
+    }
+    else if(value.includes("cancel")){
+
+        el.classList.add("status-cancelled");
+
+    }
+    else if(
+        value.includes("transit") ||
+        value.includes("pickup") ||
+        value.includes("picked") ||
+        value.includes("facility") ||
+        value.includes("out for")
+    ){
+
+        el.classList.add("status-transit");
+
+    }
+    else{
+
+        el.classList.add("status-pending");
+
+    }
+
+}
+
+
+// ======================================================
+// DELIVERY PROGRESS BAR
+// ======================================================
+
+function updateProgress(){
+
+    const bar = document.getElementById("progressBar");
+
+    const text = document.getElementById("progressText");
+
+    const progress = Number(shipment.progress || 0);
+
+    if(bar) bar.style.width = `${progress}%`;
+
+    if(text) text.textContent = `${progress}%`;
 
 }
 

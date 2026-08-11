@@ -39,10 +39,6 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
 rel="stylesheet"
 href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
-<!-- Main CSS -->
-
-<link rel="stylesheet" href="css/style.css">
-
 <!-- Receipt CSS -->
 
 <link rel="stylesheet" href="css/receipt.css">
@@ -50,6 +46,19 @@ href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 </head>
 
 <body>
+
+<!-- ==========================================
+LOADING SCREEN
+=========================================== -->
+
+<div id="loading">
+
+    <i class="fa-solid fa-file-invoice"></i>
+
+    <p>Preparing your receipt...</p>
+
+</div>
+
 
 <div class="receipt-page">
 
@@ -93,428 +102,370 @@ OFFICIAL SHIPMENT RECEIPT
 
 </h2>
 
-<span>
+<p>
 
 Verified Logistics Document
 
-</span>
+</p>
 
 </div>
 
 </div>
 
-        <!-- =========================================
-        SHIPMENT INFORMATION
-        ========================================== -->
 
-        <section class="receipt-card">
+<!-- ==========================================
+SUMMARY BAR
+=========================================== -->
 
-            <div class="card-title">
-                Shipment Information
-            </div>
+<div class="summary-bar">
 
-            <div class="info-grid">
+    <div class="summary-item">
+        <span>Tracking Number</span>
+        <strong id="trackingNumber">-</strong>
+    </div>
 
-                <div class="info-item">
-                    <label>Tracking Number</label>
-                    <strong id="trackingNumber">
-                        -
-                    </strong>
-                </div>
+    <div class="summary-item">
+        <span>Current Status</span>
+        <strong id="shipmentStatus" class="status-badge">-</strong>
+    </div>
 
-                <div class="info-item">
-                    <label>Status</label>
-                    <strong id="shipmentStatus">
-                        -
-                    </strong>
-                </div>
+    <div class="summary-item">
+        <span>Receipt Issued</span>
+        <strong id="issuedDate">-</strong>
+    </div>
 
-                <div class="info-item">
-                    <label>Shipment Type</label>
-                    <strong id="shipmentType">
-                        -
-                    </strong>
-                </div>
+</div>
 
-                <div class="info-item">
-                    <label>Payment Status</label>
-                    <strong id="paymentStatus">
-                        -
-                    </strong>
-                </div>
 
-                <div class="info-item">
-                    <label>Description</label>
-                    <strong id="shipmentDescription">
-                        -
-                    </strong>
-                </div>
+<!-- =========================================
+SHIPMENT INFORMATION
+========================================== -->
 
-                <div class="info-item">
-                    <label>Package Weight</label>
-                    <strong id="packageWeight">
-                        -
-                    </strong>
-                </div>
+<section class="receipt-card">
 
-                <div class="info-item">
-                    <label>Package Value</label>
-                    <strong id="packageValue">
-                        -
-                    </strong>
-                </div>
+    <div class="card-title">
+        <i class="fa-solid fa-box"></i>
+        Shipment Information
+    </div>
 
-                <div class="info-item">
-                    <label>Expected Delivery</label>
-                    <strong id="expectedDelivery">
-                        -
-                    </strong>
-                </div>
+    <div class="info-grid">
 
-            </div>
-
-        </section>
-
-
-
-        <!-- =========================================
-        ROUTE INFORMATION
-        ========================================== -->
-
-        <section class="receipt-card">
-
-            <div class="card-title">
-                Shipment Route
-            </div>
-
-            <div class="route-grid">
-
-                <div class="route-box">
-
-                    <span>
-                        Origin
-                    </span>
-
-                    <strong id="origin">
-                        -
-                    </strong>
-
-                </div>
-
-                <div class="route-arrow">
-
-                    <i class="fa-solid fa-arrow-right"></i>
-
-                </div>
-
-                <div class="route-box">
-
-                    <span>
-                        Current Location
-                    </span>
-
-                    <strong id="currentLocation">
-                        -
-                    </strong>
-
-                </div>
-
-                <div class="route-arrow">
-
-                    <i class="fa-solid fa-arrow-right"></i>
-
-                </div>
-
-                <div class="route-box">
-
-                    <span>
-                        Destination
-                    </span>
-
-                    <strong id="destination">
-                        -
-                    </strong>
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-
-        <!-- =========================================
-        SENDER / RECEIVER
-        ========================================== -->
-
-        <section class="receipt-flex">
-
-            <div class="receipt-card half">
-
-                <div class="card-title">
-                    Sender Information
-                </div>
-
-                <div class="info-grid">
-
-                    <div class="info-item">
-                        <label>Name</label>
-                        <strong id="senderName">
-                            -
-                        </strong>
-                    </div>
-
-                    <div class="info-item">
-                        <label>Phone</label>
-                        <strong id="senderPhone">
-                            -
-                        </strong>
-                    </div>
-
-                    <div class="info-item">
-                        <label>Email</label>
-                        <strong id="senderEmail">
-                            -
-                        </strong>
-                    </div>
-
-                    <div class="info-item">
-                        <label>Address</label>
-                        <strong id="senderAddress">
-                            -
-                        </strong>
-                    </div>
-
-                </div>
-
-            </div>
-
-
-
-            <div class="receipt-card half">
-
-                <div class="card-title">
-                    Receiver Information
-                </div>
-
-                <div class="info-grid">
-
-                    <div class="info-item">
-                        <label>Name</label>
-                        <strong id="receiverName">
-                            -
-                        </strong>
-                    </div>
-
-                    <div class="info-item">
-                        <label>Phone</label>
-                        <strong id="receiverPhone">
-                            -
-                        </strong>
-                    </div>
-
-                    <div class="info-item">
-                        <label>Email</label>
-                        <strong id="receiverEmail">
-                            -
-                        </strong>
-                    </div>
-
-                    <div class="info-item">
-                        <label>Address</label>
-                        <strong id="receiverAddress">
-                            -
-                        </strong>
-                    </div>
-
-                </div>
-
-            </div>
-
-        </section>
-                <!-- =========================================
-        SHIPMENT HISTORY
-        ========================================== -->
-
-        <section class="receipt-card">
-
-            <div class="card-title">
-                Shipment Journey
-            </div>
-
-            <div
-                id="historyContainer"
-                class="history-container">
-
-                <!-- tracking history generated by receipt.js -->
-
-            </div>
-
-        </section>
-
-
-
-        <!-- =========================================
-        VERIFICATION
-        ========================================== -->
-
-        <section class="receipt-card verification-section">
-
-            <div class="verification-left">
-
-                <h3>
-                    Shipment Verification
-                </h3>
-
-                <p>
-
-                    This shipment receipt has been generated directly from
-                    the LinkWorld Express Logistics Management System.
-
-                    The shipment information, sender details, receiver
-                    information and tracking history are stored securely
-                    inside our shipment database.
-
-                </p>
-
-                <div class="verification-list">
-
-                    <div>
-                        <i class="fa-solid fa-circle-check"></i>
-                        Tracking Number Verified
-                    </div>
-
-                    <div>
-                        <i class="fa-solid fa-circle-check"></i>
-                        Shipment Record Authenticated
-                    </div>
-
-                    <div>
-                        <i class="fa-solid fa-circle-check"></i>
-                        Logistics Network Confirmed
-                    </div>
-
-                    <div>
-                        <i class="fa-solid fa-circle-check"></i>
-                        Printable Official Receipt
-                    </div>
-
-                </div>
-
-            </div>
-
-
-
-            <div class="verification-right">
-
-                <div class="barcode-box">
-
-                    <img
-                        id="barcodeImage"
-                        alt="Shipment Barcode">
-
-                </div>
-
-                <div class="qr-box">
-
-                    <img
-                        id="qrCode"
-                        alt="QR Code">
-
-                </div>
-
-                <small>
-
-                    Scan the QR code to verify this shipment.
-
-                </small>
-
-            </div>
-
-        </section>
-
-
-
-        <!-- =========================================
-        SIGNATURES
-        ========================================== -->
-
-        <section class="receipt-card">
-
-            <div class="signature-grid">
-
-                <div class="signature-box">
-
-                    <div class="signature-line"></div>
-
-                    <strong>
-                        Sender Signature
-                    </strong>
-
-                </div>
-
-                <div class="signature-box">
-
-                    <div class="signature-line"></div>
-
-                    <strong>
-                        Receiver Signature
-                    </strong>
-
-                </div>
-
-                <div class="signature-box">
-
-                    <div class="signature-line"></div>
-
-                    <strong>
-                        LinkWorld Express
-                    </strong>
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-
-        <!-- =========================================
-        PRINT BUTTONS
-        ========================================== -->
-
-        <div class="receipt-actions">
-
-            <button
-                id="printReceipt"
-                class="btn-print">
-
-                <i class="fa-solid fa-print"></i>
-
-                Print Receipt
-
-            </button>
-
-
-
-            <button
-                id="downloadPDF"
-                class="btn-download">
-
-                <i class="fa-solid fa-file-pdf"></i>
-
-                Download PDF
-
-            </button>
-
+        <div class="info-item">
+            <label>Shipment Type</label>
+            <strong id="shipmentType">-</strong>
         </div>
 
+        <div class="info-item">
+            <label>Payment Status</label>
+            <strong id="paymentStatus">-</strong>
+        </div>
 
+        <div class="info-item">
+            <label>Package Weight</label>
+            <strong id="packageWeight">-</strong>
+        </div>
+
+        <div class="info-item">
+            <label>Package Value</label>
+            <strong id="packageValue">-</strong>
+        </div>
+
+        <div class="info-item">
+            <label>Expected Delivery</label>
+            <strong id="expectedDelivery">-</strong>
+        </div>
+
+        <div class="info-item full-width">
+            <label>Description</label>
+            <strong id="shipmentDescription">-</strong>
+        </div>
 
     </div>
 
-</main>
+</section>
 
+
+<!-- =========================================
+ROUTE INFORMATION
+========================================== -->
+
+<section class="receipt-card">
+
+    <div class="card-title">
+        <i class="fa-solid fa-route"></i>
+        Shipment Route
+    </div>
+
+    <div class="route-grid">
+
+        <div class="route-box">
+            <span>Origin</span>
+            <strong id="origin">-</strong>
+        </div>
+
+        <div class="route-arrow">
+            <i class="fa-solid fa-arrow-right"></i>
+        </div>
+
+        <div class="route-box">
+            <span>Current Location</span>
+            <strong id="currentLocation">-</strong>
+        </div>
+
+        <div class="route-arrow">
+            <i class="fa-solid fa-arrow-right"></i>
+        </div>
+
+        <div class="route-box">
+            <span>Destination</span>
+            <strong id="destination">-</strong>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================
+DELIVERY PROGRESS
+========================================== -->
+
+<section class="receipt-card">
+
+    <div class="card-title">
+        <i class="fa-solid fa-truck-fast"></i>
+        Delivery Progress
+    </div>
+
+    <div class="progress-wrap">
+
+        <div class="progress-track">
+            <div id="progressBar" class="progress-fill"></div>
+        </div>
+
+        <span id="progressText">0%</span>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================
+SENDER / RECEIVER
+========================================== -->
+
+<section class="receipt-flex">
+
+    <div class="receipt-card half">
+
+        <div class="card-title">
+            <i class="fa-solid fa-user"></i>
+            Sender Information
+        </div>
+
+        <div class="info-grid stacked">
+
+            <div class="info-item">
+                <label>Name</label>
+                <strong id="senderName">-</strong>
+            </div>
+
+            <div class="info-item">
+                <label>Phone</label>
+                <strong id="senderPhone">-</strong>
+            </div>
+
+            <div class="info-item">
+                <label>Email</label>
+                <strong id="senderEmail">-</strong>
+            </div>
+
+            <div class="info-item">
+                <label>Address</label>
+                <strong id="senderAddress">-</strong>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="receipt-card half">
+
+        <div class="card-title">
+            <i class="fa-solid fa-user-check"></i>
+            Receiver Information
+        </div>
+
+        <div class="info-grid stacked">
+
+            <div class="info-item">
+                <label>Name</label>
+                <strong id="receiverName">-</strong>
+            </div>
+
+            <div class="info-item">
+                <label>Phone</label>
+                <strong id="receiverPhone">-</strong>
+            </div>
+
+            <div class="info-item">
+                <label>Email</label>
+                <strong id="receiverEmail">-</strong>
+            </div>
+
+            <div class="info-item">
+                <label>Address</label>
+                <strong id="receiverAddress">-</strong>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================
+SHIPMENT HISTORY
+========================================== -->
+
+<section class="receipt-card">
+
+    <div class="card-title">
+        <i class="fa-solid fa-clock-rotate-left"></i>
+        Shipment Journey
+    </div>
+
+    <div
+        id="historyContainer"
+        class="history-container">
+
+        <!-- tracking history generated by receipt.js -->
+
+    </div>
+
+</section>
+
+
+<!-- =========================================
+VERIFICATION
+========================================== -->
+
+<section class="receipt-card verification-section">
+
+    <div class="verification-left">
+
+        <h3>
+            Shipment Verification
+        </h3>
+
+        <p>
+
+            This shipment receipt has been generated directly from
+            the LinkWorld Express Logistics Management System.
+            The shipment information, sender details, receiver
+            information and tracking history are stored securely
+            inside our shipment database.
+
+        </p>
+
+        <div class="verification-list">
+
+            <div>
+                <i class="fa-solid fa-circle-check"></i>
+                Tracking Number Verified
+            </div>
+
+            <div>
+                <i class="fa-solid fa-circle-check"></i>
+                Shipment Record Authenticated
+            </div>
+
+            <div>
+                <i class="fa-solid fa-circle-check"></i>
+                Logistics Network Confirmed
+            </div>
+
+            <div>
+                <i class="fa-solid fa-circle-check"></i>
+                Printable Official Receipt
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="verification-right">
+
+        <div class="barcode-box">
+            <img id="barcodeImage" alt="Shipment Barcode">
+        </div>
+
+        <div class="qr-box">
+            <img id="qrCode" alt="QR Code">
+        </div>
+
+        <small>
+            Scan the QR code to verify this shipment.
+        </small>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================
+SIGNATURES
+========================================== -->
+
+<section class="receipt-card">
+
+    <div class="signature-grid">
+
+        <div class="signature-box">
+            <div class="signature-line"></div>
+            <strong>Sender Signature</strong>
+        </div>
+
+        <div class="signature-box">
+            <div class="signature-line"></div>
+            <strong>Receiver Signature</strong>
+        </div>
+
+        <div class="signature-box">
+            <div class="signature-line"></div>
+            <strong>LinkWorld Express</strong>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================
+PRINT BUTTONS
+========================================== -->
+
+<div class="receipt-actions">
+
+    <button id="printReceipt" class="btn-print">
+        <i class="fa-solid fa-print"></i>
+        Print Receipt
+    </button>
+
+    <button id="downloadPDF" class="btn-download">
+        <i class="fa-solid fa-file-pdf"></i>
+        Download PDF
+    </button>
+
+</div>
+
+
+</div>
+
+</div>
 
 
 <!-- =========================================
@@ -523,11 +474,9 @@ FOOTER
 
 <footer class="receipt-footer">
 
-    © 2026 LinkWorld Express.
-    All Rights Reserved.
+    © 2026 LinkWorld Express. All Rights Reserved. This receipt is a system-generated document and does not require a physical stamp.
 
 </footer>
-
 
 
 <!-- =========================================
@@ -543,7 +492,6 @@ LIBRARIES
 <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
-
 
 
 <!-- =========================================

@@ -1,0 +1,245 @@
+/* =========================================================
+   LINKWORLD EXPRESS
+   SERVICES — PAGE-SPECIFIC STYLES
+   Shared tokens/header/footer/hero/buttons/cta/loader live
+   in style.css. This file only holds what's unique here.
+========================================================= */
+
+
+/* the waybill stub here only has 3 preview rows (vs. 4 on
+   ship.html), so the inherited stamp position sits too low
+   and collides with the row text beside it */
+.hero-stamp{
+  top:66px;
+}
+
+
+/* =========================================================
+   SERVICES GRID
+========================================================= */
+.services-detail{ padding:100px 0; }
+
+.services-detail-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:2px;
+  background:var(--line);
+}
+
+.service-detail-card{
+  background:var(--paper);
+  padding:34px 30px;
+  position:relative;
+  transition:background .25s ease;
+}
+
+.service-detail-card:hover{
+  background:var(--paper-2);
+}
+
+.service-code{
+  position:absolute;
+  top:28px; right:30px;
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:.08em;
+  color:var(--orange-dk);
+}
+
+.service-icon{
+  width:46px; height:46px;
+  background:var(--navy);
+  color:var(--orange);
+  display:flex; align-items:center; justify-content:center;
+  font-size:18px;
+  margin-bottom:20px;
+}
+
+.service-detail-card h3{
+  font-family:var(--display);
+  font-size:20px;
+  color:var(--navy);
+  font-weight:700;
+  letter-spacing:.01em;
+  margin-bottom:10px;
+}
+
+.service-detail-card > p{
+  color:var(--muted);
+  font-size:14px;
+  margin-bottom:20px;
+}
+
+.service-detail-card ul{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.service-detail-card li{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  font-size:13px;
+  color:var(--ink);
+}
+
+.service-detail-card li i{
+  color:var(--orange-dk);
+  font-size:11px;
+}
+
+
+/* =========================================================
+   HOW IT WORKS (process)
+========================================================= */
+.services-process{
+  background:var(--paper-2);
+  padding:100px 0;
+}
+
+.process-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:0;
+  border-top:1px solid var(--line);
+  border-left:1px solid var(--line);
+  counter-reset:step;
+}
+
+.process-card{
+  background:var(--paper);
+  border-right:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+  padding:34px 26px;
+  position:relative;
+  transition:background .2s ease;
+}
+
+.process-card:hover{ background:var(--white); }
+
+.process-card::before{
+  counter-increment:step;
+  content:"STEP-0" counter(step);
+  font-family:var(--mono);
+  font-size:11px;
+  color:var(--orange-dk);
+  letter-spacing:.08em;
+  display:block;
+  margin-bottom:22px;
+}
+
+.process-icon{
+  width:44px; height:44px;
+  border:1px solid var(--navy);
+  display:flex; align-items:center; justify-content:center;
+  color:var(--navy);
+  font-size:17px;
+  margin-bottom:18px;
+}
+
+.process-card h3{
+  font-family:var(--display);
+  font-size:20px;
+  color:var(--navy);
+  margin-bottom:8px;
+  letter-spacing:.01em;
+}
+
+.process-card p{
+  color:var(--muted);
+  font-size:14px;
+}
+
+
+/* =========================================================
+   NETWORK
+========================================================= */
+.services-network{
+  background:var(--navy);
+  color:var(--white);
+  padding:100px 0;
+}
+
+.network-wrapper{
+  display:grid;
+  grid-template-columns:1.1fr .9fr;
+  gap:60px;
+  align-items:center;
+}
+
+.network-left .eyebrow{ color:var(--orange); }
+.network-left .eyebrow::before{ background:var(--orange); }
+
+.network-left h2{
+  font-family:var(--display);
+  font-size:clamp(28px,3.6vw,40px);
+  margin:14px 0 18px;
+  line-height:1.08;
+}
+
+.network-left p{
+  color:#AFB9C4;
+  font-size:15px;
+  margin-bottom:26px;
+}
+
+.coverage-list{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px 20px;
+}
+
+.coverage-list li{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:13.5px;
+}
+
+.coverage-list i{ color:var(--orange); }
+
+.network-card{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:1px;
+  background:rgba(255,255,255,.15);
+}
+
+.network-item{
+  background:var(--navy-2);
+  padding:32px 24px;
+}
+
+.network-item h3{
+  font-family:var(--display);
+  font-size:34px;
+  color:var(--orange);
+}
+
+.network-item p{
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  color:#9BA6B2;
+  margin-top:6px;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+@media (max-width:980px){
+  .services-detail-grid{ grid-template-columns:1fr 1fr; }
+  .process-grid{ grid-template-columns:1fr 1fr; }
+  .network-wrapper{ grid-template-columns:1fr; }
+}
+
+@media (max-width:600px){
+  .services-detail-grid{ grid-template-columns:1fr; }
+  .process-grid{ grid-template-columns:1fr; }
+  .coverage-list{ grid-template-columns:1fr; }
+  .network-card{ grid-template-columns:1fr; }
+  .service-code{ position:static; display:block; margin-bottom:12px; }
+}

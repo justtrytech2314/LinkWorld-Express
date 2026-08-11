@@ -1,2019 +1,546 @@
-/* =====================================================
-LINKWORLD EXPRESS
-TRACKING RESULT CSS
-PART 1
-GLOBAL + HEADER + LIVE CARD
-===================================================== */
+/* =========================================================
+   LINKWORLD EXPRESS
+   TRACKING RESULT — PAGE-SPECIFIC STYLES
+   Shared tokens/header/footer/hero/buttons live in style.css.
+   This file only holds what's unique to this page.
+========================================================= */
 
 
-/* ==========================================
-RESET
-========================================== */
+/* =========================================================
+   HERO — ROUTE LINE (origin -> destination, replaces the
+   generic numeric hero-stats row with a place-to-place strip)
+========================================================= */
 
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:"Poppins",sans-serif;
+.route-line-stats{
+  display:flex;
+  align-items:center;
+  gap:22px;
+  border-top:1px solid rgba(255,255,255,.14);
+  padding-top:26px;
+  flex-wrap:wrap;
 }
 
-html{
-    scroll-behavior:smooth;
+.route-line-stats .stat-box{
+  display:flex;
+  align-items:center;
+  gap:12px;
 }
 
-body{
-
-    min-height:100vh;
-
-    background:
-    linear-gradient(
-        rgba(5,14,30,.88),
-        rgba(5,14,30,.88)
-    ),
-    url("../images/tracking-background.png");
-
-    background-size:cover;
-
-    background-position:center;
-
-    background-repeat:no-repeat;
-
-    background-attachment:fixed;
-
-    color:#ffffff;
-
-    overflow-x:hidden;
-
+.route-line-stats .stat-box h2{
+  font-size:20px;
+  color:var(--orange);
 }
 
-
-/* ==========================================
-SCROLLBAR
-========================================== */
-
-::-webkit-scrollbar{
-
-    width:10px;
-
-}
-
-::-webkit-scrollbar-track{
-
-    background:#07121f;
-
-}
-
-::-webkit-scrollbar-thumb{
-
-    background:#00c97b;
-
-    border-radius:30px;
-
-}
-
-
-/* ==========================================
-CONTAINER
-========================================== */
-
-.container{
-
-    width:92%;
-
-    max-width:1350px;
-
-    margin:auto;
-
-}
-
-
-/* ==========================================
-HEADER
-========================================== */
-
-.tracking-header{
-
-    position:sticky;
-
-    top:0;
-
-    z-index:9999;
-
-    background:
-    rgba(4,15,34,.78);
-
-    backdrop-filter:blur(18px);
-
-    -webkit-backdrop-filter:blur(18px);
-
-    border-bottom:
-
-    1px solid rgba(255,255,255,.08);
-
-    transition:.35s;
-
-}
-
-
-.tracking-header-container{
-
-    width:92%;
-
-    max-width:1350px;
-
-    margin:auto;
-
-    display:flex;
-
-    justify-content:space-between;
-
-    align-items:flex-start;
-
-    padding:25px 0;
-
-}
-
-
-/* ==========================================
-LEFT SIDE
-========================================== */
-
-.header-left{
-
-    display:flex;
-
-    flex-direction:column;
-
-    gap:20px;
-
-}
-
-
-/* ==========================================
-LOGO ROW
-========================================== */
-
-.brand-row{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:18px;
-
-}
-
-
-/* ==========================================
-LOGO
-========================================== */
-
-.company-logo{
-
-    width:72px;
-
-    height:72px;
-
-    border-radius:50%;
-
-    background:#ffffff;
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:center;
-
-    box-shadow:
-
-    0 15px 35px rgba(0,0,0,.30);
-
-}
-
-.company-logo img{
-
-    width:48px;
-
-    height:48px;
-
-    object-fit:contain;
-
-}
-
-
-/* ==========================================
-COMPANY
-========================================== */
-
-.brand-details h1{
-
-    font-size:34px;
-
-    font-weight:800;
-
-    letter-spacing:1px;
-
-    color:#ffffff;
-
-}
-
-.brand-details p{
-
-    margin-top:6px;
-
-    color:#d1d5db;
-
-    font-size:15px;
-
-    letter-spacing:.5px;
-
-}
-
-
-/* ==========================================
-NAVIGATION
-========================================== */
-
-.navbar{
-
-    display:flex;
-
-    gap:34px;
-
-    margin-left:90px;
-
-}
-
-.navbar a{
-
-    color:#d5dbe6;
-
-    text-decoration:none;
-
-    font-size:15px;
-
-    font-weight:600;
-
-    position:relative;
-
-    transition:.3s;
-
-}
-
-.navbar a::after{
-
-    content:"";
-
-    position:absolute;
-
-    left:0;
-
-    bottom:-8px;
-
-    width:0;
-
-    height:2px;
-
-    background:#00d37f;
-
-    transition:.3s;
-
-}
-
-.navbar a:hover{
-
-    color:#00d37f;
-
-}
-
-.navbar a:hover::after{
-
-    width:100%;
-
-}
-
-.navbar a.active{
-
-    color:#00d37f;
-
-}
-
-.navbar a.active::after{
-
-    width:100%;
-
-}
-
-
-/* ==========================================
-RIGHT SIDE
-========================================== */
-
-.tracking-identity{
-
-    transition:.25s ease;
-
-}
-
-
-/* Hide on scroll */
-
-.tracking-identity.hide{
-
-    opacity:0;
-
-    transform:translateY(-15px);
-
-    pointer-events:none;
-
-}
-
-
-/* ==========================================
-LIVE CARD
-========================================== */
-
-.tracking-live-card{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:22px;
-
-    background:
-
-    rgba(255,255,255,.08);
-
-    border:
-
-    1px solid rgba(255,255,255,.10);
-
-    border-radius:24px;
-
-    padding:22px 28px;
-
-    backdrop-filter:blur(18px);
-
-    box-shadow:
-
-    0 18px 45px rgba(0,0,0,.35);
-
-}
-
-
-/* ==========================================
-LIVE DOT
-========================================== */
-
-.live-dot-wrapper{
-
-    width:70px;
-
-    height:70px;
-
-    border-radius:50%;
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:center;
-
-    background:
-
-    rgba(0,255,136,.12);
-
-}
-
-
-.live-dot{
-
-    width:28px;
-
-    height:28px;
-
-    border-radius:50%;
-
-    background:#00ff88;
-
-    box-shadow:
-
-    0 0 15px #00ff88,
-
-    0 0 35px #00ff88,
-
-    0 0 60px rgba(0,255,136,.7);
-
-    animation:livePulse 1.2s infinite;
-
-}
-
-
-@keyframes livePulse{
-
-0%{
-
-transform:scale(.9);
-
-opacity:.7;
-
-}
-
-50%{
-
-transform:scale(1.25);
-
-opacity:1;
-
-}
-
-100%{
-
-transform:scale(.9);
-
-opacity:.7;
-
-}
-
-}
-
-
-/* ==========================================
-LIVE TEXT
-========================================== */
-
-.live-text h3{
-
-    font-size:24px;
-
-    font-weight:800;
-
-    color:#ffffff;
-
-    letter-spacing:.8px;
-
-}
-
-.live-text p{
-
-    margin-top:6px;
-
-    font-size:14px;
-
-    color:#c8d1df;
-
-}
-
-
-/* ==========================================
-SECTION TITLE
-========================================== */
-
-.section-title{
-
-    text-align:center;
-
-    margin:70px 0 45px;
-
-}
-
-.section-title span{
-
-    color:#00ff88;
-
-    font-size:13px;
-
-    font-weight:700;
-
-    letter-spacing:2px;
-
-    text-transform:uppercase;
-
-}
-
-.section-title h2{
-
-    margin-top:10px;
-
-    font-size:42px;
-
-    font-weight:800;
-
-}
-
-.section-title p{
-
-    margin-top:15px;
-
-    color:#cbd5e1;
-
-    font-size:16px;
-
-    max-width:760px;
-
-    margin-inline:auto;
-
-    line-height:1.7;
-
-}
-/* =====================================================
-LINKWORLD EXPRESS
-TRACKING RESULT CSS
-PART 2
-SHIPMENT SUMMARY + LIVE MAP + GPS
-===================================================== */
-
-
-/* ==========================================
-SHIPMENT SUMMARY
-========================================== */
-
-.shipment-summary{
-
-    margin-top:40px;
-
-    background:rgba(255,255,255,.08);
-
-    backdrop-filter:blur(18px);
-
-    border:1px solid rgba(255,255,255,.10);
-
-    border-radius:30px;
-
-    padding:45px;
-
-    box-shadow:
-    0 20px 55px rgba(0,0,0,.30);
-
-}
-
-.summary-header{
-
-    text-align:center;
-
-    margin-bottom:40px;
-
-}
-
-.summary-header h1{
-
-    font-size:48px;
-
-    color:#00ff88;
-
-    font-weight:800;
-
-}
-
-.summary-header p{
-
-    margin-top:12px;
-
-    color:#cbd5e1;
-
-    font-size:16px;
-
-}
-
-
-/* ==========================================
-ROUTE
-========================================== */
-
-.route-box{
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:space-between;
-
-    gap:25px;
-
-    margin-bottom:45px;
-
-}
-
-.route-point{
-
-    flex:1;
-
-    text-align:center;
-
-}
-
-.route-point i{
-
-    font-size:34px;
-
-    color:#00ff88;
-
-    margin-bottom:15px;
-
-}
-
-.route-point h4{
-
-    color:#8fa3ba;
-
-    margin-bottom:8px;
-
-    font-size:14px;
-
-}
-
-.route-point strong{
-
-    display:block;
-
-    font-size:20px;
-
-    color:#ffffff;
-
+.route-line-stats .stat-box span{
+  font-family:var(--mono);
+  font-size:12.5px;
+  letter-spacing:.04em;
+  text-transform:capitalize;
+  color:var(--white);
 }
 
 .route-line{
-
-    height:4px;
-
-    flex:1;
-
-    background:#1b3c55;
-
-    border-radius:20px;
-
-    position:relative;
-
-    overflow:hidden;
-
-}
-
-.route-line::before{
-
-    content:"";
-
-    position:absolute;
-
-    inset:0;
-
-    background:linear-gradient(
-        90deg,
-        #00ff88,
-        #00bfff
-    );
-
+  flex:1;
+  min-width:60px;
+  height:1px;
+  background:repeating-linear-gradient(90deg,
+    rgba(255,255,255,.4) 0 6px, transparent 6px 12px);
+  position:relative;
 }
 
 .moving-icon{
-
-    position:absolute;
-
-    top:-17px;
-
-    left:50%;
-
-    transform:translateX(-50%);
-
-    color:#ffffff;
-
-    font-size:26px;
-
-    animation:planeMove 2.5s infinite ease-in-out;
-
-}
-
-@keyframes planeMove{
-
-0%,100%{
-
-transform:translateX(-50%) translateY(0);
-
-}
-
-50%{
-
-transform:translateX(-50%) translateY(-6px);
-
-}
-
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  width:34px;
+  height:34px;
+  background:var(--orange);
+  color:var(--navy);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:14px;
 }
 
 
-/* ==========================================
-SUMMARY CARDS
-========================================== */
-
-.summary-cards{
-
-    display:grid;
-
-    grid-template-columns:repeat(3,1fr);
-
-    gap:25px;
-
-}
-
-.summary-card{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:18px;
-
-    background:rgba(255,255,255,.06);
-
-    border:1px solid rgba(255,255,255,.08);
-
-    border-radius:22px;
-
-    padding:25px;
-
-    transition:.35s;
-
-}
-
-.summary-card:hover{
-
-    transform:translateY(-8px);
-
-    background:rgba(255,255,255,.10);
-
-}
-
-.summary-card i{
-
-    width:65px;
-
-    height:65px;
-
-    border-radius:18px;
-
-    background:#00ff88;
-
-    color:#03131f;
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:center;
-
-    font-size:28px;
-
-}
-
-.summary-card h5{
-
-    color:#9fb3c8;
-
-    margin-bottom:6px;
-
-    font-size:14px;
-
-}
-
-.summary-card strong{
-
-    font-size:18px;
-
-    color:#ffffff;
-
+/* the waybill stub here only has 3 preview rows (vs. 4 on
+   ship.html), so the inherited stamp position sits too low
+   and risks overlapping the barcode strip beneath it */
+.hero-stamp{
+  top:66px;
 }
 
 
-/* ==========================================
-GLOBAL MAP
-========================================== */
+/* =========================================================
+   LIVE GPS MAP
+========================================================= */
+
+.global-map-section{
+  padding:96px 0;
+}
 
 .global-map-container{
-
-    margin-top:45px;
-
-    display:block;
-
+  display:flex;
+  flex-direction:column;
+  gap:2px;
 }
 
 .world-map-card{
-
-    width:100%;
-
-    border-radius:28px;
-
-    overflow:hidden;
-
-    border:1px solid rgba(255,255,255,.10);
-
-    box-shadow:
-    0 20px 60px rgba(0,0,0,.35);
-
+  border:1px solid var(--line);
 }
 
 #trackingMap{
-
-    width:100%;
-
-    height:650px;
-
+  width:100%;
+  height:520px;
 }
 
-
-/* ==========================================
-LEAFLET
-========================================== */
-
 .leaflet-container{
-
-    background:#041321;
-
+  background:var(--navy);
+  font-family:var(--body);
 }
 
 .leaflet-control-zoom{
-
-    border:none !important;
-
+  border:none !important;
 }
 
 .leaflet-control-zoom a{
-
-    background:#081f35 !important;
-
-    color:#ffffff !important;
-
-    border:none !important;
-
+  background:var(--navy) !important;
+  color:var(--orange) !important;
+  border-radius:0 !important;
 }
 
-
-/* ==========================================
-GPS INFORMATION
-========================================== */
-
 .gps-information-card{
-
-    margin-top:30px;
-
-    display:grid;
-
-    grid-template-columns:repeat(4,1fr);
-
-    gap:22px;
-
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:2px;
+  background:var(--line);
 }
 
 .gps-row{
-
-    background:rgba(255,255,255,.08);
-
-    border:1px solid rgba(255,255,255,.08);
-
-    border-radius:22px;
-
-    padding:25px;
-
-    text-align:center;
-
-    transition:.35s;
-
-}
-
-.gps-row:hover{
-
-    transform:translateY(-6px);
-
+  background:var(--paper);
+  padding:22px 24px;
 }
 
 .gps-row span{
-
-    display:block;
-
-    margin-bottom:10px;
-
-    color:#8ea3b7;
-
-    font-size:14px;
-
+  display:block;
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--muted);
+  margin-bottom:8px;
 }
 
 .gps-row strong{
-
-    display:block;
-
-    color:#ffffff;
-
-    font-size:18px;
-
-    word-break:break-word;
-
+  font-size:16px;
+  font-weight:700;
+  color:var(--navy);
+  word-break:break-word;
+  text-transform:capitalize;
 }
 
 
-/* ==========================================
-MAP STATUS OVERLAY
-========================================== */
+/* =========================================================
+   SHIPMENT PROGRESS
+========================================================= */
 
-.map-overlay-status{
-
-    position:absolute;
-
-    top:25px;
-
-    left:25px;
-
-    background:rgba(5,15,30,.88);
-
-    backdrop-filter:blur(15px);
-
-    padding:18px 25px;
-
-    border-radius:18px;
-
-    border:1px solid rgba(255,255,255,.08);
-
-    color:#ffffff;
-
-    z-index:500;
-
+.shipment-progress-section{
+  background:var(--paper-2);
+  padding:96px 0;
 }
-
-.map-overlay-status h4{
-
-    color:#00ff88;
-
-    margin-bottom:8px;
-
-    font-size:17px;
-
-}
-
-.map-overlay-status p{
-
-    color:#cbd5e1;
-
-    font-size:14px;
-
-    line-height:1.6;
-
-}
-/* =====================================================
-LINKWORLD EXPRESS
-TRACKING RESULT CSS
-PART 3
-PROGRESS + DETAILS + SECURITY
-===================================================== */
-
-
-/* ==========================================
-PROGRESS SECTION
-========================================== */
 
 .progress-container{
-
-    margin-top:45px;
-
-    background:rgba(255,255,255,.08);
-
-    backdrop-filter:blur(18px);
-
-    border:1px solid rgba(255,255,255,.10);
-
-    border-radius:30px;
-
-    padding:40px;
-
-    box-shadow:
-    0 20px 55px rgba(0,0,0,.30);
-
+  max-width:820px;
 }
 
 .progress-header{
-
-    display:flex;
-
-    justify-content:space-between;
-
-    align-items:center;
-
-    margin-bottom:30px;
-
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  margin-bottom:18px;
 }
 
 .progress-header h3{
-
-    color:#ffffff;
-
-    font-size:30px;
-
-    font-weight:700;
-
+  font-family:var(--display);
+  font-size:19px;
+  color:var(--navy);
+  font-weight:700;
+  letter-spacing:.01em;
 }
 
-.progress-percent{
-
-    font-size:34px;
-
-    font-weight:800;
-
-    color:#00ff88;
-
+#progressText{
+  font-family:var(--mono);
+  font-size:20px;
+  font-weight:700;
+  color:var(--orange-dk);
 }
 
 .progress-track{
-
-    width:100%;
-
-    height:18px;
-
-    background:rgba(255,255,255,.10);
-
-    border-radius:50px;
-
-    overflow:hidden;
-
-    margin-bottom:25px;
-
+  position:relative;
+  height:10px;
+  background:var(--line);
 }
 
 .progress-fill{
-
-    width:0%;
-
-    height:100%;
-
-    border-radius:50px;
-
-    background:linear-gradient(
-        90deg,
-        #00ff88,
-        #00bfff
-    );
-
-    transition:width 1.5s ease;
-
-    position:relative;
-
+  position:relative;
+  height:100%;
+  width:0%;
+  background:var(--orange);
+  transition:width 1s ease;
 }
 
-.progress-fill::after{
-
-    content:"";
-
-    position:absolute;
-
-    top:0;
-
-    right:0;
-
-    width:80px;
-
-    height:100%;
-
-    background:linear-gradient(
-        90deg,
-        transparent,
-        rgba(255,255,255,.65)
-    );
-
+.truck-progress-icon{
+  position:absolute;
+  right:-15px;
+  top:50%;
+  transform:translateY(-50%);
+  width:30px;
+  height:30px;
+  background:var(--navy);
+  color:var(--orange);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:13px;
 }
 
-.progress-message{
-
-    color:#cbd5e1;
-
-    font-size:16px;
-
-    text-align:center;
-
-    line-height:1.8;
-
+.progress-labels{
+  display:flex;
+  justify-content:space-between;
+  margin-top:16px;
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--muted);
 }
 
 
-/* ==========================================
-DETAILS SECTION
-========================================== */
+/* =========================================================
+   SHIPMENT JOURNEY / TIMELINE
+========================================================= */
+
+.shipment-journey-section{
+  background:var(--navy-2);
+  padding:96px 0;
+}
+
+.shipment-timeline{
+  max-width:720px;
+  position:relative;
+  padding-left:8px;
+}
+
+.timeline-item{
+  position:relative;
+  padding:0 0 34px 34px;
+  border-left:1px dashed rgba(255,255,255,.22);
+}
+
+.timeline-item:last-child{
+  padding-bottom:0;
+}
+
+.timeline-icon{
+  position:absolute;
+  left:-9px;
+  top:0;
+  width:18px;
+  height:18px;
+  background:var(--navy-2);
+  border:1px solid rgba(255,255,255,.35);
+  color:rgba(255,255,255,.5);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:9px;
+}
+
+.timeline-item.completed .timeline-icon{
+  background:var(--orange);
+  border-color:var(--orange);
+  color:var(--navy);
+}
+
+.timeline-content h3{
+  font-family:var(--display);
+  font-size:17px;
+  color:var(--white);
+  font-weight:700;
+  letter-spacing:.01em;
+  margin-bottom:6px;
+}
+
+.timeline-content p{
+  font-size:13.5px;
+  color:#AFB9C4;
+  margin-bottom:6px;
+}
+
+.timeline-content p i{
+  color:var(--orange);
+  margin-right:6px;
+}
+
+.timeline-content span{
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:.05em;
+  color:#7C8A97;
+}
+
+.timeline-empty{
+  font-family:var(--mono);
+  font-size:13px;
+  color:#AFB9C4;
+}
+
+
+/* =========================================================
+   SHIPMENT DETAILS
+========================================================= */
+
+.shipment-details-section{
+  padding:96px 0;
+}
+
+.details-tabs{
+  display:flex;
+  border:1px solid var(--line);
+  margin-bottom:2px;
+  width:fit-content;
+}
+
+.details-tabs button{
+  font-family:var(--mono);
+  font-size:12px;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  color:var(--muted);
+  background:var(--paper);
+  border:none;
+  padding:12px 22px;
+  cursor:pointer;
+  border-right:1px solid var(--line);
+}
+
+.details-tabs button:last-child{
+  border-right:none;
+}
+
+.details-tabs button.active{
+  background:var(--navy);
+  color:var(--orange);
+}
 
 .details-grid{
-
-    margin-top:45px;
-
-    display:grid;
-
-    grid-template-columns:repeat(2,1fr);
-
-    gap:28px;
-
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:2px;
+  background:var(--line);
 }
 
 .detail-card{
-
-    background:rgba(255,255,255,.08);
-
-    border:1px solid rgba(255,255,255,.10);
-
-    border-radius:28px;
-
-    overflow:hidden;
-
-    backdrop-filter:blur(18px);
-
-    transition:.35s;
-
-}
-
-.detail-card:hover{
-
-    transform:translateY(-8px);
-
+  background:var(--paper);
+  padding:30px 32px;
 }
 
 .detail-header{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:15px;
-
-    padding:25px 30px;
-
-    background:rgba(255,255,255,.05);
-
-    border-bottom:1px solid rgba(255,255,255,.08);
-
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:20px;
+  padding-bottom:16px;
+  border-bottom:1px solid var(--line);
 }
 
 .detail-header i{
-
-    width:52px;
-
-    height:52px;
-
-    border-radius:16px;
-
-    background:#00ff88;
-
-    color:#03131f;
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:center;
-
-    font-size:22px;
-
+  width:36px;
+  height:36px;
+  background:var(--navy);
+  color:var(--orange);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:14px;
 }
 
 .detail-header h3{
-
-    color:#ffffff;
-
-    font-size:22px;
-
-}
-
-.detail-body{
-
-    padding:28px;
-
+  font-family:var(--display);
+  font-size:18px;
+  color:var(--navy);
+  font-weight:700;
+  letter-spacing:.01em;
 }
 
 .detail-row{
-
-    display:flex;
-
-    justify-content:space-between;
-
-    align-items:flex-start;
-
-    gap:20px;
-
-    padding:16px 0;
-
-    border-bottom:1px solid rgba(255,255,255,.08);
-
+  display:flex;
+  justify-content:space-between;
+  align-items:baseline;
+  gap:14px;
+  padding:11px 0;
+  border-bottom:1px dashed var(--line);
+  font-size:14px;
 }
 
-.detail-row:last-child{
-
-    border-bottom:none;
-
+.detail-row:last-of-type{
+  border-bottom:none;
 }
 
 .detail-row span{
-
-    color:#8fa4b8;
-
-    font-size:15px;
-
+  color:var(--muted);
+  font-family:var(--mono);
+  font-size:11.5px;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  flex-shrink:0;
 }
 
 .detail-row strong{
+  font-weight:600;
+  color:var(--ink);
+  text-align:right;
+  word-break:break-word;
+  text-transform:capitalize;
+}
 
-    color:#ffffff;
+.detail-card.live-card{
+  position:relative;
+}
 
-    text-align:right;
+.location-live{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  margin-top:16px;
+  font-family:var(--mono);
+  font-size:10.5px;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--orange-dk);
+}
 
-    font-size:16px;
+.location-live span{
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:var(--orange);
+  position:relative;
+}
 
-    word-break:break-word;
-
+.location-live span::after{
+  content:"";
+  position:absolute;
+  inset:-4px;
+  border-radius:50%;
+  border:1px solid var(--orange);
+  animation:liveDotPulse 1.8s ease-out infinite;
 }
 
 
-/* ==========================================
-SECURITY SECTION
-========================================== */
+/* =========================================================
+   SECURITY VERIFICATION
+========================================================= */
+
+.security-section{
+  background:var(--paper-2);
+  padding:96px 0;
+}
 
 .security-card{
-
-    margin-top:45px;
-
-    background:rgba(255,255,255,.08);
-
-    backdrop-filter:blur(18px);
-
-    border:1px solid rgba(255,255,255,.10);
-
-    border-radius:30px;
-
-    padding:45px;
-
+  display:flex;
+  gap:30px;
+  align-items:flex-start;
+  background:var(--paper);
+  border:1px solid var(--line);
+  padding:48px;
+  max-width:900px;
+  margin:0 auto;
 }
 
-.security-card h2{
-
-    color:#ffffff;
-
-    font-size:34px;
-
-    margin-bottom:18px;
-
+.security-icon{
+  width:56px;
+  height:56px;
+  min-width:56px;
+  background:var(--orange);
+  color:var(--white);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:22px;
 }
 
-.security-card>p{
+.security-content h2{
+  font-family:var(--display);
+  font-size:clamp(22px,3vw,28px);
+  color:var(--navy);
+  font-weight:700;
+  margin-bottom:12px;
+}
 
-    color:#cbd5e1;
-
-    line-height:1.8;
-
-    margin-bottom:35px;
-
+.security-content p{
+  color:var(--muted);
+  font-size:14.5px;
+  max-width:600px;
+  margin-bottom:24px;
 }
 
 .security-items{
-
-    display:grid;
-
-    grid-template-columns:repeat(2,1fr);
-
-    gap:25px;
-
-}
-
-.security-item{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:18px;
-
-    padding:22px;
-
-    background:rgba(255,255,255,.05);
-
-    border:1px solid rgba(255,255,255,.08);
-
-    border-radius:22px;
-
-    transition:.35s;
-
-}
-
-.security-item:hover{
-
-    transform:translateY(-6px);
-
-    background:rgba(255,255,255,.10);
-
-}
-
-.security-item i{
-
-    width:58px;
-
-    height:58px;
-
-    border-radius:18px;
-
-    background:#00ff88;
-
-    color:#04131f;
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:center;
-
-    font-size:24px;
-
-}
-
-.security-item h4{
-
-    color:#ffffff;
-
-    margin-bottom:6px;
-
-    font-size:18px;
-
-}
-
-.security-item p{
-
-    color:#b7c6d5;
-
-    font-size:14px;
-
-    line-height:1.6;
-
-}
-
-
-/* ==========================================
-FADE ANIMATION
-========================================== */
-
-.shipment-summary,
-.progress-container,
-.detail-card,
-.security-card,
-.world-map-card{
-
-    animation:fadeUp .8s ease both;
-
-}
-
-@keyframes fadeUp{
-
-from{
-
-opacity:0;
-
-transform:translateY(35px);
-
-}
-
-to{
-
-opacity:1;
-
-transform:translateY(0);
-
-}
-
-}
-
-
-/* ==========================================
-TABLET
-========================================== */
-
-@media(max-width:992px){
-
-.details-grid{
-
-grid-template-columns:1fr;
-
-}
-
-.security-items{
-
-grid-template-columns:1fr;
-
-}
-
-.gps-information-card{
-
-grid-template-columns:repeat(2,1fr);
-
-}
-
-}
-
-
-/* ==========================================
-MOBILE
-========================================== */
-
-@media(max-width:768px){
-
-.progress-container,
-.security-card{
-
-padding:28px;
-
-}
-
-.progress-header{
-
-flex-direction:column;
-
-gap:15px;
-
-text-align:center;
-
-}
-
-.detail-header{
-
-padding:20px;
-
-}
-
-.detail-body{
-
-padding:20px;
-
-}
-
-.detail-row{
-
-flex-direction:column;
-
-gap:8px;
-
-}
-
-.detail-row strong{
-
-text-align:left;
-
-}
-
-.gps-information-card{
-
-grid-template-columns:1fr;
-
-}
-
-.security-item{
-
-flex-direction:column;
-
-text-align:center;
-
-}
-
-#trackingMap{
-
-height:420px;
-
-}
-
-}
-/* =====================================================
-LINKWORLD EXPRESS
-TRACKING RESULT CSS
-PART 4
-FOOTER + LOADING + ANIMATIONS + RESPONSIVE
-===================================================== */
-
-
-/* ==========================================
-TRACKING FOOTER
-========================================== */
-
-.tracking-footer{
-
-    margin-top:60px;
-
-    padding:50px 40px;
-
-    background:rgba(255,255,255,.08);
-
-    backdrop-filter:blur(18px);
-
-    border-top:1px solid rgba(255,255,255,.10);
-
-    text-align:center;
-
-    border-radius:30px 30px 0 0;
-
-}
-
-.footer-follow-row{
-
-    display:flex;
-
-    justify-content:center;
-
-    align-items:center;
-
-    gap:15px;
-
-    margin-bottom:20px;
-
-}
-
-.footer-follow-row span{
-
-    color:#dce7f3;
-
-    font-size:16px;
-
-    font-weight:600;
-
-}
-
-.footer-social{
-
-    display:flex;
-
-    gap:15px;
-
-}
-
-.footer-social a{
-
-    width:48px;
-
-    height:48px;
-
-    border-radius:50%;
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:center;
-
-    background:rgba(255,255,255,.08);
-
-    color:#ffffff;
-
-    text-decoration:none;
-
-    font-size:18px;
-
-    transition:.35s;
-
-    border:1px solid rgba(255,255,255,.10);
-
-}
-
-.footer-social a:hover{
-
-    background:#00ff88;
-
-    color:#041321;
-
-    transform:translateY(-5px);
-
-}
-
-.tracking-footer p{
-
-    margin-top:20px;
-
-    color:#b9c8d8;
-
-    font-size:15px;
-
-    line-height:1.8;
-
-}
-
-
-/* ==========================================
-LOADING SCREEN
-========================================== */
-
-.loading-screen{
-
-    position:fixed;
-
-    inset:0;
-
-    background:#031321;
-
-    display:flex;
-
-    flex-direction:column;
-
-    justify-content:center;
-
-    align-items:center;
-
-    z-index:99999;
-
-    transition:.5s;
-
-}
-
-.loading-screen.hidden{
-
-    opacity:0;
-
-    visibility:hidden;
-
-}
-
-.loader{
-
-    width:80px;
-
-    height:80px;
-
-    border:6px solid rgba(255,255,255,.15);
-
-    border-top:6px solid #00ff88;
-
-    border-radius:50%;
-
-    animation:spin 1s linear infinite;
-
-}
-
-.loading-screen h2{
-
-    margin-top:25px;
-
-    color:#ffffff;
-
-    font-size:26px;
-
-    font-weight:700;
-
-}
-
-.loading-screen p{
-
-    margin-top:12px;
-
-    color:#b8c9d7;
-
-    font-size:15px;
-
-}
-
-@keyframes spin{
-
-100%{
-
-transform:rotate(360deg);
-
-}
-
-}
-
-
-/* ==========================================
-GLOBAL ANIMATIONS
-========================================== */
-
-.fade-up{
-
-    animation:fadeUp .8s ease both;
-
-}
-
-.fade-in{
-
-    animation:fadeIn .8s ease both;
-
-}
-
-.zoom-in{
-
-    animation:zoomIn .6s ease both;
-
-}
-
-@keyframes fadeIn{
-
-from{
-
-opacity:0;
-
-}
-
-to{
-
-opacity:1;
-
-}
-
-}
-
-@keyframes zoomIn{
-
-from{
-
-opacity:0;
-
-transform:scale(.92);
-
-}
-
-to{
-
-opacity:1;
-
-transform:scale(1);
-
-}
-
-}
-
-
-/* ==========================================
-SCROLLBAR
-========================================== */
-
-::-webkit-scrollbar{
-
-    width:10px;
-
-}
-
-::-webkit-scrollbar-track{
-
-    background:#071827;
-
-}
-
-::-webkit-scrollbar-thumb{
-
-    background:#00bfff;
-
-    border-radius:50px;
-
-}
-
-::-webkit-scrollbar-thumb:hover{
-
-    background:#00ff88;
-
-}
-
-
-/* ==========================================
-TEXT SELECTION
-========================================== */
-
-::selection{
-
-    background:#00ff88;
-
-    color:#041321;
-
-}
-
-
-/* ==========================================
-PRINT MODE
-========================================== */
-
-@media print{
-
-body{
-
-background:#ffffff;
-
-}
-
-.tracking-header,
-.tracking-footer,
-.navbar,
-.loading-screen{
-
-display:none !important;
-
-}
-
-.shipment-summary,
-.progress-container,
-.detail-card,
-.security-card{
-
-background:#ffffff !important;
-
-color:#000000 !important;
-
-box-shadow:none;
-
-border:1px solid #dddddd;
-
-}
-
-#trackingMap{
-
-height:500px;
-
-}
-
-}
-
-
-/* ==========================================
-TABLET
-========================================== */
-
-@media(max-width:992px){
-
-.tracking-header-container{
-
-flex-direction:column;
-
-align-items:flex-start;
-
-gap:30px;
-
-}
-
-.tracking-identity{
-
-align-self:flex-end;
-
-}
-
-.summary-cards{
-
-grid-template-columns:repeat(2,1fr);
-
-}
-
-.route-box{
-
-flex-direction:column;
-
-}
-
-.route-line{
-
-width:4px;
-
-height:70px;
-
-}
-
-}
-
-
-/* ==========================================
-MOBILE
-========================================== */
-
-@media(max-width:768px){
-
-.container{
-
-width:94%;
-
-}
-
-.brand-row{
-
-flex-direction:column;
-
-align-items:flex-start;
-
-}
-
-.navbar{
-
-flex-wrap:wrap;
-
-gap:14px;
-
-}
-
-.tracking-live-card{
-
-width:100%;
-
-}
-
-.summary-header h1{
-
-font-size:34px;
-
-}
-
-.summary-cards{
-
-grid-template-columns:1fr;
-
-}
-
-.route-point{
-
-width:100%;
-
-}
-
-.progress-percent{
-
-font-size:26px;
-
-}
-
-.footer-follow-row{
-
-flex-direction:column;
-
-}
-
-.footer-social{
-
-justify-content:center;
-
-}
-
-#trackingMap{
-
-height:360px;
-
-}
-
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
 }
 
-
-/* ==========================================
-SMALL PHONES
-========================================== */
-
-@media(max-width:480px){
-
-.company-logo{
-
-width:60px;
-
-height:60px;
-
-}
-
-.company-logo img{
-
-width:36px;
-
-}
-
-.brand-details h1{
-
-font-size:24px;
-
-}
-
-.brand-details p{
-
-font-size:13px;
-
+.security-items div{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-family:var(--mono);
+  font-size:11.5px;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+  border:1px solid var(--line);
+  padding:9px 14px;
+  background:var(--white);
 }
-
-.live-dot-wrapper{
-
-width:60px;
 
-height:60px;
-
+.security-items i{
+  color:var(--orange-dk);
 }
-
-.live-dot{
-
-width:22px;
 
-height:22px;
 
-}
+/* =========================================================
+   RESPONSIVE
+========================================================= */
 
-.live-text h3{
+@media (max-width:980px){
 
-font-size:16px;
+  .route-line-stats{ flex-direction:column; align-items:flex-start; }
+  .route-line{ display:none; }
 
-}
+  .gps-information-card{ grid-template-columns:1fr 1fr; }
 
-.live-text p{
+  .details-grid{ grid-template-columns:1fr; }
 
-font-size:12px;
+  .security-card{ flex-direction:column; }
 
 }
 
-.summary-header h1{
+@media (max-width:600px){
 
-font-size:28px;
+  .global-map-section,
+  .shipment-progress-section,
+  .shipment-journey-section,
+  .shipment-details-section,
+  .security-section{ padding:64px 0; }
 
-}
+  #trackingMap{ height:360px; }
 
-.section-title h2{
+  .gps-information-card{ grid-template-columns:1fr; }
 
-font-size:30px;
+  .progress-labels{ font-size:9.5px; }
 
-}
+  .detail-card{ padding:26px 22px; }
 
 }

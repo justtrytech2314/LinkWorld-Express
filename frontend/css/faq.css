@@ -1,0 +1,113 @@
+/* =========================================================
+   LINKWORLD EXPRESS
+   FAQ — PAGE-SPECIFIC STYLES
+   Shared tokens/header/footer/hero/buttons/cta/loader live
+   in style.css. This file only holds what's unique here.
+========================================================= */
+
+.hero-stamp{
+  top:76px;
+}
+
+
+/* =========================================================
+   FAQ CONTENT
+========================================================= */
+.faq-page-section{ padding:100px 0; }
+
+.faq-categories{
+  display:flex;
+  flex-direction:column;
+  gap:56px;
+  max-width:860px;
+  margin:0 auto;
+}
+
+.faq-category-title{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  margin-bottom:20px;
+}
+
+.faq-category-icon{
+  width:38px; height:38px;
+  min-width:38px;
+  background:var(--navy);
+  color:var(--orange);
+  display:flex; align-items:center; justify-content:center;
+  font-size:14px;
+}
+
+.faq-category-title .eyebrow{ margin-bottom:0; }
+
+.faq-list{
+  border-top:1px solid var(--line);
+}
+
+.faq-item{
+  border-bottom:1px solid var(--line);
+}
+
+.faq-question{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+  background:none;
+  border:none;
+  cursor:pointer;
+  padding:20px 4px;
+  text-align:left;
+  font-family:var(--body);
+  font-size:15.5px;
+  font-weight:600;
+  color:var(--ink);
+}
+
+.faq-question:hover{ color:var(--orange-dk); }
+
+.faq-question i{
+  flex-shrink:0;
+  width:26px; height:26px;
+  border:1px solid var(--line);
+  display:flex; align-items:center; justify-content:center;
+  font-size:11px;
+  color:var(--orange-dk);
+  transition:transform .3s ease, background .3s ease;
+}
+
+.faq-item.open .faq-question i{
+  transform:rotate(135deg);
+  background:var(--orange);
+  color:var(--white);
+  border-color:var(--orange);
+}
+
+.faq-answer{
+  max-height:0;
+  overflow:hidden;
+  transition:max-height .35s ease;
+}
+
+.faq-answer p{
+  padding:0 30px 22px 4px;
+  color:var(--muted);
+  font-size:14.5px;
+  line-height:1.7;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+@media (max-width:600px){
+
+  .faq-page-section{ padding:64px 0; }
+
+  .faq-categories{ gap:44px; }
+
+  .faq-question{ font-size:14.5px; }
+
+}

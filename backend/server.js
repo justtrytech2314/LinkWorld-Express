@@ -221,6 +221,16 @@ app.use(
 
 
 
+app.use(
+
+    "/api/contact",
+
+    require("./routes/contactRoutes")
+
+);
+
+
+
 
 
 // ======================================================

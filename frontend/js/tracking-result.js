@@ -300,6 +300,22 @@ shipment.status
 
 
 
+setText(
+"heroStampText",
+shipment.status
+);
+
+
+
+
+setText(
+"barcodeTrackingNumber",
+shipment.trackingNumber
+);
+
+
+
+
 
 
 
