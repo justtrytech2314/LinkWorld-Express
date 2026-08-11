@@ -23,7 +23,7 @@ const LWX_API =
 
     }
 
-    return "https://api.linkworldexpress.com/api";
+    return "https://linkworld-express-kchx.onrender.com/api";
 
 })();
 
