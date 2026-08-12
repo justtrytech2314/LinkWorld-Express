@@ -92,6 +92,17 @@ RECEIPT CONTAINER
 
 }
 
+/* Keep every background/accent color intact for both native
+   print and the html2canvas PDF export - browsers strip colors
+   by default the moment a print-style context is involved. */
+.receipt-container,
+.receipt-container *{
+
+    -webkit-print-color-adjust:exact;
+    print-color-adjust:exact;
+
+}
+
 @keyframes receiptFade{
 
     from{ opacity:0; transform:translateY(24px); }
@@ -833,16 +844,6 @@ PRINT MODE
         box-shadow:none;
         max-width:100%;
         animation:none;
-
-    }
-
-    .receipt-header,
-    .route-box,
-    .card-title i,
-    .history-icon{
-
-        -webkit-print-color-adjust:exact;
-        print-color-adjust:exact;
 
     }
 

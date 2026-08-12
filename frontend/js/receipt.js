@@ -442,12 +442,37 @@ document.addEventListener("DOMContentLoaded", () => {
             const fileName =
                 `LinkWorld-Express-Receipt-${shipment?.trackingNumber || "shipment"}.pdf`;
 
+            // html2canvas captures relative to the current scroll
+            // position - if the page is scrolled down (likely, since
+            // this button sits at the bottom of a long receipt) the
+            // export comes out with a blank leading page. Snap to the
+            // top and let the browser paint before grabbing the canvas.
+            window.scrollTo(0,0);
+
+            // html2canvas doesn't resolve the receiptFade keyframe
+            // animation correctly and bakes in a faded opacity across
+            // the whole capture - it's already played out on load, so
+            // just strip it before rasterizing.
+            container.style.animation = "none";
+
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+
             html2pdf().from(container).set({
                 filename:fileName,
                 margin:0.3,
                 image:{ type:"jpeg", quality:0.98 },
-                html2canvas:{ scale:2, useCORS:true },
-                jsPDF:{ unit:"in", format:"letter", orientation:"portrait" }
+                html2canvas:{
+                    scale:2,
+                    useCORS:true,
+                    scrollX:0,
+                    scrollY:0,
+                    // html2canvas always renders in "screen" context, so
+                    // the @media print rule that hides .no-print never
+                    // applies here - skip those elements explicitly.
+                    ignoreElements:(el) => el.classList?.contains("no-print")
+                },
+                jsPDF:{ unit:"in", format:"letter", orientation:"portrait" },
+                pagebreak:{ mode:"avoid-all" }
             }).save()
             .then(() => {
 
@@ -482,6 +507,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
 
             });
+
+            }));
 
         });
 
