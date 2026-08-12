@@ -455,26 +455,44 @@ document.addEventListener("DOMContentLoaded", () => {
             // just strip it before rasterizing.
             container.style.animation = "none";
 
+            // Hide the on-screen-only buttons before measuring, so the
+            // page we build below is sized to the real receipt content
+            // only - not the button bar underneath it.
+            const hiddenEls = container.querySelectorAll(".no-print");
+            const prevDisplay = Array.from(hiddenEls).map(el => el.style.display);
+
+            hiddenEls.forEach(el => { el.style.display = "none"; });
+
+            const restoreHidden = () => {
+                hiddenEls.forEach((el,i) => { el.style.display = prevDisplay[i]; });
+            };
+
             requestAnimationFrame(() => requestAnimationFrame(() => {
+
+            // A fixed Letter page chops this receipt across 2-3 pages.
+            // Build a custom page sized to the actual rendered content
+            // instead, so the whole receipt lands on a single page.
+            const MARGIN_IN = 0.3;
+            const PX_TO_IN = 1 / 96;
+            const pageWidthIn = (container.scrollWidth * PX_TO_IN) + (MARGIN_IN * 2);
+            const pageHeightIn = (container.scrollHeight * PX_TO_IN) + (MARGIN_IN * 2);
 
             html2pdf().from(container).set({
                 filename:fileName,
-                margin:0.3,
+                margin:MARGIN_IN,
                 image:{ type:"jpeg", quality:0.98 },
                 html2canvas:{
                     scale:2,
                     useCORS:true,
                     scrollX:0,
-                    scrollY:0,
-                    // html2canvas always renders in "screen" context, so
-                    // the @media print rule that hides .no-print never
-                    // applies here - skip those elements explicitly.
-                    ignoreElements:(el) => el.classList?.contains("no-print")
+                    scrollY:0
                 },
-                jsPDF:{ unit:"in", format:"letter", orientation:"portrait" },
+                jsPDF:{ unit:"in", format:[pageWidthIn, pageHeightIn], orientation:"portrait" },
                 pagebreak:{ mode:"avoid-all" }
             }).save()
             .then(() => {
+
+                restoreHidden();
 
                 downloadBtn.innerHTML =
                     '<i class="fa-solid fa-circle-check"></i> Downloaded';
@@ -489,6 +507,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
             })
             .catch((error) => {
+
+                restoreHidden();
 
                 console.error("PDF GENERATION ERROR:", error);
 
