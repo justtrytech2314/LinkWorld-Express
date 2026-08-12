@@ -543,6 +543,7 @@ ul{ list-style:none; }
 }
 .social-icons a:hover{ border-color:var(--orange); color:var(--orange); }
 .footer-bottom{ display:flex; justify-content:space-between; padding:24px 0; font-size:12px; flex-wrap:wrap; gap:8px; }
+.footer-bottom a:hover{ color:var(--orange); }
 
 /* lightweight footer variant for pages that only need a follow
    row + copyright, without the full link-column grid */
@@ -558,6 +559,8 @@ ul{ list-style:none; }
   text-transform:uppercase; color:var(--white);
 }
 .footer-simple p{ font-size:12px; }
+.footer-simple p + p{ margin-top:8px; }
+.footer-simple p a:hover{ color:var(--orange); }
 
 
 /* =========================================================

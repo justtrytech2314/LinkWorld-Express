@@ -11,24 +11,50 @@
 
 :root {
 
-    --lw-cookie-navy: #071a2b;
-    --lw-cookie-navy-light: #102c43;
+    --lw-cookie-navy: #0D1A2B;
+    --lw-cookie-navy-light: #14263D;
 
-    --lw-cookie-orange: #f47b20;
-    --lw-cookie-orange-dark: #d96510;
+    --lw-cookie-orange: #FF5A1F;
+    --lw-cookie-orange-dark: #C8410C;
 
     --lw-cookie-white: #ffffff;
 
-    --lw-cookie-text: #172532;
-    --lw-cookie-muted: #657582;
+    --lw-cookie-text: #10161F;
+    --lw-cookie-muted: #57626C;
 
-    --lw-cookie-border: #e4e9ed;
+    --lw-cookie-border: #CDD1C3;
 
-    --lw-cookie-soft: #f4f7f9;
+    --lw-cookie-soft: #F2F3EC;
 
     --lw-cookie-shadow:
         0 25px 70px rgba(0, 0, 0, 0.20);
 
+    --lw-cookie-display: 'Big Shoulders Stencil Text', sans-serif;
+    --lw-cookie-body: 'IBM Plex Sans', sans-serif;
+    --lw-cookie-mono: 'IBM Plex Mono', monospace;
+
+}
+
+.lw-cookie-banner,
+.lw-cookie-banner input,
+.lw-cookie-banner button {
+    font-family: var(--lw-cookie-body);
+}
+
+.lw-cookie-heading h2 {
+    font-family: var(--lw-cookie-display);
+    font-weight: 700;
+    letter-spacing: .01em;
+}
+
+.lw-cookie-label {
+    font-family: var(--lw-cookie-mono);
+    letter-spacing: .12em;
+}
+
+.lw-cookie-option-info h3 {
+    font-family: var(--lw-cookie-display);
+    font-weight: 700;
 }
 
 
