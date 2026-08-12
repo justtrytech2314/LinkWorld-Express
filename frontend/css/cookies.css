@@ -1203,3 +1203,20 @@
     }
 
 }
+
+
+/* ============================================================
+   PRINT
+   The banner is site chrome, not document content - never let
+   it show up in a printed page or exported PDF.
+============================================================ */
+
+@media print {
+
+    .lw-cookie-banner {
+
+        display:none !important;
+
+    }
+
+}

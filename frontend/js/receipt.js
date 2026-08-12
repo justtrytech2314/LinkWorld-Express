@@ -312,24 +312,27 @@ function buildVerificationCodes(){
 
     const qrImg = document.getElementById("qrCode");
 
-    if(qrImg && typeof QRCode !== "undefined"){
+    if(qrImg && typeof qrcode !== "undefined"){
 
-        const verifyUrl =
-            `${window.location.origin}${window.location.pathname.replace("receipt.html","tracking-result.html")}?tracking=${encodeURIComponent(shipment.trackingNumber)}`;
+        try{
 
-        QRCode.toDataURL(verifyUrl, { margin:1, width:160 }, (error, url) => {
+            const verifyUrl =
+                `${window.location.origin}${window.location.pathname.replace("receipt.html","tracking-result.html")}?tracking=${encodeURIComponent(shipment.trackingNumber)}`;
 
-            if(error){
+            const qr = qrcode(0, "M");
 
-                console.error("QR CODE ERROR:", error);
+            qr.addData(verifyUrl);
 
-                return;
+            qr.make();
 
-            }
+            qrImg.src = qr.createDataURL(6, 4);
 
-            qrImg.src = url;
+        }
+        catch(error){
 
-        });
+            console.error("QR CODE ERROR:", error);
+
+        }
 
     }
 
@@ -409,11 +412,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if(downloadBtn){
 
+        const defaultLabel = downloadBtn.innerHTML;
+
         downloadBtn.addEventListener("click", () => {
 
             const container = document.getElementById("receiptContainer");
 
-            if(!container || typeof html2pdf === "undefined") return;
+            if(!container || typeof html2pdf === "undefined"){
+
+                if(typeof Swal !== "undefined"){
+
+                    Swal.fire({
+                        icon:"error",
+                        title:"PDF Unavailable",
+                        text:"The PDF generator failed to load. Check your connection and try again."
+                    });
+
+                }
+
+                return;
+
+            }
+
+            downloadBtn.disabled = true;
+
+            downloadBtn.innerHTML =
+                '<i class="fa-solid fa-spinner fa-spin"></i> Generating PDF...';
 
             const fileName =
                 `LinkWorld-Express-Receipt-${shipment?.trackingNumber || "shipment"}.pdf`;
@@ -422,9 +446,42 @@ document.addEventListener("DOMContentLoaded", () => {
                 filename:fileName,
                 margin:0.3,
                 image:{ type:"jpeg", quality:0.98 },
-                html2canvas:{ scale:2 },
+                html2canvas:{ scale:2, useCORS:true },
                 jsPDF:{ unit:"in", format:"letter", orientation:"portrait" }
-            }).save();
+            }).save()
+            .then(() => {
+
+                downloadBtn.innerHTML =
+                    '<i class="fa-solid fa-circle-check"></i> Downloaded';
+
+                setTimeout(() => {
+
+                    downloadBtn.disabled = false;
+
+                    downloadBtn.innerHTML = defaultLabel;
+
+                },2000);
+
+            })
+            .catch((error) => {
+
+                console.error("PDF GENERATION ERROR:", error);
+
+                downloadBtn.disabled = false;
+
+                downloadBtn.innerHTML = defaultLabel;
+
+                if(typeof Swal !== "undefined"){
+
+                    Swal.fire({
+                        icon:"error",
+                        title:"PDF Generation Failed",
+                        text:"Something went wrong while creating your PDF. Please try again."
+                    });
+
+                }
+
+            });
 
         });
 
