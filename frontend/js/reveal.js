@@ -14,7 +14,10 @@ in any [data-reveal] element as it scrolls into view.
 
     if(!loader) return;
 
-    const MIN_VISIBLE_MS = 900;
+    // Only wait a short minimum so the loader never just flashes -
+    // NOT waiting for every image/font (window "load") to finish,
+    // since that's what was making this feel slow.
+    const MIN_VISIBLE_MS = 350;
 
     const shownAt = Date.now();
 
@@ -28,20 +31,23 @@ in any [data-reveal] element as it scrolls into view.
 
             loader.classList.add("is-hidden");
 
-            setTimeout(() => loader.remove(), 700);
+            setTimeout(() => loader.remove(), 400);
 
         }, wait);
 
     }
 
-    if(document.readyState === "complete"){
+    // "interactive" means the HTML is parsed and the page is
+    // already usable - don't hold the loader hostage waiting for
+    // every image and web font to finish downloading in the background.
+    if(document.readyState === "interactive" || document.readyState === "complete"){
 
         hide();
 
     }
     else{
 
-        window.addEventListener("load", hide);
+        document.addEventListener("DOMContentLoaded", hide);
 
     }
 
