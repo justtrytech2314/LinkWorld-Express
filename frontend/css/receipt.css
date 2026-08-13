@@ -58,7 +58,7 @@ has actually loaded - separate from the shared page loader.
 #loading p{
 
     font-family:var(--mono);
-    font-size:12px;
+    font-size:14px;
     letter-spacing:.08em;
     text-transform:uppercase;
     color:#9BA6B2;
@@ -156,16 +156,16 @@ DOCUMENT HEADER
 
 .receipt-header .company-logo{
 
-    width:56px;
-    height:56px;
-    font-size:24px;
+    width:60px;
+    height:60px;
+    font-size:26px;
 
 }
 
 .company h1{
 
     font-family:var(--display);
-    font-size:24px;
+    font-size:28px;
     font-weight:700;
     letter-spacing:.03em;
     margin-bottom:4px;
@@ -175,7 +175,7 @@ DOCUMENT HEADER
 .company p{
 
     font-family:var(--mono);
-    font-size:11px;
+    font-size:13px;
     letter-spacing:.05em;
     color:rgba(255,255,255,.7);
 
@@ -190,7 +190,7 @@ DOCUMENT HEADER
 .receipt-title h2{
 
     font-family:var(--display);
-    font-size:20px;
+    font-size:23px;
     font-weight:700;
     letter-spacing:.04em;
     margin-bottom:6px;
@@ -200,7 +200,7 @@ DOCUMENT HEADER
 .receipt-title p{
 
     font-family:var(--mono);
-    font-size:11px;
+    font-size:13px;
     letter-spacing:.05em;
     color:var(--orange);
 
@@ -238,7 +238,7 @@ SUMMARY BAR
 
     display:block;
     font-family:var(--mono);
-    font-size:11px;
+    font-size:13px;
     letter-spacing:.06em;
     text-transform:uppercase;
     color:var(--muted);
@@ -249,7 +249,7 @@ SUMMARY BAR
 .summary-item strong{
 
     font-family:var(--display);
-    font-size:18px;
+    font-size:21px;
     font-weight:700;
     color:var(--navy);
     word-break:break-word;
@@ -270,7 +270,7 @@ so Delivered/Transit/Pending/Cancelled stay legible at a glance)
     justify-content:center;
     padding:7px 18px;
     font-family:var(--mono) !important;
-    font-size:11.5px !important;
+    font-size:13.5px !important;
     font-weight:600 !important;
     text-transform:uppercase;
     letter-spacing:.06em;
@@ -308,7 +308,7 @@ GENERIC CARD / SECTION
     align-items:center;
     gap:12px;
     font-family:var(--display);
-    font-size:17px;
+    font-size:20px;
     font-weight:700;
     letter-spacing:.01em;
     color:var(--navy);
@@ -318,14 +318,14 @@ GENERIC CARD / SECTION
 
 .card-title i{
 
-    width:36px;
-    height:36px;
+    width:38px;
+    height:38px;
     display:flex;
     align-items:center;
     justify-content:center;
     background:var(--navy);
     color:var(--orange);
-    font-size:14px;
+    font-size:16px;
 
 }
 
@@ -366,7 +366,7 @@ INFO GRID
 
     display:block;
     font-family:var(--mono);
-    font-size:11px;
+    font-size:13px;
     letter-spacing:.05em;
     text-transform:uppercase;
     color:var(--muted);
@@ -376,7 +376,7 @@ INFO GRID
 
 .info-item strong{
 
-    font-size:14.5px;
+    font-size:17px;
     font-weight:600;
     color:var(--ink);
     word-break:break-word;
@@ -413,7 +413,7 @@ ROUTE
 
     display:block;
     font-family:var(--mono);
-    font-size:11px;
+    font-size:13px;
     text-transform:uppercase;
     letter-spacing:.06em;
     color:var(--orange);
@@ -423,7 +423,7 @@ ROUTE
 
 .route-box strong{
 
-    font-size:14.5px;
+    font-size:17px;
     font-weight:600;
     word-break:break-word;
 
@@ -433,7 +433,7 @@ ROUTE
 
     background:var(--paper);
     color:var(--orange-dk);
-    font-size:16px;
+    font-size:18px;
     padding:20px 10px;
     display:flex;
     align-items:center;
@@ -476,7 +476,7 @@ PROGRESS
     min-width:48px;
     text-align:right;
     font-family:var(--mono);
-    font-size:16px;
+    font-size:18px;
     font-weight:700;
     color:var(--orange-dk);
 
@@ -546,14 +546,14 @@ HISTORY / TIMELINE
     display:flex;
     align-items:center;
     justify-content:center;
-    font-size:12px;
+    font-size:14px;
 
 }
 
 .history-content h3{
 
     font-family:var(--display);
-    font-size:14.5px;
+    font-size:17px;
     font-weight:700;
     color:var(--navy);
     margin-bottom:6px;
@@ -562,7 +562,7 @@ HISTORY / TIMELINE
 
 .history-content p{
 
-    font-size:13px;
+    font-size:15px;
     color:var(--muted);
     margin-bottom:4px;
 
@@ -578,7 +578,7 @@ HISTORY / TIMELINE
 .history-content span{
 
     font-family:var(--mono);
-    font-size:11px;
+    font-size:13px;
     color:#94a3b8;
 
 }
@@ -587,7 +587,7 @@ HISTORY / TIMELINE
 
     font-family:var(--mono);
     color:#94a3b8;
-    font-size:13px;
+    font-size:15px;
     text-align:center;
     padding:20px 0;
 
@@ -610,7 +610,7 @@ VERIFICATION
 .verification-left h3{
 
     font-family:var(--display);
-    font-size:18px;
+    font-size:21px;
     font-weight:700;
     color:var(--navy);
     margin-bottom:14px;
@@ -619,7 +619,7 @@ VERIFICATION
 
 .verification-left p{
 
-    font-size:13.5px;
+    font-size:15.5px;
     line-height:1.7;
     color:var(--muted);
     margin-bottom:20px;
@@ -640,7 +640,7 @@ VERIFICATION
     align-items:center;
     gap:8px;
     font-family:var(--mono);
-    font-size:11.5px;
+    font-size:13.5px;
     color:var(--ink);
 
 }
@@ -687,46 +687,8 @@ VERIFICATION
 .verification-right small{
 
     font-family:var(--mono);
-    font-size:11px;
+    font-size:13px;
     color:var(--muted);
-
-}
-
-
-/* ======================================================
-SIGNATURES
-====================================================== */
-
-.signature-grid{
-
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:30px;
-
-}
-
-.signature-box{
-
-    text-align:center;
-
-}
-
-.signature-line{
-
-    height:1px;
-    background:repeating-linear-gradient(90deg, var(--line) 0 6px, transparent 6px 12px);
-    margin-bottom:12px;
-
-}
-
-.signature-box strong{
-
-    font-family:var(--mono);
-    font-size:11px;
-    font-weight:600;
-    color:var(--muted);
-    text-transform:uppercase;
-    letter-spacing:.05em;
 
 }
 
@@ -751,7 +713,7 @@ ACTION BUTTONS
     cursor:pointer;
     padding:15px 30px;
     font-family:var(--body);
-    font-size:14px;
+    font-size:16px;
     font-weight:700;
     display:flex;
     align-items:center;
@@ -808,7 +770,7 @@ FOOTER
     margin:26px auto 0;
     text-align:center;
     color:var(--muted);
-    font-size:12.5px;
+    font-size:14.5px;
     line-height:1.7;
     padding:0 20px;
 
@@ -964,13 +926,6 @@ RESPONSIVE
     .verification-list{
 
         grid-template-columns:1fr;
-
-    }
-
-    .signature-grid{
-
-        grid-template-columns:1fr;
-        gap:22px;
 
     }
 
