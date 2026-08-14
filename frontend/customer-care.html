@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="robots"
+        content="noindex, nofollow">
+
+    <title>
+        LinkWorld Express | LinkWorld Care
+    </title>
+
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil+Text:wght@500;700;900&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <link
+        rel="stylesheet"
+        href="css/customer-care.css">
+
+</head>
+
+
+<body>
+
+
+    <!-- =====================================================
+         LINKWORLD CARE
+         Floating support widget: greeting bubble, launcher
+         button, and the chat panel itself. customer-care.js
+         fetches this file and injects #lwCareWidget into
+         every real customer-facing page, the same way
+         cookies.js injects #lwCookieBanner.
+    ====================================================== -->
+
+    <div class="lw-care-widget" id="lwCareWidget">
+
+
+        <!-- =================================================
+             GREETING BUBBLE
+             Shown once per session after a short delay.
+             Never reappears once dismissed or once the chat
+             has been opened.
+        ================================================== -->
+
+        <div
+            class="lw-care-greeting"
+            id="lwCareGreeting"
+            hidden>
+
+            <button
+                type="button"
+                class="lw-care-greeting-close"
+                id="lwCareGreetingClose"
+                aria-label="Dismiss message">
+
+                <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+
+            </button>
+
+            <p id="lwCareGreetingText">
+                Need help with your shipment? 💬
+            </p>
+
+        </div>
+
+
+        <!-- =================================================
+             LAUNCHER BUTTON
+        ================================================== -->
+
+        <button
+            type="button"
+            class="lw-care-fab"
+            id="lwCareFab"
+            aria-haspopup="dialog"
+            aria-expanded="false"
+            aria-controls="lwCarePanel"
+            aria-label="Open LinkWorld Care chat support">
+
+            <i class="fa-solid fa-comment-dots" id="lwCareFabIconOpen" aria-hidden="true"></i>
+            <i class="fa-solid fa-xmark" id="lwCareFabIconClose" aria-hidden="true" hidden></i>
+
+        </button>
+
+
+        <!-- =================================================
+             CHAT PANEL
+        ================================================== -->
+
+        <section
+            class="lw-care-panel"
+            id="lwCarePanel"
+            role="dialog"
+            aria-modal="false"
+            aria-labelledby="lwCareTitle"
+            hidden>
+
+
+            <!-- Header -->
+
+            <header class="lw-care-header">
+
+                <div class="lw-care-header-brand">
+
+                    <div class="lw-care-logo" aria-hidden="true">LX</div>
+
+                    <div class="lw-care-header-text">
+
+                        <h2 id="lwCareTitle">LinkWorld Care</h2>
+
+                        <p class="lw-care-status">
+                            <span class="lw-care-live-dot" aria-hidden="true"></span>
+                            Online &bull; 24/7 Customer Support
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <div class="lw-care-header-actions">
+
+                    <button
+                        type="button"
+                        id="lwCareMinimize"
+                        aria-label="Minimize chat">
+
+                        <i class="fa-solid fa-minus" aria-hidden="true"></i>
+
+                    </button>
+
+                    <button
+                        type="button"
+                        id="lwCareClose"
+                        aria-label="Close chat">
+
+                        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+
+                    </button>
+
+                </div>
+
+            </header>
+
+
+            <!-- Messages -->
+
+            <div
+                class="lw-care-messages"
+                id="lwCareMessages"
+                role="log"
+                aria-live="polite"
+                aria-label="Conversation with LinkWorld Care">
+            </div>
+
+
+            <!-- Input -->
+
+            <form
+                class="lw-care-input-row"
+                id="lwCareForm"
+                autocomplete="off">
+
+                <label class="lw-care-sr-only" for="lwCareInput">
+                    Message LinkWorld Care
+                </label>
+
+                <input
+                    type="text"
+                    id="lwCareInput"
+                    placeholder="Type your message..."
+                    maxlength="1000"
+                    autocomplete="off">
+
+                <button
+                    type="submit"
+                    id="lwCareSend"
+                    aria-label="Send message">
+
+                    <i class="fa-solid fa-paper-plane" aria-hidden="true"></i>
+
+                </button>
+
+            </form>
+
+            <p class="lw-care-disclaimer">
+                LinkWorld Care is an automated assistant and may not always have every answer. For urgent issues, please contact our team directly.
+            </p>
+
+        </section>
+
+    </div>
+
+
+    <!-- =====================================================
+         LINKWORLD CARE JAVASCRIPT
+    ====================================================== -->
+
+    <script src="js/customer-care.js"></script>
+
+
+</body>
+
+</html>

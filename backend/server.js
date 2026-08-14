@@ -231,6 +231,16 @@ app.use(
 
 
 
+app.use(
+
+    "/api/customer-care",
+
+    require("./routes/customerCareRoutes")
+
+);
+
+
+
 
 
 // ======================================================
