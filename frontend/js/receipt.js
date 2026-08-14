@@ -392,7 +392,85 @@ function buildHistory(){
 
 // ======================================================
 // PRINT / DOWNLOAD
+// ------------------------------------------------------
+// Both buttons build the exact same single-page PDF (via
+// html2pdf, sized to the actual content instead of a fixed
+// physical page). Download saves it directly. Print opens
+// it in a new tab so the browser's own PDF viewer handles
+// printing - that respects the PDF's real page count, unlike
+// fighting native @page pagination for content this tall.
 // ======================================================
+
+function buildReceiptPdf(){
+
+    const container = document.getElementById("receiptContainer");
+
+    if(!container || typeof html2pdf === "undefined"){
+
+        return Promise.reject(new Error("PDF generator unavailable"));
+
+    }
+
+    const fileName =
+        `LinkWorld-Express-Receipt-${shipment?.trackingNumber || "shipment"}.pdf`;
+
+    // html2canvas captures relative to the current scroll position -
+    // if the page is scrolled down (likely, since these buttons sit
+    // at the bottom of a long receipt) the capture comes out with a
+    // blank leading page. Snap to the top first.
+    window.scrollTo(0,0);
+
+    // html2canvas doesn't resolve the receiptFade keyframe animation
+    // correctly and bakes in a faded opacity across the whole
+    // capture - it's already played out on load, so strip it.
+    container.style.animation = "none";
+
+    // Hide the on-screen-only buttons before measuring, so the page
+    // is sized to the real receipt content only, not the button bar.
+    const hiddenEls = container.querySelectorAll(".no-print");
+
+    const prevDisplay = Array.from(hiddenEls).map(el => el.style.display);
+
+    hiddenEls.forEach(el => { el.style.display = "none"; });
+
+    const restoreHidden = () => {
+        hiddenEls.forEach((el,i) => { el.style.display = prevDisplay[i]; });
+    };
+
+    return new Promise((resolve) => {
+
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+
+            const MARGIN_IN = 0.3;
+
+            const PX_TO_IN = 1 / 96;
+
+            const pageWidthIn = (container.scrollWidth * PX_TO_IN) + (MARGIN_IN * 2);
+
+            const pageHeightIn = (container.scrollHeight * PX_TO_IN) + (MARGIN_IN * 2);
+
+            const worker = html2pdf().from(container).set({
+                filename:fileName,
+                margin:MARGIN_IN,
+                image:{ type:"jpeg", quality:0.98 },
+                html2canvas:{
+                    scale:2,
+                    useCORS:true,
+                    scrollX:0,
+                    scrollY:0
+                },
+                jsPDF:{ unit:"in", format:[pageWidthIn, pageHeightIn], orientation:"portrait" },
+                pagebreak:{ mode:"avoid-all" }
+            });
+
+            resolve({ worker, restoreHidden });
+
+        }));
+
+    });
+
+}
+
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -400,9 +478,92 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if(printBtn){
 
+        const defaultPrintLabel = printBtn.innerHTML;
+
         printBtn.addEventListener("click", () => {
 
-            window.print();
+            if(typeof html2pdf === "undefined"){
+
+                // No PDF engine available - plain native print is
+                // better than nothing.
+                window.print();
+
+                return;
+
+            }
+
+            // Open the tab now, synchronously within the click, so
+            // popup blockers don't block it once the PDF is ready
+            // a moment later (async work loses the "user gesture").
+            const printWindow = window.open("", "_blank");
+
+            if(printWindow){
+
+                printWindow.document.write(
+                    "<title>Preparing receipt...</title>" +
+                    "<body style=\"font-family:sans-serif;padding:60px;color:#57626C\">Preparing your receipt for printing&hellip;</body>"
+                );
+
+            }
+
+            printBtn.disabled = true;
+
+            printBtn.innerHTML =
+                '<i class="fa-solid fa-spinner fa-spin"></i> Preparing...';
+
+            buildReceiptPdf()
+                .then(({ worker, restoreHidden }) =>
+
+                    worker.outputPdf("bloburl")
+                        .then((blobUrl) => {
+
+                            restoreHidden();
+
+                            if(printWindow && !printWindow.closed){
+
+                                printWindow.location.href = blobUrl;
+
+                            }
+                            else{
+
+                                window.open(blobUrl, "_blank");
+
+                            }
+
+                        })
+                        .catch((error) => {
+
+                            restoreHidden();
+
+                            throw error;
+
+                        })
+
+                )
+                .catch((error) => {
+
+                    console.error("PRINT PDF ERROR:", error);
+
+                    if(printWindow && !printWindow.closed) printWindow.close();
+
+                    if(typeof Swal !== "undefined"){
+
+                        Swal.fire({
+                            icon:"error",
+                            title:"Print Failed",
+                            text:"Something went wrong preparing your receipt. Please try again."
+                        });
+
+                    }
+
+                })
+                .finally(() => {
+
+                    printBtn.disabled = false;
+
+                    printBtn.innerHTML = defaultPrintLabel;
+
+                });
 
         });
 
@@ -416,9 +577,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         downloadBtn.addEventListener("click", () => {
 
-            const container = document.getElementById("receiptContainer");
-
-            if(!container || typeof html2pdf === "undefined"){
+            if(typeof html2pdf === "undefined"){
 
                 if(typeof Swal !== "undefined"){
 
@@ -439,96 +598,54 @@ document.addEventListener("DOMContentLoaded", () => {
             downloadBtn.innerHTML =
                 '<i class="fa-solid fa-spinner fa-spin"></i> Generating PDF...';
 
-            const fileName =
-                `LinkWorld-Express-Receipt-${shipment?.trackingNumber || "shipment"}.pdf`;
+            buildReceiptPdf()
+                .then(({ worker, restoreHidden }) =>
 
-            // html2canvas captures relative to the current scroll
-            // position - if the page is scrolled down (likely, since
-            // this button sits at the bottom of a long receipt) the
-            // export comes out with a blank leading page. Snap to the
-            // top and let the browser paint before grabbing the canvas.
-            window.scrollTo(0,0);
+                    worker.save()
+                        .then(() => {
 
-            // html2canvas doesn't resolve the receiptFade keyframe
-            // animation correctly and bakes in a faded opacity across
-            // the whole capture - it's already played out on load, so
-            // just strip it before rasterizing.
-            container.style.animation = "none";
+                            restoreHidden();
 
-            // Hide the on-screen-only buttons before measuring, so the
-            // page we build below is sized to the real receipt content
-            // only - not the button bar underneath it.
-            const hiddenEls = container.querySelectorAll(".no-print");
-            const prevDisplay = Array.from(hiddenEls).map(el => el.style.display);
+                            downloadBtn.innerHTML =
+                                '<i class="fa-solid fa-circle-check"></i> Downloaded';
 
-            hiddenEls.forEach(el => { el.style.display = "none"; });
+                            setTimeout(() => {
 
-            const restoreHidden = () => {
-                hiddenEls.forEach((el,i) => { el.style.display = prevDisplay[i]; });
-            };
+                                downloadBtn.disabled = false;
 
-            requestAnimationFrame(() => requestAnimationFrame(() => {
+                                downloadBtn.innerHTML = defaultLabel;
 
-            // A fixed Letter page chops this receipt across 2-3 pages.
-            // Build a custom page sized to the actual rendered content
-            // instead, so the whole receipt lands on a single page.
-            const MARGIN_IN = 0.3;
-            const PX_TO_IN = 1 / 96;
-            const pageWidthIn = (container.scrollWidth * PX_TO_IN) + (MARGIN_IN * 2);
-            const pageHeightIn = (container.scrollHeight * PX_TO_IN) + (MARGIN_IN * 2);
+                            },2000);
 
-            html2pdf().from(container).set({
-                filename:fileName,
-                margin:MARGIN_IN,
-                image:{ type:"jpeg", quality:0.98 },
-                html2canvas:{
-                    scale:2,
-                    useCORS:true,
-                    scrollX:0,
-                    scrollY:0
-                },
-                jsPDF:{ unit:"in", format:[pageWidthIn, pageHeightIn], orientation:"portrait" },
-                pagebreak:{ mode:"avoid-all" }
-            }).save()
-            .then(() => {
+                        })
+                        .catch((error) => {
 
-                restoreHidden();
+                            restoreHidden();
 
-                downloadBtn.innerHTML =
-                    '<i class="fa-solid fa-circle-check"></i> Downloaded';
+                            throw error;
 
-                setTimeout(() => {
+                        })
+
+                )
+                .catch((error) => {
+
+                    console.error("PDF GENERATION ERROR:", error);
 
                     downloadBtn.disabled = false;
 
                     downloadBtn.innerHTML = defaultLabel;
 
-                },2000);
+                    if(typeof Swal !== "undefined"){
 
-            })
-            .catch((error) => {
+                        Swal.fire({
+                            icon:"error",
+                            title:"PDF Generation Failed",
+                            text:"Something went wrong while creating your PDF. Please try again."
+                        });
 
-                restoreHidden();
+                    }
 
-                console.error("PDF GENERATION ERROR:", error);
-
-                downloadBtn.disabled = false;
-
-                downloadBtn.innerHTML = defaultLabel;
-
-                if(typeof Swal !== "undefined"){
-
-                    Swal.fire({
-                        icon:"error",
-                        title:"PDF Generation Failed",
-                        text:"Something went wrong while creating your PDF. Please try again."
-                    });
-
-                }
-
-            });
-
-            }));
+                });
 
         });
 

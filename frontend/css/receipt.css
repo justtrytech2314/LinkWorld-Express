@@ -809,11 +809,12 @@ PRINT MODE
 
     }
 
-    section{
-
-        break-inside:avoid;
-
-    }
+    /* Deliberately no break-inside:avoid here - the print button
+       sizes @page to fit everything on one page (see js/receipt.js),
+       so there's no page boundary to avoid breaking across. Keeping
+       it would turn any small measurement rounding into a whole
+       section getting shoved onto an otherwise-empty second page,
+       instead of just a few stray pixels. */
 
 }
 
