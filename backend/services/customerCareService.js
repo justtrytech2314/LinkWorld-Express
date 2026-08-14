@@ -293,6 +293,42 @@ function extractReplyText(response){
 // MAIN ENTRY POINT
 // ======================================================
 
+function sleep(ms){
+
+    return new Promise(resolve => setTimeout(resolve, ms));
+
+}
+
+
+// The free tier's quota bucket is small but tends to free up again
+// within a few seconds - one short retry turns a lot of those into
+// a real answer instead of the fallback message.
+async function generateContentWithRetry(ai, params){
+
+    try{
+
+        return await ai.models.generateContent(params);
+
+    }
+    catch(error){
+
+        if(error?.status !== 429){
+
+            throw error;
+
+        }
+
+        console.warn("LinkWorld Care: Gemini quota hit, retrying once in 4s...");
+
+        await sleep(4000);
+
+        return await ai.models.generateContent(params);
+
+    }
+
+}
+
+
 async function generateReply({ message, history }){
 
     const trackingNumber = findTrackingNumber(message, history);
@@ -313,7 +349,7 @@ async function generateReply({ message, history }){
 
     const ai = getClient();
 
-    const response = await ai.models.generateContent({
+    const response = await generateContentWithRetry(ai, {
 
         model: MODEL,
 
