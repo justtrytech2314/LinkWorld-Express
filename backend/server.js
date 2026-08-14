@@ -241,6 +241,16 @@ app.use(
 
 
 
+app.use(
+
+    "/api/config",
+
+    require("./routes/configRoutes")
+
+);
+
+
+
 
 
 // ======================================================

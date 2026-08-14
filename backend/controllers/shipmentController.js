@@ -69,6 +69,68 @@ function calculateProgress(status){
 
 
 
+// ======================================================
+// VALIDATE GPS COORDINATES
+// Checks any lat/long pair present in req.body. Returns an
+// error message string if something is out of range, or
+// null if everything supplied is valid.
+// ======================================================
+
+
+function findInvalidCoordinate(body){
+
+
+    const pairs = [
+
+        ["originLatitude","originLongitude","Origin"],
+
+        ["currentLatitude","currentLongitude","Current location"],
+
+        ["destinationLatitude","destinationLongitude","Destination"]
+
+    ];
+
+
+    for(const [latKey,lngKey,label] of pairs){
+
+
+        if(body[latKey] !== undefined){
+
+            const lat = Number(body[latKey]);
+
+            if(Number.isNaN(lat) || lat < -90 || lat > 90){
+
+                return `${label} latitude must be a number between -90 and 90.`;
+
+            }
+
+        }
+
+
+        if(body[lngKey] !== undefined){
+
+            const lng = Number(body[lngKey]);
+
+            if(Number.isNaN(lng) || lng < -180 || lng > 180){
+
+                return `${label} longitude must be a number between -180 and 180.`;
+
+            }
+
+        }
+
+
+    }
+
+
+    return null;
+
+
+}
+
+
+
+
 
 
 
@@ -116,6 +178,12 @@ destination,
 
 
 currentLocation,
+
+
+originLatitude,
+
+
+originLongitude,
 
 
 currentLatitude,
@@ -193,6 +261,29 @@ success:false,
 message:
 
 "Please complete all required shipment fields."
+
+
+});
+
+
+}
+
+
+
+
+const coordinateError = findInvalidCoordinate(req.body);
+
+
+if(coordinateError){
+
+
+return res.status(400).json({
+
+
+success:false,
+
+
+message:coordinateError
 
 
 });
@@ -386,6 +477,20 @@ destination,
 
 
 
+originLatitude:
+
+Number(originLatitude || 0),
+
+
+
+
+originLongitude:
+
+Number(originLongitude || 0),
+
+
+
+
 currentLatitude:
 
 Number(currentLatitude || 0),
@@ -410,6 +515,13 @@ Number(destinationLatitude || 0),
 destinationLongitude:
 
 Number(destinationLongitude || 0),
+
+
+
+
+locationUpdatedAt:
+
+new Date(),
 
 
 
@@ -761,17 +873,12 @@ req.params.trackingNumber
 
 
 
-
-
-
 const shipment = await Shipment.findOne({
 
 trackingNumber
 
 
-});
-
-
+}).lean();
 
 
 
@@ -794,9 +901,49 @@ message:"Tracking number not found."
 }
 
 
+// Customer-facing tracking response - no MongoDB _id,
+// version key, or sender/receiver personal details. The
+// receipt endpoint (getShipmentByTracking) is the one that
+// needs full sender/receiver info, not this one.
 
+const publicShipment = {
 
+    trackingNumber:shipment.trackingNumber,
+    status:shipment.status,
+    progress:shipment.progress,
+    shipmentType:shipment.shipmentType,
+    shipmentDescription:shipment.shipmentDescription,
+    packageWeight:shipment.packageWeight,
+    packageValue:shipment.packageValue,
+    paymentStatus:shipment.paymentStatus,
 
+    origin:shipment.origin,
+    originLatitude:shipment.originLatitude || 0,
+    originLongitude:shipment.originLongitude || 0,
+
+    currentLocation:shipment.currentLocation,
+    currentLatitude:shipment.currentLatitude || 0,
+    currentLongitude:shipment.currentLongitude || 0,
+
+    destination:shipment.destination,
+    destinationLatitude:shipment.destinationLatitude || 0,
+    destinationLongitude:shipment.destinationLongitude || 0,
+
+    expectedDelivery:shipment.expectedDelivery,
+    locationUpdatedAt:shipment.locationUpdatedAt || null,
+
+    history:(shipment.history || []).map(entry => ({
+        location:entry.location,
+        status:entry.status,
+        latitude:entry.latitude,
+        longitude:entry.longitude,
+        timestamp:entry.timestamp
+    })),
+
+    createdAt:shipment.createdAt,
+    updatedAt:shipment.updatedAt
+
+};
 
 
 return res.status(200).json({
@@ -805,7 +952,7 @@ return res.status(200).json({
 success:true,
 
 
-shipment
+shipment:publicShipment
 
 
 });
@@ -836,9 +983,7 @@ success:false,
 
 message:error.message
 
-
 });
-
 
 
 }
@@ -847,18 +992,6 @@ message:error.message
 };
 
 
-
-
-
-
-
-
-
-// ======================================================
-// RECEIPT LOOKUP
-// CUSTOMER RECEIPT PAGE
-// GET /api/shipments/receipt/:trackingNumber
-// ======================================================
 
 
 exports.getShipmentByTracking = async(req,res)=>{
@@ -1012,6 +1145,104 @@ message:"Shipment not found."
 
 
 
+const coordinateError = findInvalidCoordinate(req.body);
+
+
+if(coordinateError){
+
+
+return res.status(400).json({
+
+
+success:false,
+
+
+message:coordinateError
+
+
+});
+
+
+}
+
+
+
+
+// ================================
+// DETECT A REAL LOCATION CHANGE
+// Compared against the document as it existed BEFORE this
+// update, so a history entry only gets written when the
+// admin actually moved the shipment - not on every edit.
+// ================================
+
+
+const locationFields = [
+    "currentLocation",
+    "currentLatitude",
+    "currentLongitude"
+];
+
+
+const locationChanged = locationFields.some(field =>
+
+    req.body[field] !== undefined &&
+
+    String(req.body[field]) !== String(shipment[field])
+
+);
+
+
+
+
+const updateOps = {
+
+    $set:{ ...req.body }
+
+};
+
+
+if(locationChanged){
+
+
+    updateOps.$set.locationUpdatedAt = new Date();
+
+
+    updateOps.$push = {
+
+        history:{
+
+            location:
+
+            req.body.currentLocation !== undefined ?
+            req.body.currentLocation :
+            shipment.currentLocation,
+
+            status:
+
+            req.body.status !== undefined ?
+            req.body.status :
+            shipment.status,
+
+            latitude:
+
+            req.body.currentLatitude !== undefined ?
+            Number(req.body.currentLatitude) :
+            shipment.currentLatitude,
+
+            longitude:
+
+            req.body.currentLongitude !== undefined ?
+            Number(req.body.currentLongitude) :
+            shipment.currentLongitude,
+
+            timestamp:new Date()
+
+        }
+
+    };
+
+
+}
 
 
 
@@ -1022,7 +1253,7 @@ const updatedShipment = await Shipment.findByIdAndUpdate(
 req.params.id,
 
 
-req.body,
+updateOps,
 
 
 {
@@ -1154,6 +1385,27 @@ message:"Shipment not found."
 
 
 
+
+
+const coordinateError = findInvalidCoordinate(req.body);
+
+
+if(coordinateError){
+
+
+return res.status(400).json({
+
+
+success:false,
+
+
+message:coordinateError
+
+
+});
+
+
+}
 
 
 const {
@@ -1329,6 +1581,9 @@ timestamp:new Date()
 
 
 });
+
+
+shipment.locationUpdatedAt = new Date();
 
 
 }

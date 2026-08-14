@@ -33,6 +33,16 @@ let trackingMap = null;
 
 let shipmentMarker = null;
 
+let originMarker = null;
+
+let destinationMarker = null;
+
+let routeLine = null;
+
+let mapInitialized = false;
+
+let previousCoords = { lat:0, lng:0 };
+
 
 
 
@@ -400,6 +410,14 @@ shipment.currentLongitude
 
 
 setText(
+"mapLastUpdated",
+formatRelativeTime(shipment.locationUpdatedAt)
+);
+
+
+
+
+setText(
 "detailsCurrentLocation",
 shipment.currentLocation
 );
@@ -456,7 +474,27 @@ buildShipmentTimeline();
 // MAP
 
 
+if(!mapInitialized){
+
 initializeTrackingMap();
+
+mapInitialized = true;
+
+previousCoords = {
+
+lat:Number(shipment.currentLatitude || 0),
+
+lng:Number(shipment.currentLongitude || 0)
+
+};
+
+}
+
+else{
+
+handleLocationRefresh();
+
+}
 
 
 
@@ -690,8 +728,6 @@ return;
 
 
 
-
-
 const current = [
 
 Number(
@@ -705,7 +741,17 @@ shipmentData.currentLongitude
 ];
 
 
+const origin = [
 
+Number(
+shipmentData.originLatitude
+),
+
+Number(
+shipmentData.originLongitude
+)
+
+];
 
 
 const destination = [
@@ -722,27 +768,23 @@ shipmentData.destinationLongitude
 
 
 
+const hasCurrent =
+current[0] !== 0 || current[1] !== 0;
 
+const hasOrigin =
+origin[0] !== 0 || origin[1] !== 0;
 
+const hasDestination =
+destination[0] !== 0 || destination[1] !== 0;
 
 
 
 // REMOVE INVALID GPS
 
 
-if(
-
-current[0] === 0 ||
-
-current[1] === 0
-
-)
+if(!hasCurrent)
 
 return;
-
-
-
-
 
 
 
@@ -773,9 +815,6 @@ html:
 
 
 });
-
-
-
 
 
 
@@ -824,10 +863,60 @@ ${shipmentData.status}
 
 
 
+// ORIGIN MARKER
 
 
+if(hasOrigin){
 
 
+const originIcon =
+L.divIcon({
+
+className:
+"origin-map-marker",
+
+html:
+`<div class="origin-marker-dot"></div>`
+
+});
+
+
+originMarker =
+
+L.marker(
+
+origin,
+
+{
+
+icon:originIcon
+
+}
+
+)
+
+.addTo(
+trackingMap
+)
+
+.bindPopup(
+
+`
+
+<b>
+Origin
+</b>
+
+<br>
+
+${shipmentData.origin}
+
+`
+
+);
+
+
+}
 
 
 
@@ -835,11 +924,32 @@ ${shipmentData.status}
 // DESTINATION MARKER
 
 
-const destinationMarker =
+if(hasDestination){
+
+
+const destinationIcon =
+L.divIcon({
+
+className:
+"destination-map-marker",
+
+html:
+`<div class="destination-marker-flag"><i class="fa-solid fa-flag-checkered"></i></div>`
+
+});
+
+
+destinationMarker =
 
 L.marker(
 
-destination
+destination,
+
+{
+
+icon:destinationIcon
+
+}
 
 )
 
@@ -864,29 +974,35 @@ ${shipmentData.destination}
 );
 
 
-
-
-
-
-
+}
 
 
 
 
 // ROUTE LINE
+// Origin -> Current -> Destination when all three points
+// are available. This is a straight geographic line
+// between recorded coordinates, NOT the actual road,
+// flight, or sea route the shipment physically travels.
 
 
-const routeLine =
+const routePoints = [];
+
+if(hasOrigin) routePoints.push(origin);
+
+routePoints.push(current);
+
+if(hasDestination) routePoints.push(destination);
+
+
+if(routePoints.length > 1){
+
+
+routeLine =
 
 L.polyline(
 
-[
-
-current,
-
-destination
-
-],
+routePoints,
 
 {
 
@@ -894,7 +1010,9 @@ color:"#00c853",
 
 weight:4,
 
-opacity:0.8
+opacity:0.8,
+
+dashArray:"8 6"
 
 }
 
@@ -902,15 +1020,22 @@ opacity:0.8
 
 .addTo(
 trackingMap
+)
+
+.bindTooltip(
+
+"Approximate progress line - not the exact road, flight or sea route",
+
+{
+
+sticky:true
+
+}
+
 );
 
 
-
-
-
-
-
-
+}
 
 
 
@@ -918,9 +1043,16 @@ trackingMap
 // FIT WORLD VIEW
 
 
+const boundsSource =
+
+routeLine ?
+routeLine.getBounds() :
+L.latLngBounds([current]);
+
+
 trackingMap.fitBounds(
 
-routeLine.getBounds(),
+boundsSource,
 
 {
 
@@ -933,73 +1065,99 @@ padding:[40,40]
 
 
 
-
-
-
-
 }
 
 
 
 
-
-
-
-
-
 // ======================================================
-// UPDATE LIVE POSITION
-// USED WHEN DASHBOARD CHANGES LOCATION
+// HANDLE LOCATION REFRESH
+// Called on every periodic refresh (never on first load).
+// Only moves the marker when the freshly-fetched
+// coordinates differ from the last known ones - if the
+// admin hasn't changed anything, nothing moves.
 // ======================================================
 
 
-function updateLiveMarker(){
+function handleLocationRefresh(){
 
 
-
-if(
-
-!shipmentMarker ||
-
-!shipmentData
-
-)
+if(!shipmentData || !shipmentMarker)
 
 return;
 
 
+const newLat = Number(shipmentData.currentLatitude || 0);
+
+const newLng = Number(shipmentData.currentLongitude || 0);
 
 
+if(newLat === 0 && newLng === 0)
+
+return;
 
 
-shipmentMarker.setLatLng(
+const changed =
 
-[
+newLat !== previousCoords.lat ||
 
-shipmentData.currentLatitude,
+newLng !== previousCoords.lng;
 
-shipmentData.currentLongitude
 
-]
+if(!changed)
+
+return;
+
+
+moveMarkerSmoothly(
+
+shipmentMarker,
+
+[newLat, newLng]
+
+);
+
+
+shipmentMarker.setPopupContent(
+
+`
+
+<b>
+LinkWorld Express
+</b>
+
+<br>
+
+${shipmentData.currentLocation}
+
+<br>
+
+Status:
+${shipmentData.status}
+
+`
 
 );
 
 
+if(routeLine){
 
 
+const points = [];
 
-trackingMap.panTo(
+if(originMarker) points.push(originMarker.getLatLng());
 
-[
+points.push([newLat, newLng]);
 
-shipmentData.currentLatitude,
+if(destinationMarker) points.push(destinationMarker.getLatLng());
 
-shipmentData.currentLongitude
+routeLine.setLatLngs(points);
 
-]
 
-);
+}
 
+
+previousCoords = { lat:newLat, lng:newLng };
 
 
 }
@@ -1273,6 +1431,62 @@ minute:"2-digit"
 
 }
 
+
+
+
+// ======================================================
+// RELATIVE TIME
+// "2 minutes ago" style, falling back to a plain date once
+// it's more than a day old.
+// ======================================================
+
+
+function formatRelativeTime(date){
+
+
+if(!date)
+
+return "-";
+
+
+const then = new Date(date);
+
+if(Number.isNaN(then.getTime()))
+
+return "-";
+
+
+const seconds = Math.floor((Date.now() - then.getTime()) / 1000);
+
+
+if(seconds < 45)
+
+return "Just now";
+
+
+if(seconds < 90)
+
+return "1 minute ago";
+
+
+const minutes = Math.floor(seconds / 60);
+
+if(minutes < 60)
+
+return `${minutes} minutes ago`;
+
+
+const hours = Math.floor(minutes / 60);
+
+if(hours < 24)
+
+return hours === 1 ? "1 hour ago" : `${hours} hours ago`;
+
+
+return formatDateTime(date);
+
+
+}
 
 
 
@@ -2042,7 +2256,7 @@ console.log(
 
 
 
-// REFRESH EVERY 60 SECONDS
+// REFRESH EVERY 30 SECONDS
 
 
 setInterval(
@@ -2055,7 +2269,7 @@ refreshTracking();
 
 },
 
-60000
+30000
 
 );
 
@@ -2371,106 +2585,6 @@ clearInterval(interval);
 
 
 // ======================================================
-// UPDATE MAP WITHOUT RELOAD
-// ======================================================
-
-
-function updateMapPosition(){
-
-
-
-if(
-
-!shipmentMarker ||
-
-!shipmentData
-
-)
-
-return;
-
-
-
-
-
-
-
-moveMarkerSmoothly(
-
-shipmentMarker,
-
-[
-
-
-shipmentData.currentLatitude,
-
-
-shipmentData.currentLongitude
-
-
-]
-
-);
-
-
-
-
-
-
-
-
-
-}
-
-
-
-
-
-// ======================================================
-// OVERRIDE LIVE UPDATE
-// ======================================================
-
-
-const originalRefresh =
-
-refreshTracking;
-
-
-
-
-
-refreshTracking = async()=>{
-
-
-
-
-
-await originalRefresh();
-
-
-
-
-
-
-
-updateMapPosition();
-
-
-
-
-
-
-};
-
-
-
-
-
-
-
-
-
-// ======================================================
 // MAP RESIZE FIX
 // ======================================================
 
@@ -2671,6 +2785,52 @@ trackingMap.invalidateSize();
 
 
 
+
+
+
+
+// ======================================================
+// STREET VIEW BUTTON
+// ======================================================
+
+
+document.addEventListener("DOMContentLoaded", () => {
+
+
+const streetViewBtn = document.getElementById("streetViewBtn");
+
+if(!streetViewBtn) return;
+
+streetViewBtn.addEventListener("click", () => {
+
+if(!shipmentData) return;
+
+const lat = Number(shipmentData.currentLatitude || 0);
+
+const lng = Number(shipmentData.currentLongitude || 0);
+
+if(lat === 0 && lng === 0){
+
+Swal.fire({
+icon:"info",
+title:"Location Not Available",
+text:"This shipment doesn't have GPS coordinates yet, so Street View isn't available."
+});
+
+return;
+
+}
+
+if(window.LinkWorldStreetView){
+
+window.LinkWorldStreetView.open(lat, lng, shipmentData.currentLocation);
+
+}
+
+});
+
+
+});
 
 
 

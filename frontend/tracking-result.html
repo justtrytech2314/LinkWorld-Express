@@ -337,13 +337,62 @@ LIVE GLOBAL TRACKING MAP
                     <strong id="gpsLastSignal">-</strong>
                 </div>
 
+                <div class="gps-row">
+                    <span>Last Updated</span>
+                    <strong id="mapLastUpdated">-</strong>
+                </div>
+
+            </div>
+
+        </div>
+
+        <button type="button" class="street-view-btn" id="streetViewBtn">
+            <i class="fa-solid fa-street-view"></i>
+            Explore Street View
+        </button>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+STREET VIEW MODAL
+====================================================== -->
+
+<div class="street-view-modal" id="streetViewModal" hidden>
+
+    <div class="street-view-modal-inner">
+
+        <div class="street-view-modal-header">
+            <span>
+                <i class="fa-solid fa-street-view"></i>
+                Street View &bull; <span id="streetViewLocationName">-</span>
+            </span>
+            <button type="button" id="streetViewClose" aria-label="Close Street View">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="street-view-modal-body" id="streetViewBody">
+
+            <div class="street-view-loading" id="streetViewLoading">
+                <i class="fa-solid fa-spinner fa-spin"></i>
+                Loading Street View...
+            </div>
+
+            <div class="street-view-panorama" id="streetViewPanorama" hidden></div>
+
+            <div class="street-view-unavailable" id="streetViewUnavailable" hidden>
+                <i class="fa-solid fa-video-slash"></i>
+                <p id="streetViewUnavailableText">Street View is not available at this location.</p>
             </div>
 
         </div>
 
     </div>
 
-</section>
+</div>
 
 
 <!-- ======================================================
@@ -739,6 +788,8 @@ JAVASCRIPT
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
 <script src="js/config.js"></script>
+
+<script src="js/street-view.js"></script>
 
 <script src="js/tracking-result.js"></script>
 <script src="js/cookies.js"></script>

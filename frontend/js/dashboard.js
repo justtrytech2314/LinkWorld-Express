@@ -849,6 +849,32 @@ document.getElementById(
 // ================================
 
 
+originLatitude:
+
+Number(
+
+document.getElementById(
+"originLatitude"
+).value
+
+) || 0,
+
+
+
+
+originLongitude:
+
+Number(
+
+document.getElementById(
+"originLongitude"
+).value
+
+) || 0,
+
+
+
+
 currentLatitude:
 
 Number(

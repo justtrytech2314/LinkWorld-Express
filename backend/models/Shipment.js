@@ -316,6 +316,32 @@ destination:{
 // ======================================================
 
 
+originLatitude:{
+
+
+    type:Number,
+
+
+    default:0
+
+
+},
+
+
+
+originLongitude:{
+
+
+    type:Number,
+
+
+    default:0
+
+
+},
+
+
+
 currentLatitude:{
 
 
@@ -480,6 +506,27 @@ paymentStatus:{
 
 
 expectedDelivery:{
+
+
+    type:Date,
+
+
+    default:null
+
+
+},
+
+
+
+
+// ======================================================
+// LOCATION UPDATE TRACKING
+// Set whenever the admin changes the current location, so
+// the tracking page can show a real "last updated" time.
+// ======================================================
+
+
+locationUpdatedAt:{
 
 
     type:Date,
