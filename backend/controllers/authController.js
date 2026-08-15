@@ -9,6 +9,17 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 
+const { verifyToken } = require("../utils/totp");
+
+
+// ======================================================
+// Every rejected login returns this one message. Saying
+// "wrong password" or "wrong code" would confirm to an
+// attacker which half they already have.
+// ======================================================
+
+const REJECTION_MESSAGE = "Invalid email, password or authentication code.";
+
 
 // ======================================================
 // ADMIN LOGIN
@@ -26,7 +37,9 @@ exports.loginAdmin = async (req, res) => {
 
             email,
 
-            password
+            password,
+
+            totp
 
 
         } = req.body;
@@ -96,33 +109,25 @@ exports.loginAdmin = async (req, res) => {
         // ==============================================
 
 
-        if (
+        const emailMatch =
 
-            email.toLowerCase()
+            email.trim().toLowerCase()
 
-            !==
+            ===
 
-            adminEmail.toLowerCase()
-
-        ) {
-
-
-            return res.status(401).json({
-
-                success:false,
-
-                message:
-                "Invalid email or password."
-
-            });
-
-
-        }
+            adminEmail.trim().toLowerCase();
 
 
 
         // ==============================================
         // CHECK PASSWORD
+        // ==============================================
+        //
+        // The password is compared even when the email is
+        // already wrong. Skipping it would return noticeably
+        // faster for an unknown address than a known one,
+        // which tells an attacker when they have guessed the
+        // right email.
         // ==============================================
 
 
@@ -138,15 +143,55 @@ exports.loginAdmin = async (req, res) => {
 
 
 
-        if (!passwordMatch) {
+        // ==============================================
+        // CHECK TWO-FACTOR CODE
+        // ==============================================
+        //
+        // Enforced only once ADMIN_TOTP_SECRET is set, so
+        // enrolling does not lock anyone out mid-deployment.
+        // ==============================================
+
+
+        const totpSecret = process.env.ADMIN_TOTP_SECRET;
+
+
+        let totpMatch = true;
+
+
+        if (totpSecret) {
+
+
+            totpMatch = await verifyToken(
+
+                totpSecret,
+
+                totp
+
+            );
+
+
+        }
+
+        else {
+
+
+            console.warn(
+                "⚠️  ADMIN_TOTP_SECRET is not set - admin login is running WITHOUT two-factor authentication."
+            );
+
+
+        }
+
+
+
+        if (!emailMatch || !passwordMatch || !totpMatch) {
 
 
             return res.status(401).json({
 
                 success:false,
 
-                message:
-                "Invalid email or password."
+                message: REJECTION_MESSAGE
 
             });
 

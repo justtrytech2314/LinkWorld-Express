@@ -41,6 +41,11 @@ const passwordInput = document.getElementById(
 );
 
 
+const totpInput = document.getElementById(
+"totp"
+);
+
+
 const loginButton = document.getElementById(
 "loginButton"
 );
@@ -144,6 +149,16 @@ passwordInput.value.trim();
 
 
 
+// Authenticator apps show codes as "123 456" - strip the
+// spacing so a straight copy-paste still works.
+
+const totp =
+totpInput
+? totpInput.value.replace(/\s+/g, "")
+: "";
+
+
+
 
 
 if(!email || !password){
@@ -212,7 +227,9 @@ body:JSON.stringify({
 
 email,
 
-password
+password,
+
+totp
 
 
 })

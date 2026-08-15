@@ -17,6 +17,8 @@ const router = express.Router();
 
 const auth = require("../middleware/auth");
 
+const loginRateLimit = require("../middleware/loginRateLimit");
+
 
 
 // ======================================================
@@ -52,6 +54,8 @@ const {
 router.post(
 
     "/login",
+
+    loginRateLimit,
 
     loginAdmin
 

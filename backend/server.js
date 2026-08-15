@@ -55,6 +55,25 @@ connectDB();
 
 
 // ======================================================
+// PROXY TRUST
+// ------------------------------------------------------
+// Render (like most hosts) terminates TLS at its own proxy
+// and forwards the real client address in X-Forwarded-For.
+// Without this, req.ip is Render's internal address for
+// every visitor, so all of them share a single rate-limit
+// bucket: one abusive client would throttle every customer,
+// and a stranger's failed logins would lock the
+// administrator out of their own dashboard.
+//
+// The value is 1, not true. "true" trusts the whole chain,
+// which lets a client forge X-Forwarded-For and sidestep
+// every limit; 1 trusts only Render's own hop.
+// ======================================================
+
+app.set("trust proxy", 1);
+
+
+// ======================================================
 // SECURITY / MIDDLEWARE
 // ======================================================
 
