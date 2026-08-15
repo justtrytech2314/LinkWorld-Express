@@ -319,6 +319,11 @@
 .street-view-unavailable{
   position:absolute;
   inset:0;
+  /* the panorama is mounted underneath while it loads so mapillary can
+     measure a real container - these overlays must stay on top of the
+     positioned elements it creates inside it */
+  z-index:2;
+  background:var(--navy);
   display:flex;
   flex-direction:column;
   align-items:center;
