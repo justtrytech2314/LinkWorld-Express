@@ -2,7 +2,7 @@
 // LINKWORLD EXPRESS
 // LINKWORLD CARE - AI CUSTOMER CARE SERVICE
 // ------------------------------------------------------
-// Talks to the Gemini API and to the real Shipment model.
+// Talks to the AI provider and to the real Shipment model.
 // The browser never touches either directly - it only ever
 // calls our own /api/customer-care/chat endpoint.
 //
@@ -13,72 +13,52 @@
 
 "use strict";
 
-const { GoogleGenAI } = require("@google/genai");
-
 const Shipment = require("../models/Shipment");
 
 const { CONTACT, KNOWLEDGE_TEXT } = require("./companyKnowledgeBase");
 
 
 // ======================================================
-// GEMINI CLIENT
-// Created lazily so a missing key fails per-request with a
-// clean error instead of crashing the whole server on boot.
+// AI PROVIDER
+// ------------------------------------------------------
+// Speaks the OpenAI chat-completions protocol over plain
+// fetch - no vendor SDK. Groq, OpenRouter, Cerebras,
+// Together and Mistral all implement that same shape, so
+// moving between them is a change of AI_BASE_URL and
+// AI_MODEL, never a change of code.
+//
+// Default is Groq: its free tier allows 1,000 requests a
+// day against the 20 Gemini's free tier permitted, which is
+// what pushed the switch.
 // ======================================================
 
-let client = null;
+const AI_BASE_URL =
+    process.env.AI_BASE_URL || "https://api.groq.com/openai/v1";
 
-function getClient(){
+const MODEL =
+    process.env.AI_MODEL || "llama-3.3-70b-versatile";
 
-    if(client) return client;
 
-    if(!process.env.GEMINI_API_KEY){
+function getApiKey(){
 
-        throw new Error("GEMINI_API_KEY is not configured on the server.");
+    const key = process.env.AI_API_KEY;
+
+    if(!key){
+
+        throw new Error("AI_API_KEY is not configured on the server.");
 
     }
 
-    client = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
-    return client;
+    return key;
 
 }
 
-const MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 
-
-// Room for the answer itself. Must stay comfortably above the longest
-// reply we expect (~400 tokens) - see the note on thinking below.
+// Room for the answer itself, comfortably above the longest reply we
+// expect (~400 tokens). Llama is not a reasoning model, so unlike
+// Gemini 2.5 nothing invisible is billed against this budget - the
+// whole allowance reaches the customer.
 const MAX_OUTPUT_TOKENS = 800;
-
-
-// The 2.5 family bills its hidden reasoning tokens against
-// maxOutputTokens, which is what used to truncate replies mid-word, and
-// it accepts thinkingBudget: 0 to switch that off. Newer models reject
-// that same field with a 400 (flash-lite) or quietly ignore it, so it is
-// only sent to the family that actually understands it - GEMINI_MODEL is
-// configurable and must not be able to break the widget.
-function buildGenerationConfig(){
-
-    const config = {
-
-        systemInstruction: SYSTEM_INSTRUCTION,
-
-        temperature: 0.3,
-
-        maxOutputTokens: MAX_OUTPUT_TOKENS
-
-    };
-
-    if(/^gemini-2\.5-/.test(MODEL)){
-
-        config.thinkingConfig = { thinkingBudget: 0 };
-
-    }
-
-    return config;
-
-}
 
 
 // ======================================================
@@ -229,7 +209,7 @@ async function lookupShipment(trackingNumber){
 // ======================================================
 // VERIFIED-DATA CONTEXT BLOCK
 // Built fresh every turn a tracking number is in play, and
-// injected only into that turn's message to Gemini - never
+// injected only into that turn's message to the model - never
 // stored back into the conversation the customer sees.
 // ======================================================
 
@@ -268,15 +248,18 @@ function buildShipmentContextBlock(trackingNumber, shipment, lookupFailed){
 
 
 // ======================================================
-// BUILD GEMINI "contents"
-// Maps the frontend's session history into Gemini's
-// role/parts shape, and appends the current turn with any
-// verified shipment context prepended.
+// BUILD THE MESSAGE ARRAY
+// Maps the frontend's session history into the OpenAI
+// chat-completions shape, and appends the current turn with
+// any verified shipment context prepended. The system prompt
+// leads the array rather than sitting in its own field.
 // ======================================================
 
-function buildContents({ message, history, contextBlock }){
+function buildMessages({ message, history, contextBlock }){
 
-    const contents = [];
+    const messages = [
+        { role: "system", content: SYSTEM_INSTRUCTION }
+    ];
 
     if(Array.isArray(history)){
 
@@ -284,23 +267,12 @@ function buildContents({ message, history, contextBlock }){
 
             if(!entry || !entry.content) return;
 
-            const role = entry.role === "assistant" ? "model" : "user";
-
-            contents.push({
-                role,
-                parts: [{ text: String(entry.content).slice(0, 2000) }]
+            messages.push({
+                role: entry.role === "assistant" ? "assistant" : "user",
+                content: String(entry.content).slice(0, 2000)
             });
 
         });
-
-    }
-
-    // Gemini expects the conversation to open with a user turn. History
-    // trimming can leave an assistant reply sitting first, so drop any
-    // leading model turns before sending.
-    while(contents.length && contents[0].role === "model"){
-
-        contents.shift();
 
     }
 
@@ -308,12 +280,12 @@ function buildContents({ message, history, contextBlock }){
         ? `${contextBlock}\n\nCustomer message: ${message}`
         : message;
 
-    contents.push({
+    messages.push({
         role: "user",
-        parts: [{ text: finalText }]
+        content: finalText
     });
 
-    return contents;
+    return messages;
 
 }
 
@@ -370,24 +342,22 @@ function trimToLastCompleteSentence(text){
 
 
 // ======================================================
-// EXTRACT PLAIN TEXT FROM A GEMINI RESPONSE
+// EXTRACT PLAIN TEXT FROM A CHAT-COMPLETIONS RESPONSE
 // ======================================================
 
 function extractReplyText(response){
 
-    if(response && typeof response.text === "string" && response.text.trim()){
+    const content = response?.choices?.[0]?.message?.content;
 
-        return response.text.trim();
+    return typeof content === "string" ? content.trim() : "";
 
-    }
+}
 
-    const candidateText =
-        response?.candidates?.[0]?.content?.parts
-            ?.map(p => p.text || "")
-            .join("")
-            .trim();
 
-    return candidateText || "";
+// Providers report a truncated answer as finish_reason "length".
+function wasTruncated(response){
+
+    return response?.choices?.[0]?.finish_reason === "length";
 
 }
 
@@ -403,40 +373,41 @@ function sleep(ms){
 }
 
 
-// Quota (429) and Gemini's transient server errors (500/503) both tend
-// to clear within a few seconds, so a couple of backed-off retries turn
-// a lot of them into a real answer instead of the fallback message.
-// Anything else (bad key, bad request) is a real fault - fail fast.
+// Rate limits (429) and transient upstream errors (500/503) usually
+// clear within seconds, so a couple of backed-off retries turn many of
+// them into a real answer instead of the fallback message. Anything
+// else - a bad key, a malformed request - is a real fault, so fail fast
+// rather than making the customer wait out a pointless backoff.
 const RETRYABLE_STATUSES = new Set([429, 500, 502, 503, 504]);
 
 const MAX_RETRIES = 2;
 
 const MAX_RETRY_WAIT_MS = 12000;
 
+// Cap on how long we will hold a customer request open in total.
+const REQUEST_TIMEOUT_MS = 30000;
 
-// On a quota error Gemini tells us exactly how long to wait
-// (RetryInfo.retryDelay, e.g. "9s"). Honouring that beats guessing -
-// a blind 2s backoff just burns the retry while the bucket is still
-// empty. Returns null when waiting is pointless, so we fail fast
-// instead of holding the customer on a spinner.
+
+// Providers report how long to wait in a Retry-After header (seconds,
+// sometimes fractional). Honouring it beats guessing - a blind 2s
+// backoff just burns the retry while the bucket is still empty.
+// Returns null when waiting is pointless, so we can fail fast.
 function getRetryWaitMs(error, attempt){
-
-    const detail = error?.message || "";
-
-    // A *daily* quota will not refill for hours. Retrying it just makes
-    // the customer wait out the backoff before the same failure.
-    if(/PerDay/i.test(detail)) return null;
 
     const fallback = 2000 * Math.pow(2, attempt);
 
-    const match = /"retryDelay"\s*:\s*"(\d+(?:\.\d+)?)s"/.exec(detail);
+    const advised = error?.retryAfterSeconds;
 
-    if(!match) return fallback;
+    if(typeof advised !== "number" || !Number.isFinite(advised)){
 
-    const advisedMs = Math.ceil(parseFloat(match[1]) * 1000) + 500;
+        return fallback;
 
-    // Gemini wants longer than we are willing to hold the request open -
-    // answer with the busy message now rather than time the customer out.
+    }
+
+    const advisedMs = Math.ceil(advised * 1000) + 500;
+
+    // Longer than we are willing to hold the request open - answer with
+    // the busy message now rather than time the customer out.
     if(advisedMs > MAX_RETRY_WAIT_MS) return null;
 
     return Math.max(advisedMs, fallback);
@@ -444,16 +415,79 @@ function getRetryWaitMs(error, attempt){
 }
 
 
-async function generateContentWithRetry(ai, params, attempt = 0){
+// One call to the provider. Throws an Error carrying .status (and
+// .retryAfterSeconds when the provider supplied it) so the retry layer
+// and the controller can both reason about the failure.
+async function callProvider(messages){
+
+    const controller = new AbortController();
+
+    const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+    let response;
 
     try{
 
-        return await ai.models.generateContent(params);
+        response = await fetch(`${AI_BASE_URL}/chat/completions`, {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${getApiKey()}`
+            },
+
+            body: JSON.stringify({
+                model: MODEL,
+                messages,
+                temperature: 0.3,
+                max_tokens: MAX_OUTPUT_TOKENS
+            }),
+
+            signal: controller.signal
+
+        });
+
+    }
+    finally{
+
+        clearTimeout(timer);
+
+    }
+
+    if(!response.ok){
+
+        const body = await response.text().catch(() => "");
+
+        const error = new Error(
+            `AI provider returned ${response.status}: ${body.slice(0, 300)}`
+        );
+
+        error.status = response.status;
+
+        const retryAfter = parseFloat(response.headers.get("retry-after"));
+
+        if(Number.isFinite(retryAfter)) error.retryAfterSeconds = retryAfter;
+
+        throw error;
+
+    }
+
+    return response.json();
+
+}
+
+
+async function generateContentWithRetry(messages, attempt = 0){
+
+    try{
+
+        return await callProvider(messages);
 
     }
     catch(error){
 
-        const status = Number(error?.status ?? error?.code);
+        const status = Number(error?.status);
 
         if(!RETRYABLE_STATUSES.has(status) || attempt >= MAX_RETRIES){
 
@@ -470,12 +504,12 @@ async function generateContentWithRetry(ai, params, attempt = 0){
         }
 
         console.warn(
-            `LinkWorld Care: Gemini returned ${status}, retry ${attempt + 1}/${MAX_RETRIES} in ${waitMs}ms...`
+            `LinkWorld Care: AI provider returned ${status}, retry ${attempt + 1}/${MAX_RETRIES} in ${waitMs}ms...`
         );
 
         await sleep(waitMs);
 
-        return generateContentWithRetry(ai, params, attempt + 1);
+        return generateContentWithRetry(messages, attempt + 1);
 
     }
 
@@ -605,25 +639,15 @@ async function generateReply({ message, history }){
 
     }
 
-    const contents = buildContents({ message, history, contextBlock });
+    const messages = buildMessages({ message, history, contextBlock });
 
-    const ai = getClient();
-
-    const response = await generateContentWithRetry(ai, {
-
-        model: MODEL,
-
-        contents,
-
-        config: buildGenerationConfig()
-
-    });
+    const response = await generateContentWithRetry(messages);
 
     let rawReply = extractReplyText(response);
 
     // Even with the headroom above, an unusually long answer can still
     // hit the ceiling - never show the customer a half-finished sentence.
-    if(response?.candidates?.[0]?.finishReason === "MAX_TOKENS" && rawReply){
+    if(wasTruncated(response) && rawReply){
 
         rawReply = trimToLastCompleteSentence(rawReply);
 
