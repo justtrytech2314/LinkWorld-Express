@@ -13,10 +13,13 @@ FETCH SHIPMENT + CONNECT API
 
 // ======================================================
 // API CONFIG
+// Comes from js/config.js, which is loaded first and picks
+// localhost or the live backend based on the hostname.
 // ======================================================
 
 
 const TRACKING_API = LWX_API;
+
 
 
 
