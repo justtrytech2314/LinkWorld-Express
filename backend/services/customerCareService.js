@@ -482,9 +482,96 @@ async function generateContentWithRetry(ai, params, attempt = 0){
 }
 
 
+// ======================================================
+// REPLY CACHE
+// The quick-action buttons send fixed strings ("I'd like a
+// shipping quote", "Tell me about your shipping services"),
+// and customers open with the same handful of questions. On
+// a free tier capped at 20 calls a day, answering a repeat
+// opening question from memory is the difference between the
+// widget lasting the day and dying before lunchtime.
+//
+// Deliberately narrow: only a first turn with no
+// conversation history and no shipment lookup is eligible.
+// Anything carrying history or live shipment data is
+// specific to that customer and must never be replayed to
+// somebody else.
+// ======================================================
+
+const REPLY_CACHE_TTL_MS = 6 * 60 * 60 * 1000;
+
+const REPLY_CACHE_MAX_ENTRIES = 200;
+
+const replyCache = new Map();
+
+
+function buildCacheKey(message){
+
+    return message.trim().toLowerCase().replace(/\s+/g, " ");
+
+}
+
+
+function getCachedReply(message){
+
+    const key = buildCacheKey(message);
+
+    const hit = replyCache.get(key);
+
+    if(!hit) return null;
+
+    if(Date.now() - hit.storedAt > REPLY_CACHE_TTL_MS){
+
+        replyCache.delete(key);
+
+        return null;
+
+    }
+
+    return hit.reply;
+
+}
+
+
+function storeCachedReply(message, reply){
+
+    // Plain insertion-ordered eviction - the oldest key is the
+    // first one Map hands back.
+    if(replyCache.size >= REPLY_CACHE_MAX_ENTRIES){
+
+        const oldest = replyCache.keys().next().value;
+
+        replyCache.delete(oldest);
+
+    }
+
+    replyCache.set(buildCacheKey(message), {
+        reply,
+        storedAt: Date.now()
+    });
+
+}
+
+
 async function generateReply({ message, history }){
 
     const trackingNumber = findTrackingNumber(message, history);
+
+    // Eligible for the cache only when nothing about this turn is
+    // customer-specific: no shipment in play and no prior conversation.
+    const isCacheable = !trackingNumber && !(Array.isArray(history) && history.length);
+
+    if(isCacheable){
+
+        const cached = getCachedReply(message);
+
+        if(cached){
+
+            return { reply: cached, shipment: null, cached: true };
+
+        }
+
+    }
 
     let shipmentPayload = null;
 
@@ -542,13 +629,23 @@ async function generateReply({ message, history }){
 
     }
 
-    if(!rawReply){
+    const answered = Boolean(rawReply);
+
+    if(!answered){
 
         rawReply = "I'm sorry, I wasn't able to put together a response for that. Please try rephrasing, or contact LinkWorld Express customer care.";
 
     }
 
     const reply = stripMarkdown(rawReply);
+
+    // Never cache the apology - a one-off empty response would
+    // otherwise be served to everyone asking that question for hours.
+    if(isCacheable && answered){
+
+        storeCachedReply(message, reply);
+
+    }
 
     return {
         reply,

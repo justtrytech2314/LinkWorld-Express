@@ -12,7 +12,10 @@ const {
     contactCard
 } = require("../controllers/customerCareController");
 
-const customerCareRateLimit = require("../middleware/customerCareRateLimit");
+const {
+    chatRateLimit,
+    contactRateLimit
+} = require("../middleware/customerCareRateLimit");
 
 
 // ======================================================
@@ -23,7 +26,7 @@ const customerCareRateLimit = require("../middleware/customerCareRateLimit");
 
 router.post(
     "/chat",
-    customerCareRateLimit,
+    chatRateLimit,
     chat
 );
 
@@ -36,7 +39,7 @@ router.post(
 
 router.get(
     "/contact",
-    customerCareRateLimit,
+    contactRateLimit,
     contactCard
 );
 
