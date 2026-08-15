@@ -47,6 +47,40 @@ function getClient(){
 const MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 
 
+// Room for the answer itself. Must stay comfortably above the longest
+// reply we expect (~400 tokens) - see the note on thinking below.
+const MAX_OUTPUT_TOKENS = 800;
+
+
+// The 2.5 family bills its hidden reasoning tokens against
+// maxOutputTokens, which is what used to truncate replies mid-word, and
+// it accepts thinkingBudget: 0 to switch that off. Newer models reject
+// that same field with a 400 (flash-lite) or quietly ignore it, so it is
+// only sent to the family that actually understands it - GEMINI_MODEL is
+// configurable and must not be able to break the widget.
+function buildGenerationConfig(){
+
+    const config = {
+
+        systemInstruction: SYSTEM_INSTRUCTION,
+
+        temperature: 0.3,
+
+        maxOutputTokens: MAX_OUTPUT_TOKENS
+
+    };
+
+    if(/^gemini-2\.5-/.test(MODEL)){
+
+        config.thinkingConfig = { thinkingBudget: 0 };
+
+    }
+
+    return config;
+
+}
+
+
 // ======================================================
 // SYSTEM INSTRUCTION
 // The assistant's identity, scope and hard rules. This is
@@ -90,11 +124,11 @@ ${KNOWLEDGE_TEXT}
 // ======================================================
 // TRACKING NUMBER DETECTION
 // Format: LWX + 4-digit year + 8-character code,
-// e.g. LWX2026A8F4C9D2. Matched loosely (spacing/case)
-// since the real DB lookup is the actual gate.
+// e.g. LWX2026A8F4C9D2. Matched loosely (spacing, hyphens,
+// case) since the real DB lookup is the actual gate.
 // ======================================================
 
-const TRACKING_REGEX = /LWX\s*\d{4}\s*[A-Z0-9]{4,12}/gi;
+const TRACKING_REGEX = /LWX[\s-]*\d{4}[\s-]*[A-Z0-9]{4,12}/gi;
 
 function extractTrackingNumbers(text){
 
@@ -102,15 +136,30 @@ function extractTrackingNumbers(text){
 
     const matches = text.match(TRACKING_REGEX) || [];
 
-    return matches.map(m => m.replace(/\s+/g, "").toUpperCase());
+    return matches.map(m => m.replace(/[\s-]+/g, "").toUpperCase());
 
 }
 
+
+// Vocabulary that means "this turn is still about a shipment".
+// Without this gate, a tracking number mentioned once was reused for
+// every later message in the session, so unrelated questions ("what
+// are your office hours?") re-ran the lookup and re-showed the
+// shipment card.
+const SHIPMENT_TOPIC_REGEX =
+    /\b(track|tracking|shipment|package|parcel|cargo|freight|consignment|delivery|deliver|delivered|arrive|arrived|arriving|arrival|eta|dispatch|dispatched|customs|transit|status|update|progress|delayed|late|stuck|held|missing|lost|shipped|pickup|picked\s+up|where\s+is\s+it|is\s+it\s+\w+)\b/i;
+
+
 function findTrackingNumber(message, history){
 
+    // A number typed in this turn always wins.
     const fromMessage = extractTrackingNumbers(message);
 
     if(fromMessage.length) return fromMessage[fromMessage.length - 1];
+
+    // Otherwise only carry one forward when the customer is still
+    // asking about their shipment.
+    if(!SHIPMENT_TOPIC_REGEX.test(message || "")) return null;
 
     if(Array.isArray(history)){
 
@@ -184,7 +233,20 @@ async function lookupShipment(trackingNumber){
 // stored back into the conversation the customer sees.
 // ======================================================
 
-function buildShipmentContextBlock(trackingNumber, shipment){
+function buildShipmentContextBlock(trackingNumber, shipment, lookupFailed){
+
+    // The database was unreachable - which is NOT the same as "no such
+    // shipment". Saying "not found" here would be a false statement
+    // about a shipment that may well exist.
+    if(lookupFailed){
+
+        return [
+            "[VERIFIED SHIPMENT DATA]",
+            `The shipment lookup service is temporarily unavailable, so tracking number ${trackingNumber} could NOT be checked. Do not say the shipment was not found and do not state any status for it. Apologise briefly, explain that live tracking is temporarily unavailable, and suggest they try again shortly or contact customer care.`,
+            "[END VERIFIED SHIPMENT DATA]"
+        ].join("\n");
+
+    }
 
     if(!shipment){
 
@@ -233,6 +295,15 @@ function buildContents({ message, history, contextBlock }){
 
     }
 
+    // Gemini expects the conversation to open with a user turn. History
+    // trimming can leave an assistant reply sitting first, so drop any
+    // leading model turns before sending.
+    while(contents.length && contents[0].role === "model"){
+
+        contents.shift();
+
+    }
+
     const finalText = contextBlock
         ? `${contextBlock}\n\nCustomer message: ${message}`
         : message;
@@ -257,11 +328,43 @@ function buildContents({ message, history, contextBlock }){
 function stripMarkdown(text){
 
     return text
+        .replace(/```[a-z]*\n?([\s\S]*?)```/gi, "$1")
+        .replace(/`([^`]+)`/g, "$1")
         .replace(/\*\*(.+?)\*\*/g, "$1")
         .replace(/__(.+?)__/g, "$1")
+        .replace(/~~(.+?)~~/g, "$1")
+        .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
         .replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, "$1")
         .replace(/^#{1,6}\s+/gm, "")
-        .replace(/^[-*]\s+/gm, "");
+        .replace(/^[ \t]*>[ \t]?/gm, "")
+        .replace(/^[ \t]*[-*][ \t]+/gm, "")
+        .replace(/\n{3,}/g, "\n\n")
+        .trim();
+
+}
+
+
+// ======================================================
+// TRUNCATION REPAIR
+// A reply cut off mid-word reads as broken. If the model ran
+// out of room, fall back to the last sentence that actually
+// finished rather than showing the fragment.
+// ======================================================
+
+function trimToLastCompleteSentence(text){
+
+    if(/[.!?)"']\s*$/.test(text)) return text;
+
+    const lastEnd = Math.max(
+        text.lastIndexOf("."),
+        text.lastIndexOf("!"),
+        text.lastIndexOf("?")
+    );
+
+    // Nothing usable to cut back to - keep what we have.
+    if(lastEnd < 40) return text;
+
+    return text.slice(0, lastEnd + 1);
 
 }
 
@@ -300,10 +403,48 @@ function sleep(ms){
 }
 
 
-// The free tier's quota bucket is small but tends to free up again
-// within a few seconds - one short retry turns a lot of those into
-// a real answer instead of the fallback message.
-async function generateContentWithRetry(ai, params){
+// Quota (429) and Gemini's transient server errors (500/503) both tend
+// to clear within a few seconds, so a couple of backed-off retries turn
+// a lot of them into a real answer instead of the fallback message.
+// Anything else (bad key, bad request) is a real fault - fail fast.
+const RETRYABLE_STATUSES = new Set([429, 500, 502, 503, 504]);
+
+const MAX_RETRIES = 2;
+
+const MAX_RETRY_WAIT_MS = 12000;
+
+
+// On a quota error Gemini tells us exactly how long to wait
+// (RetryInfo.retryDelay, e.g. "9s"). Honouring that beats guessing -
+// a blind 2s backoff just burns the retry while the bucket is still
+// empty. Returns null when waiting is pointless, so we fail fast
+// instead of holding the customer on a spinner.
+function getRetryWaitMs(error, attempt){
+
+    const detail = error?.message || "";
+
+    // A *daily* quota will not refill for hours. Retrying it just makes
+    // the customer wait out the backoff before the same failure.
+    if(/PerDay/i.test(detail)) return null;
+
+    const fallback = 2000 * Math.pow(2, attempt);
+
+    const match = /"retryDelay"\s*:\s*"(\d+(?:\.\d+)?)s"/.exec(detail);
+
+    if(!match) return fallback;
+
+    const advisedMs = Math.ceil(parseFloat(match[1]) * 1000) + 500;
+
+    // Gemini wants longer than we are willing to hold the request open -
+    // answer with the busy message now rather than time the customer out.
+    if(advisedMs > MAX_RETRY_WAIT_MS) return null;
+
+    return Math.max(advisedMs, fallback);
+
+}
+
+
+async function generateContentWithRetry(ai, params, attempt = 0){
 
     try{
 
@@ -312,17 +453,29 @@ async function generateContentWithRetry(ai, params){
     }
     catch(error){
 
-        if(error?.status !== 429){
+        const status = Number(error?.status ?? error?.code);
+
+        if(!RETRYABLE_STATUSES.has(status) || attempt >= MAX_RETRIES){
 
             throw error;
 
         }
 
-        console.warn("LinkWorld Care: Gemini quota hit, retrying once in 4s...");
+        const waitMs = getRetryWaitMs(error, attempt);
 
-        await sleep(4000);
+        if(waitMs === null){
 
-        return await ai.models.generateContent(params);
+            throw error;
+
+        }
+
+        console.warn(
+            `LinkWorld Care: Gemini returned ${status}, retry ${attempt + 1}/${MAX_RETRIES} in ${waitMs}ms...`
+        );
+
+        await sleep(waitMs);
+
+        return generateContentWithRetry(ai, params, attempt + 1);
 
     }
 
@@ -339,9 +492,29 @@ async function generateReply({ message, history }){
 
     if(trackingNumber){
 
-        shipmentPayload = await lookupShipment(trackingNumber);
+        let lookupFailed = false;
 
-        contextBlock = buildShipmentContextBlock(trackingNumber, shipmentPayload);
+        try{
+
+            shipmentPayload = await lookupShipment(trackingNumber);
+
+        }
+        catch(error){
+
+            // A database wobble should not cost the customer their whole
+            // answer - degrade to an ungrounded reply that is explicit
+            // about not having checked, instead of failing the request.
+            console.error("LinkWorld Care: shipment lookup failed:", error.message);
+
+            lookupFailed = true;
+
+        }
+
+        contextBlock = buildShipmentContextBlock(
+            trackingNumber,
+            shipmentPayload,
+            lookupFailed
+        );
 
     }
 
@@ -355,16 +528,25 @@ async function generateReply({ message, history }){
 
         contents,
 
-        config: {
-            systemInstruction: SYSTEM_INSTRUCTION,
-            temperature: 0.3,
-            maxOutputTokens: 500
-        }
+        config: buildGenerationConfig()
 
     });
 
-    const rawReply = extractReplyText(response) ||
-        "I'm sorry, I wasn't able to put together a response for that. Please try rephrasing, or contact LinkWorld Express customer care.";
+    let rawReply = extractReplyText(response);
+
+    // Even with the headroom above, an unusually long answer can still
+    // hit the ceiling - never show the customer a half-finished sentence.
+    if(response?.candidates?.[0]?.finishReason === "MAX_TOKENS" && rawReply){
+
+        rawReply = trimToLastCompleteSentence(rawReply);
+
+    }
+
+    if(!rawReply){
+
+        rawReply = "I'm sorry, I wasn't able to put together a response for that. Please try rephrasing, or contact LinkWorld Express customer care.";
+
+    }
 
     const reply = stripMarkdown(rawReply);
 

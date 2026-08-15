@@ -169,9 +169,14 @@
 
     }
 
-    function pushMessage(role, content) {
+    /* `transient` marks a locally-generated notice (a connection error,
+       not something the assistant actually said). It still shows in the
+       transcript, but it is never sent back to the model as prior
+       context - otherwise the AI reads its own error text as a real
+       reply and the conversation drifts. */
+    function pushMessage(role, content, transient) {
 
-        history.push({ role, content, time: new Date().toISOString() });
+        history.push({ role, content, time: new Date().toISOString(), transient: !!transient });
 
         if (history.length > CONFIG.maxHistoryStored) {
 
@@ -400,10 +405,12 @@
 
             body: JSON.stringify({
                 message,
-                history: priorHistory.map((entry) => ({
-                    role: entry.role,
-                    content: entry.content
-                }))
+                history: priorHistory
+                    .filter((entry) => !entry.transient)
+                    .map((entry) => ({
+                        role: entry.role,
+                        content: entry.content
+                    }))
             })
 
         });
@@ -467,7 +474,7 @@
             const fallback =
                 "I'm having trouble connecting right now. Please try again in a moment or contact LinkWorld Express customer care.";
 
-            pushMessage("assistant", fallback);
+            pushMessage("assistant", fallback, true);
 
             appendTextBubble("assistant", fallback, new Date());
 
@@ -523,7 +530,7 @@
             const fallback =
                 "I'm having trouble loading our contact details right now. Please try again shortly.";
 
-            pushMessage("assistant", fallback);
+            pushMessage("assistant", fallback, true);
 
             appendTextBubble("assistant", fallback, new Date());
 

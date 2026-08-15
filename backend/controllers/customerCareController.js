@@ -88,6 +88,20 @@ exports.chat = async (req, res) => {
 
         console.error("LINKWORLD CARE ERROR:", error);
 
+        // A busy AI service is a different problem from a broken one -
+        // telling the customer to wait a few seconds is actionable,
+        // where a generic connection error just reads as "it's down".
+        const status = Number(error?.status ?? error?.code);
+
+        if(status === 429){
+
+            return res.status(503).json({
+                success: false,
+                message: "I'm getting a lot of questions at the moment. Please wait a few seconds and send that again, or contact LinkWorld Express customer care if it's urgent."
+            });
+
+        }
+
         return res.status(503).json({
             success: false,
             message: "I'm having trouble connecting right now. Please try again in a moment or contact LinkWorld Express customer care."
