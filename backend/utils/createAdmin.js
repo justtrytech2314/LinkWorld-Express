@@ -1,23 +1,47 @@
 // ======================================================
 // LINKWORLD EXPRESS
 // CREATE DEFAULT ADMIN
+// ------------------------------------------------------
+// Seeds the first administrator on boot if one does not
+// already exist. Credentials come from the environment -
+// ADMIN_EMAIL and ADMIN_PASSWORD - and are never written
+// into this file, which is public on GitHub.
+//
+// ADMIN_PASSWORD may be either a plain password or an
+// already-bcrypted hash. Hashes are stored as-is; hashing a
+// hash would silently lock the account out.
 // ======================================================
 
 const bcrypt = require("bcryptjs");
 
 const Admin = require("../models/Admin");
 
+
+// bcrypt hashes look like $2a$10$..., $2b$12$... etc.
+const BCRYPT_HASH_PATTERN = /^\$2[aby]\$\d{2}\$/;
+
+
 const createAdmin = async () => {
 
     try {
 
+        const email = (process.env.ADMIN_EMAIL || "").trim();
+
+        const password = process.env.ADMIN_PASSWORD || "";
+
+        if (!email || !password) {
+
+            console.warn(
+                "⚠️  ADMIN_EMAIL / ADMIN_PASSWORD not configured - skipping administrator seed."
+            );
+
+            return;
+
+        }
+
         // Check if admin already exists
 
-        const existingAdmin = await Admin.findOne({
-
-            email: "udehuchekingsley80@gmail.com"
-
-        });
+        const existingAdmin = await Admin.findOne({ email });
 
         if (existingAdmin) {
 
@@ -27,23 +51,22 @@ const createAdmin = async () => {
 
         }
 
-        // Hash Password
+        // Accept a pre-hashed value so the plain password never has to
+        // exist anywhere, but still support a plain one for convenience.
 
-        const hashedPassword = await bcrypt.hash(
+        const hashedPassword = BCRYPT_HASH_PATTERN.test(password)
 
-            "linkworld2026$",
+            ? password
 
-            10
-
-        );
+            : await bcrypt.hash(password, 10);
 
         // Create Admin
 
         await Admin.create({
 
-            fullName: "Udeh Uche",
+            fullName: process.env.ADMIN_NAME || "Udeh Uche",
 
-            email: "udehuchekingsley80@gmail.com",
+            email,
 
             password: hashedPassword,
 
@@ -55,7 +78,7 @@ const createAdmin = async () => {
 
         console.log("========================================");
         console.log("✅ Default Administrator Created");
-        console.log("Email : udehuchekingsley80@gmail.com");
+        console.log("Email :", email);
         console.log("========================================");
 
     }
