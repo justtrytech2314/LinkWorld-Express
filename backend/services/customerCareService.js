@@ -39,6 +39,100 @@ const MODEL =
     process.env.AI_MODEL || "openai/gpt-oss-120b";
 
 
+// ======================================================
+// MODEL FALLBACK
+// ------------------------------------------------------
+// Providers retire models without warning - Groq dropped
+// the entire Llama family, and every reply became "I'm
+// having trouble connecting" until the name was changed by
+// hand. Pinning a single name means that outage recurs
+// every time a model is decommissioned.
+//
+// So a 404 for an unknown model is treated as recoverable:
+// ask the provider what it actually serves, pick the best
+// one still on the list, and carry on. The configured model
+// is always tried first, so this only engages when the
+// preferred choice has genuinely gone away.
+// ======================================================
+
+// Best first. Anything not listed is still usable as a last
+// resort below, but these are the ones vetted against the
+// support prompt.
+const MODEL_PREFERENCES = [
+    "openai/gpt-oss-120b",
+    "openai/gpt-oss-20b",
+    "qwen/qwen3.6-27b"
+];
+
+
+// Speech, safety and embedding models answer /models too but
+// cannot hold a support conversation.
+const NON_CHAT_MODEL = /whisper|tts|guard|embed|orpheus|allam/i;
+
+
+// Null until a fallback is needed; then the working model.
+let resolvedModel = null;
+
+
+// Ensures the discovery lookup happens once, not on every request.
+let modelFallbackTried = false;
+
+
+function getActiveModel(){
+
+    return resolvedModel || MODEL;
+
+}
+
+
+async function discoverWorkingModel(){
+
+    let ids = [];
+
+    try{
+
+        const response = await fetch(`${AI_BASE_URL}/models`, {
+
+            headers: { "Authorization": `Bearer ${getApiKey()}` }
+
+        });
+
+        if(!response.ok) return null;
+
+        const body = await response.json();
+
+        ids = (body?.data || [])
+            .filter(m => m && m.id && m.active !== false)
+            .map(m => m.id);
+
+    }
+    catch(error){
+
+        console.error("LinkWorld Care: could not list models:", error.message);
+
+        return null;
+
+    }
+
+    const preferred = MODEL_PREFERENCES.find(id => ids.includes(id));
+
+    if(preferred) return preferred;
+
+    return ids.find(id => !NON_CHAT_MODEL.test(id)) || null;
+
+}
+
+
+// True when the provider is saying "that model does not exist"
+// rather than refusing the request for some other reason.
+function isUnknownModelError(error){
+
+    return Number(error?.status) === 404 &&
+        /model|not exist|not found|decommission/i.test(error?.message || "");
+
+}
+
+
 function getApiKey(){
 
     const key = process.env.AI_API_KEY;
@@ -444,7 +538,7 @@ async function callProvider(messages){
             },
 
             body: JSON.stringify({
-                model: MODEL,
+                model: getActiveModel(),
                 messages,
                 temperature: 0.3,
                 max_tokens: MAX_OUTPUT_TOKENS
@@ -494,6 +588,33 @@ async function generateContentWithRetry(messages, attempt = 0){
     catch(error){
 
         const status = Number(error?.status);
+
+        // The configured model has been retired. Find one the provider
+        // still serves and retry immediately - this is a configuration
+        // problem, not a transient one, so backing off would not help.
+        if(isUnknownModelError(error) && !modelFallbackTried){
+
+            modelFallbackTried = true;
+
+            const replacement = await discoverWorkingModel();
+
+            if(replacement){
+
+                console.warn(
+                    `LinkWorld Care: model "${getActiveModel()}" is no longer available - falling back to "${replacement}".`
+                );
+
+                resolvedModel = replacement;
+
+                return generateContentWithRetry(messages, attempt);
+
+            }
+
+            console.error(
+                "LinkWorld Care: no usable model found at the provider."
+            );
+
+        }
 
         if(!RETRYABLE_STATUSES.has(status) || attempt >= MAX_RETRIES){
 
