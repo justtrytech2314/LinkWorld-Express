@@ -36,7 +36,7 @@ const AI_BASE_URL =
     process.env.AI_BASE_URL || "https://api.groq.com/openai/v1";
 
 const MODEL =
-    process.env.AI_MODEL || "llama-3.3-70b-versatile";
+    process.env.AI_MODEL || "openai/gpt-oss-120b";
 
 
 function getApiKey(){
@@ -55,9 +55,9 @@ function getApiKey(){
 
 
 // Room for the answer itself, comfortably above the longest reply we
-// expect (~400 tokens). Llama is not a reasoning model, so unlike
-// Gemini 2.5 nothing invisible is billed against this budget - the
-// whole allowance reaches the customer.
+// expect (~400 tokens). Models that reason return it in a separate
+// "reasoning" field rather than spending this budget, so unlike
+// Gemini 2.5 the whole allowance reaches the customer.
 const MAX_OUTPUT_TOKENS = 800;
 
 
@@ -300,6 +300,12 @@ function buildMessages({ message, history, contextBlock }){
 function stripMarkdown(text){
 
     return text
+        // Some models emit their scratchpad inline as <think>...</think>
+        // rather than in a separate field. Never show that to a customer.
+        // The unclosed variant matters too: a reply truncated mid-thought
+        // would otherwise arrive as raw reasoning.
+        .replace(/<think>[\s\S]*?<\/think>/gi, "")
+        .replace(/<think>[\s\S]*$/i, "")
         .replace(/```[a-z]*\n?([\s\S]*?)```/gi, "$1")
         .replace(/`([^`]+)`/g, "$1")
         .replace(/\*\*(.+?)\*\*/g, "$1")
