@@ -7,7 +7,9 @@
 
 const {
     generateReply,
-    getContactCard
+    getContactCard,
+    getModelStatus,
+    checkModelHealth
 } = require("../services/customerCareService");
 
 
@@ -135,6 +137,47 @@ exports.contactCard = (req, res) => {
         return res.status(500).json({
             success: false,
             message: "Unable to load contact information right now."
+        });
+
+    }
+
+};
+
+
+// ======================================================
+// GET /api/customer-care/status
+// Which model is actually answering, and whether the
+// watchdog still considers it healthy. Handy for checking
+// the live site without sending a message and spending a
+// request against the daily quota.
+// ======================================================
+
+exports.status = async (req, res) => {
+
+    try{
+
+        // ?refresh=1 forces an immediate provider check rather
+        // than reporting the last scheduled one.
+        if(req.query.refresh){
+
+            await checkModelHealth();
+
+        }
+
+        return res.status(200).json({
+            success: true,
+            ai: getModelStatus()
+        });
+
+    }
+
+    catch(error){
+
+        console.error("LINKWORLD CARE STATUS ERROR:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Unable to read AI status."
         });
 
     }

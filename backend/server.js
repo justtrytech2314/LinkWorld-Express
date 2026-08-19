@@ -361,6 +361,17 @@ const server = app.listen(PORT,()=>{
     console.log("========================================");
 
 
+
+    // ==================================================
+    // AI MODEL WATCHDOG
+    // Providers retire models without notice. This checks
+    // now and on an interval, so a retired model is
+    // replaced before a customer ever reaches it, instead
+    // of after their message has already failed.
+    // ==================================================
+
+    require("./services/customerCareService").startModelMonitor();
+
 });
 
 

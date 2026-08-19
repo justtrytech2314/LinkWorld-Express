@@ -9,7 +9,8 @@ const router = express.Router();
 
 const {
     chat,
-    contactCard
+    contactCard,
+    status
 } = require("../controllers/customerCareController");
 
 const {
@@ -41,6 +42,21 @@ router.get(
     "/contact",
     contactRateLimit,
     contactCard
+);
+
+
+
+
+// ======================================================
+// AI STATUS
+// PUBLIC (no secrets - model name and health only)
+// GET /api/customer-care/status
+// ======================================================
+
+router.get(
+    "/status",
+    contactRateLimit,
+    status
 );
 
 

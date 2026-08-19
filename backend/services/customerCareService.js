@@ -85,9 +85,13 @@ function getActiveModel(){
 }
 
 
-async function discoverWorkingModel(){
-
-    let ids = [];
+// Ask the provider what it currently serves.
+//
+// Returns null - never an empty array - when the list cannot be
+// retrieved. That distinction matters: an empty list would look
+// exactly like "every model was retired", and a passing network
+// blip would then trigger a pointless model swap.
+async function fetchServedModelIds(){
 
     try{
 
@@ -101,9 +105,11 @@ async function discoverWorkingModel(){
 
         const body = await response.json();
 
-        ids = (body?.data || [])
+        const ids = (body?.data || [])
             .filter(m => m && m.id && m.active !== false)
             .map(m => m.id);
+
+        return ids.length ? ids : null;
 
     }
     catch(error){
@@ -114,11 +120,27 @@ async function discoverWorkingModel(){
 
     }
 
+}
+
+
+function pickBestModel(ids){
+
     const preferred = MODEL_PREFERENCES.find(id => ids.includes(id));
 
     if(preferred) return preferred;
 
     return ids.find(id => !NON_CHAT_MODEL.test(id)) || null;
+
+}
+
+
+async function discoverWorkingModel(){
+
+    const ids = await fetchServedModelIds();
+
+    if(!ids) return null;
+
+    return pickBestModel(ids);
 
 }
 
@@ -825,8 +847,165 @@ function getContactCard(){
 }
 
 
+// ======================================================
+// MODEL HEALTH MONITOR
+// ------------------------------------------------------
+// The fallback in generateContentWithRetry is reactive: it
+// only discovers a retirement because a real customer's
+// message failed first. This watches ahead of them, so a
+// retired model is replaced before anyone types anything.
+//
+// Runs once at boot and then on an interval. The provider
+// is the source of truth - if the active model is missing
+// from its list, it is gone, and the best remaining one
+// takes over immediately.
+// ======================================================
+
+const MODEL_CHECK_INTERVAL_MS =
+    Number(process.env.AI_MODEL_CHECK_INTERVAL_MS) || 15 * 60 * 1000;
+
+
+let modelMonitorTimer = null;
+
+const modelStatus = {
+    configuredModel: MODEL,
+    activeModel: MODEL,
+    healthy: null,
+    lastCheckedAt: null,
+    lastResult: "not checked yet",
+    servedModelCount: 0
+};
+
+
+async function checkModelHealth(){
+
+    const ids = await fetchServedModelIds();
+
+    modelStatus.lastCheckedAt = new Date().toISOString();
+
+    // Could not reach the provider. Say nothing about the model's
+    // health and change nothing - the current one may be perfectly
+    // fine, and swapping on a failed lookup would be guesswork.
+    if(!ids){
+
+        modelStatus.lastResult = "provider unreachable - keeping current model";
+
+        return modelStatus;
+
+    }
+
+    modelStatus.servedModelCount = ids.length;
+
+    const active = getActiveModel();
+
+    // The operator's configured choice is available again after a
+    // fallback - go back to it, since it is what they asked for.
+    if(active !== MODEL && ids.includes(MODEL)){
+
+        console.warn(
+            `LinkWorld Care: configured model "${MODEL}" is available again - switching back from "${active}".`
+        );
+
+        resolvedModel = null;
+
+        modelFallbackTried = false;
+
+        modelStatus.activeModel = MODEL;
+
+        modelStatus.healthy = true;
+
+        modelStatus.lastResult = `restored configured model ${MODEL}`;
+
+        return modelStatus;
+
+    }
+
+    if(ids.includes(active)){
+
+        modelStatus.activeModel = active;
+
+        modelStatus.healthy = true;
+
+        modelStatus.lastResult = "ok";
+
+        return modelStatus;
+
+    }
+
+    // Active model is gone from the provider's list.
+    const replacement = pickBestModel(ids);
+
+    if(!replacement){
+
+        modelStatus.healthy = false;
+
+        modelStatus.lastResult =
+            `"${active}" retired and no usable replacement found`;
+
+        console.error("LinkWorld Care: " + modelStatus.lastResult);
+
+        return modelStatus;
+
+    }
+
+    console.warn(
+        `LinkWorld Care: model "${active}" is no longer served - switching to "${replacement}".`
+    );
+
+    resolvedModel = replacement;
+
+    // Let the reactive fallback arm again for any future retirement.
+    modelFallbackTried = false;
+
+    modelStatus.activeModel = replacement;
+
+    modelStatus.healthy = true;
+
+    modelStatus.lastResult = `switched from ${active} to ${replacement}`;
+
+    return modelStatus;
+
+}
+
+
+function startModelMonitor(){
+
+    if(modelMonitorTimer) return modelMonitorTimer;
+
+    // Check straight away so a retirement that happened while the
+    // service was asleep is corrected before the first customer.
+    checkModelHealth().catch(error =>
+        console.error("LinkWorld Care: model check failed:", error.message)
+    );
+
+    modelMonitorTimer = setInterval(() => {
+
+        checkModelHealth().catch(error =>
+            console.error("LinkWorld Care: model check failed:", error.message)
+        );
+
+    }, MODEL_CHECK_INTERVAL_MS);
+
+    // Never hold the process open just for this.
+    if(typeof modelMonitorTimer.unref === "function") modelMonitorTimer.unref();
+
+    return modelMonitorTimer;
+
+}
+
+
+function getModelStatus(){
+
+    return { ...modelStatus, checkIntervalMs: MODEL_CHECK_INTERVAL_MS };
+
+}
+
+
 module.exports = {
     generateReply,
+    startModelMonitor,
+    checkModelHealth,
+    getModelStatus,
     getContactCard,
     findTrackingNumber,
     lookupShipment
