@@ -28,6 +28,8 @@ const compression = require("compression");
 
 const morgan = require("morgan");
 
+const mongoose = require("mongoose");
+
 const connectDB = require("./config/database");
 
 
@@ -380,78 +382,133 @@ const server = app.listen(PORT,()=>{
 
 // ======================================================
 // GRACEFUL SHUTDOWN
+// ------------------------------------------------------
+// Ctrl+C used to appear to hang. server.close() waits for
+// every open connection to finish, and browsers hold
+// keep-alive sockets open, so the callback often never
+// fired. The Mongo connection was never closed either, which
+// kept the event loop alive on its own. The process had to
+// be force-killed, and the port could still be held when
+// npm start ran again.
+//
+// Now: stop the watchdog, refuse new connections, hang up
+// idle sockets straight away, close Mongo, and exit. A hard
+// deadline guarantees the port is released even if something
+// refuses to let go.
 // ======================================================
 
 
-process.on(
+const SHUTDOWN_DEADLINE_MS = 5000;
 
-"SIGINT",
-
-async()=>{
+let shuttingDown = false;
 
 
-    console.log(
+async function shutdown(signal){
 
-        "\nStopping server..."
+    // A second Ctrl+C means "stop waiting" - honour it.
+    if(shuttingDown){
 
-    );
+        console.log("Forcing immediate exit...");
 
+        process.exit(1);
 
-    server.close(()=>{
+    }
 
-
-        console.log(
-
-            "HTTP server closed."
-
-        );
+    shuttingDown = true;
 
 
-        process.exit(0);
+    console.log("");
+    console.log("========================================");
+    console.log(`Shutting down LinkWorld Express (${signal})`);
+    console.log("========================================");
 
 
-    });
+    // Nothing may outlive this deadline. Whatever is still
+    // pending, the port gets released.
+    const deadline = setTimeout(() => {
 
-
-});
-
-
-process.on(
-
-"SIGTERM",
-
-async()=>{
-
-
-    console.log(
-
-        "\nSIGTERM received."
-
-    );
-
-
-    server.close(()=>{
-
-
-        console.log(
-
-            "Server shutdown complete."
-
-        );
-
+        console.log("⏱️  Shutdown timed out - exiting anyway.");
 
         process.exit(0);
 
+    }, SHUTDOWN_DEADLINE_MS);
 
-    });
-
-
-});
+    deadline.unref();
 
 
+    try{
+
+        // Live tracking imagery is served through this API, so once
+        // the server stops accepting requests the camera view can no
+        // longer load.
+        console.log("📷 Live camera shutdown");
 
 
-// ======================================================
+        const { stopModelMonitor } = require("./services/customerCareService");
+
+        console.log(
+            stopModelMonitor()
+                ? "🤖 AI model watchdog stopped"
+                : "🤖 AI model watchdog was not running"
+        );
+
+
+        // Stop accepting new connections...
+        server.close(() => console.log("🔌 HTTP server closed"));
+
+        // ...and hang up the idle keep-alive sockets that would
+        // otherwise hold the close open indefinitely.
+        if(typeof server.closeIdleConnections === "function"){
+
+            server.closeIdleConnections();
+
+        }
+
+        // Give in-flight requests a brief moment, then drop the rest.
+        await new Promise(resolve => setTimeout(resolve, 300));
+
+        if(typeof server.closeAllConnections === "function"){
+
+            server.closeAllConnections();
+
+        }
+
+
+        if(mongoose.connection.readyState === 1){
+
+            await mongoose.connection.close(false);
+
+            console.log("🗄️  MongoDB connection closed");
+
+        }
+
+
+        console.log("✅ Shutdown complete - port " + PORT + " released");
+        console.log("========================================");
+        console.log("");
+
+        clearTimeout(deadline);
+
+        process.exit(0);
+
+    }
+    catch(error){
+
+        console.error("Error during shutdown:", error.message);
+
+        process.exit(1);
+
+    }
+
+}
+
+
+process.on("SIGINT",  () => shutdown("Ctrl+C"));
+
+process.on("SIGTERM", () => shutdown("SIGTERM"));
+
+
+
 // UNHANDLED ERRORS
 // ======================================================
 

@@ -994,6 +994,21 @@ function startModelMonitor(){
 }
 
 
+// Stops the watchdog so the process can exit cleanly. Safe to
+// call when it was never started.
+function stopModelMonitor(){
+
+    if(!modelMonitorTimer) return false;
+
+    clearInterval(modelMonitorTimer);
+
+    modelMonitorTimer = null;
+
+    return true;
+
+}
+
+
 function getModelStatus(){
 
     return { ...modelStatus, checkIntervalMs: MODEL_CHECK_INTERVAL_MS };
@@ -1004,6 +1019,7 @@ function getModelStatus(){
 module.exports = {
     generateReply,
     startModelMonitor,
+    stopModelMonitor,
     checkModelHealth,
     getModelStatus,
     getContactCard,
