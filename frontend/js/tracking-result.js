@@ -602,34 +602,24 @@ WORLD MAP + GPS + TIMELINE SYSTEM
 // ======================================================
 // BASEMAP PROVIDERS
 // ------------------------------------------------------
-// Tried in order. The map previously used
-// tile.openstreetmap.org, which has two problems: their tile
-// usage policy does not permit commercial production traffic
-// and they block offenders, and the host resolves to
-// IPv6-only Fastly addresses that fail outright on networks
-// without working IPv6. Either way the customer got an empty
-// panel with no explanation.
+// Tried in order, each falling back to the next.
 //
-// Carto and Esri are both built for embedding in
-// applications, so a tile failure is now a fallback rather
-// than a blank map.
+// Two earlier choices were wrong for this page:
+// tile.openstreetmap.org forbids commercial production
+// traffic and now resolves IPv6-only, so it simply failed;
+// Carto stamps "API KEY REQUIRED" across every tile served
+// without a key, which reads as broken to a customer.
+//
+// Esri's ArcGIS Online basemaps need no key and carry no
+// watermark. World Street Map leads because a customer
+// tracking a parcel wants real geography around it - roads,
+// towns, borders. Light Gray Canvas is cleaner still but
+// carries almost no road detail outside major markets, so it
+// sits last as a legible worst case rather than the default.
 // ======================================================
 
 
 const BASEMAP_PROVIDERS = [
-
-{
-    name: "Carto Voyager",
-
-    url: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
-
-    options: {
-        subdomains: "abcd",
-        maxZoom: 20,
-        detectRetina: true,
-        attribution: "&copy; OpenStreetMap contributors &copy; CARTO"
-    }
-},
 
 {
     name: "Esri World Street Map",
@@ -652,6 +642,20 @@ const BASEMAP_PROVIDERS = [
         maxZoom: 18,
         attribution: "&copy; OpenStreetMap contributors"
     }
+},
+
+{
+    name: "Esri Light Gray Canvas",
+
+    url: "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}",
+
+    // Transparent place labels, drawn above the base.
+    labelsUrl: "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}",
+
+    options: {
+        maxZoom: 19,
+        attribution: "Tiles &copy; Esri"
+    }
 }
 
 ];
@@ -664,7 +668,11 @@ const TILE_FAILURES_BEFORE_FALLBACK = 6;
 
 let basemapLayer = null;
 
+let basemapLabels = null;
+
 let basemapIndex = 0;
+
+
 
 
 
@@ -750,6 +758,27 @@ function hideMapMessage(){
 // ======================================================
 
 
+function removeBasemapLayers(){
+
+    if(basemapLayer){
+
+        trackingMap.removeLayer(basemapLayer);
+
+        basemapLayer = null;
+
+    }
+
+    if(basemapLabels){
+
+        trackingMap.removeLayer(basemapLabels);
+
+        basemapLabels = null;
+
+    }
+
+}
+
+
 function attachBasemap(index){
 
     if(!trackingMap) return;
@@ -768,11 +797,7 @@ function attachBasemap(index){
 
     basemapIndex = index;
 
-    if(basemapLayer){
-
-        trackingMap.removeLayer(basemapLayer);
-
-    }
+    removeBasemapLayers();
 
     let failures = 0;
 
@@ -803,7 +828,19 @@ function attachBasemap(index){
 
     basemapLayer.addTo(trackingMap);
 
+
+    // Place names ride above the base. A failure here is not
+    // worth falling back over - an unlabelled map still works.
+    if(provider.labelsUrl){
+
+        basemapLabels = L.tileLayer(provider.labelsUrl, provider.options);
+
+        basemapLabels.addTo(trackingMap);
+
+    }
+
 }
+
 
 
 
