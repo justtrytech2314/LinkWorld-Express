@@ -600,6 +600,214 @@ WORLD MAP + GPS + TIMELINE SYSTEM
 
 
 // ======================================================
+// BASEMAP PROVIDERS
+// ------------------------------------------------------
+// Tried in order. The map previously used
+// tile.openstreetmap.org, which has two problems: their tile
+// usage policy does not permit commercial production traffic
+// and they block offenders, and the host resolves to
+// IPv6-only Fastly addresses that fail outright on networks
+// without working IPv6. Either way the customer got an empty
+// panel with no explanation.
+//
+// Carto and Esri are both built for embedding in
+// applications, so a tile failure is now a fallback rather
+// than a blank map.
+// ======================================================
+
+
+const BASEMAP_PROVIDERS = [
+
+{
+    name: "Carto Voyager",
+
+    url: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+
+    options: {
+        subdomains: "abcd",
+        maxZoom: 20,
+        detectRetina: true,
+        attribution: "&copy; OpenStreetMap contributors &copy; CARTO"
+    }
+},
+
+{
+    name: "Esri World Street Map",
+
+    url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
+
+    options: {
+        maxZoom: 19,
+        attribution: "Tiles &copy; Esri"
+    }
+},
+
+{
+    name: "OpenStreetMap Germany",
+
+    url: "https://{s}.tile.openstreetmap.de/{z}/{x}/{y}.png",
+
+    options: {
+        subdomains: "abc",
+        maxZoom: 18,
+        attribution: "&copy; OpenStreetMap contributors"
+    }
+}
+
+];
+
+
+// A handful of missing tiles is normal while panning. Only a
+// provider that fails repeatedly is treated as unavailable.
+const TILE_FAILURES_BEFORE_FALLBACK = 6;
+
+
+let basemapLayer = null;
+
+let basemapIndex = 0;
+
+
+
+// ======================================================
+// COORDINATE VALIDATION
+// ------------------------------------------------------
+// A missing coordinate becomes NaN, and NaN !== 0, so the old
+// "is it zero" check let it through - then Leaflet threw
+// "Invalid LatLng" and took the whole map down with it. Range
+// is checked too, since a transposed pair can otherwise put a
+// shipment somewhere impossible.
+// ======================================================
+
+
+function isValidCoordinate(lat, lng){
+
+    return Number.isFinite(lat) &&
+           Number.isFinite(lng) &&
+           Math.abs(lat) <= 90 &&
+           Math.abs(lng) <= 180 &&
+           !(lat === 0 && lng === 0);
+
+}
+
+
+function readCoordinate(latValue, lngValue){
+
+    const lat = Number(latValue);
+
+    const lng = Number(lngValue);
+
+    return isValidCoordinate(lat, lng) ? [lat, lng] : null;
+
+}
+
+
+
+// ======================================================
+// MAP STATUS MESSAGE
+// Replaces the silent blank panel when tiles cannot load.
+// ======================================================
+
+
+function showMapMessage(text){
+
+    const mapElement = document.getElementById("trackingMap");
+
+    if(!mapElement) return;
+
+    let banner = document.getElementById("trackingMapMessage");
+
+    if(!banner){
+
+        banner = document.createElement("div");
+
+        banner.id = "trackingMapMessage";
+
+        banner.className = "tracking-map-message";
+
+        mapElement.appendChild(banner);
+
+    }
+
+    banner.textContent = text;
+
+    banner.hidden = false;
+
+}
+
+
+function hideMapMessage(){
+
+    const banner = document.getElementById("trackingMapMessage");
+
+    if(banner) banner.hidden = true;
+
+}
+
+
+
+// ======================================================
+// ATTACH A BASEMAP, FALLING BACK ON REPEATED FAILURE
+// ======================================================
+
+
+function attachBasemap(index){
+
+    if(!trackingMap) return;
+
+    const provider = BASEMAP_PROVIDERS[index];
+
+    if(!provider){
+
+        showMapMessage(
+            "Map imagery is unavailable right now. Shipment details and coordinates below are unaffected."
+        );
+
+        return;
+
+    }
+
+    basemapIndex = index;
+
+    if(basemapLayer){
+
+        trackingMap.removeLayer(basemapLayer);
+
+    }
+
+    let failures = 0;
+
+    let switched = false;
+
+    basemapLayer = L.tileLayer(provider.url, provider.options);
+
+    basemapLayer.on("tileerror", () => {
+
+        failures += 1;
+
+        if(failures >= TILE_FAILURES_BEFORE_FALLBACK && !switched){
+
+            switched = true;
+
+            console.warn(
+                "Tracking map: " + provider.name +
+                " failed to serve tiles - trying the next provider."
+            );
+
+            attachBasemap(index + 1);
+
+        }
+
+    });
+
+    basemapLayer.on("load", hideMapMessage);
+
+    basemapLayer.addTo(trackingMap);
+
+}
+
+
+
+// ======================================================
 // INITIALIZE WORLD MAP
 // ======================================================
 
@@ -622,6 +830,31 @@ return;
 
 
 
+// Leaflet throws if the same container is initialised twice,
+// which happens whenever tracking is re-run in the same page.
+if(trackingMap){
+
+    trackingMap.remove();
+
+    trackingMap = null;
+
+    basemapLayer = null;
+
+}
+
+
+
+if(typeof L === "undefined"){
+
+    showMapMessage(
+        "Map library could not be loaded. Shipment details and coordinates below are unaffected."
+    );
+
+    return;
+
+}
+
+
 
 
 // CREATE WORLD VIEW
@@ -634,7 +867,14 @@ L.map(
 
     zoomControl:false,
 
-    worldCopyJump:true
+    worldCopyJump:true,
+
+    // Stops the customer scrolling out into grey emptiness.
+    minZoom:2,
+
+    maxBounds:[[-85,-180],[85,180]],
+
+    maxBoundsViscosity:0.8
 
 }
 
@@ -655,41 +895,19 @@ L.map(
 
 
 
+// Controls placed where they do not cover the route.
 
+L.control.zoom({ position:"topright" }).addTo(trackingMap);
 
-
-// MAP STYLE
-
-
-L.tileLayer(
-
-"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-
-{
-
-
-maxZoom:18,
-
-
-attribution:
-
-"© OpenStreetMap"
-
-
-}
-
-)
-
-.addTo(
-trackingMap
-);
+L.control.scale({ position:"bottomleft", imperial:true }).addTo(trackingMap);
 
 
 
 
+// MAP STYLE - with automatic fallback
 
 
-
+attachBasemap(0);
 
 
 
@@ -702,16 +920,7 @@ drawShipmentRoute();
 
 
 
-
-
 }
-
-
-
-
-
-
-
 
 
 // ======================================================
@@ -731,63 +940,47 @@ return;
 
 
 
-const current = [
+// Validated rather than merely non-zero. A missing value
+// arrives as NaN, which the old check treated as usable and
+// Leaflet then rejected, taking the whole map down.
 
-Number(
-shipmentData.currentLatitude
-),
+const current = readCoordinate(
+    shipmentData.currentLatitude,
+    shipmentData.currentLongitude
+);
 
-Number(
-shipmentData.currentLongitude
-)
+const origin = readCoordinate(
+    shipmentData.originLatitude,
+    shipmentData.originLongitude
+);
 
-];
-
-
-const origin = [
-
-Number(
-shipmentData.originLatitude
-),
-
-Number(
-shipmentData.originLongitude
-)
-
-];
+const destination = readCoordinate(
+    shipmentData.destinationLatitude,
+    shipmentData.destinationLongitude
+);
 
 
-const destination = [
+const hasOrigin = Boolean(origin);
 
-Number(
-shipmentData.destinationLatitude
-),
-
-Number(
-shipmentData.destinationLongitude
-)
-
-];
+const hasDestination = Boolean(destination);
 
 
 
-const hasCurrent =
-current[0] !== 0 || current[1] !== 0;
+// Without a usable live position there is nothing to plot.
+// Say so rather than leaving an unexplained empty map.
 
-const hasOrigin =
-origin[0] !== 0 || origin[1] !== 0;
+if(!current){
 
-const hasDestination =
-destination[0] !== 0 || destination[1] !== 0;
+    showMapMessage(
+        "No GPS position has been recorded for this shipment yet."
+    );
+
+    return;
+
+}
 
 
-
-// REMOVE INVALID GPS
-
-
-if(!hasCurrent)
-
-return;
+hideMapMessage();
 
 
 
@@ -800,6 +993,16 @@ L.divIcon({
 
 className:
 "live-map-marker",
+
+// 38px pulse marker, centred on the true position. Without an explicit size
+// Leaflet cannot anchor a divIcon, so the marker drifts
+// away from the coordinate it is meant to mark.
+iconSize:[38,38],
+
+iconAnchor:[19,19],
+
+popupAnchor:[0,-19],
+
 
 
 html:
@@ -878,6 +1081,16 @@ L.divIcon({
 className:
 "origin-map-marker",
 
+// 14px dot, centred. Without an explicit size
+// Leaflet cannot anchor a divIcon, so the marker drifts
+// away from the coordinate it is meant to mark.
+iconSize:[14,14],
+
+iconAnchor:[7,7],
+
+popupAnchor:[0,-7],
+
+
 html:
 `<div class="origin-marker-dot"></div>`
 
@@ -935,6 +1148,16 @@ L.divIcon({
 
 className:
 "destination-map-marker",
+
+// 32px flag, centred. Without an explicit size
+// Leaflet cannot anchor a divIcon, so the marker drifts
+// away from the coordinate it is meant to mark.
+iconSize:[32,32],
+
+iconAnchor:[16,16],
+
+popupAnchor:[0,-16],
+
 
 html:
 `<div class="destination-marker-flag"><i class="fa-solid fa-flag-checkered"></i></div>`
